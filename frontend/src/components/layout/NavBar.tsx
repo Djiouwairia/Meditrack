@@ -1,6 +1,6 @@
 import type { JSX } from "react";
 import React from "react";
-
+import { Link } from "react-router-dom";
 interface NavBarProps {
   brandName: string;
   imageSrcPath: string;
@@ -249,9 +249,10 @@ function NavBar({ brandName, imageSrcPath }: NavBarProps) {
               <a className="btn btn-connect btn-rdv" href="#rdv" onClick={closeMenu}>
                 {icons.rdv} Prendre RDV
               </a>
-              <a className="btn btn-connect" href="#connexion" onClick={closeMenu}>
+              <Link className="btn btn-connect"  to="/login" onClick={closeMenu}>
                 {icons.login} Se connecter
-              </a>
+              </Link>
+              
             </div>
 
           </div>

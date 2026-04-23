@@ -9,22 +9,36 @@ import Apropos from "./components/sections/Apropos";
 import Contact from "./components/sections/Contact";
 import RDV from "./components/sections/RDV";
 import Footer from "./components/layout/Footer";
-
+import { Routes, Route } from "react-router-dom";
+import Login from "./pages/Login";
 function App() {
   return (
-    <div style={{ paddingTop: "80px" }}>
-      <NavBar brandName="Meditrack" imageSrcPath={imagePath} />
+    <Routes>
+      
+      {/* Page principale */}
+      <Route
+        path="/"
+        element={
+          <div style={{ paddingTop: "80px" }}>
+            <NavBar brandName="Meditrack" imageSrcPath={imagePath} />
 
-      <section id="accueil"><Accueil /></section>
-      <section id="fonctionnalites"><Fonctionnalites /></section>
-      <section id="specialites"><Specialites /></section>
-      <section id="apropos"><Apropos /></section>
-      <section id="contact"><Contact /></section>
-      <section id="rdv"><RDV /></section>
-      <Footer />
+            <section id="accueil"><Accueil /></section>
+            <section id="fonctionnalites"><Fonctionnalites /></section>
+            <section id="specialites"><Specialites /></section>
+            <section id="apropos"><Apropos /></section>
+            <section id="contact"><Contact /></section>
+            <section id="rdv"><RDV /></section>
 
-      <ChatbotButton />
-    </div>
+            <Footer />
+            <ChatbotButton />
+          </div>
+        }
+      />
+
+      {/* Page login */}
+      <Route path="/login" element={<Login />} />
+
+    </Routes>
   );
 }
 
