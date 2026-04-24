@@ -191,6 +191,14 @@ const icons: Record<string, JSX.Element> = {
       <path d="m2 7 10 7 10-7"/>
     </svg>
   ),
+  signup: (
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+    <circle cx="12" cy="7" r="4"/>
+    <line x1="20" y1="8" x2="20" y2="14"/>
+    <line x1="23" y1="11" x2="17" y2="11"/>
+  </svg>
+),
   login: (
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
       <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
@@ -251,6 +259,9 @@ function NavBar({ brandName, imageSrcPath }: NavBarProps) {
               </a>
               <Link className="btn btn-connect"  to="/login" onClick={closeMenu}>
                 {icons.login} Se connecter
+              </Link>
+              <Link className="btn btn-connect"  to="/register" onClick={closeMenu}>
+                {icons.signup} S'inscrire
               </Link>
               
             </div>

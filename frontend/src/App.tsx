@@ -11,6 +11,7 @@ import RDV from "./components/sections/RDV";
 import Footer from "./components/layout/Footer";
 import { Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
+import Inscription from "./pages/Inscription";
 function App() {
   return (
     <Routes>
@@ -37,7 +38,7 @@ function App() {
 
       {/* Page login */}
       <Route path="/login" element={<Login />} />
-
+      <Route path="/register" element={<Inscription />} />
     </Routes>
   );
 }

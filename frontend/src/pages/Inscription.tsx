@@ -1,17 +1,12 @@
 import LogoImg from "../assets/logo.png";
-import Img from "../assets/Privacy policy.gif";
+import Img from "../assets/Sign up.gif";
 import Typewriter from "typewriter-effect";
 
-function Login() {
+function Inscription() {
   return (
     <div className="container-fluid vh-100">
       <div className="row h-100">
-
-        <div className="col-md-6 d-none d-md-flex align-items-center justify-content-center bg-light p-4">
-          <img src={Img} style={{ width: "28rem" }} alt="illustration" />
-        </div>
-
-        <div className="col-12 col-md-6 d-flex align-items-center justify-content-center px-4">
+         <div className="col-12 col-md-6 d-flex align-items-center justify-content-center px-4">
 
           <div className="w-100" style={{ maxWidth: "360px" }}>
 
@@ -19,14 +14,14 @@ function Login() {
               <img src={LogoImg} className="w-75" alt="logo" />
               
 
-              <div className="rounded mt-3 p-2  text-muted bg-light">
+              <div className="rounded mt-1 p-2 small text-muted bg-light">
                 <Typewriter
                   options={{
                     strings: [
-                      "Bienvenue sur Meditrack !",
-                      "Accédez à votre espace médical sécurisé",
-                      "Gérez vos rendez-vous en toute simplicité",
-                      "Votre santé, notre priorité",
+                      "Créez votre compte Meditrack",
+                      "Rejoignez votre espace médical sécurisé",
+                      "Suivez votre santé en toute simplicité",
+                      "Bienvenue, votre bien-être commence ici",
                     ],
                     autoStart: true,
                     loop: true,
@@ -38,39 +33,55 @@ function Login() {
             </div>
 
             <form className="">
+              <div className="d-flex gap-3">
+                   <div className="mb-3">
+                <label className="form-label ">Nom</label>
+                <input type="text" className="form-control form-control-sm" />
+              </div>
 
               <div className="mb-3">
-                <label className="form-label small">Email</label>
+                <label className="form-label ">Prénom</label>
+                <input type="text" className="form-control form-control-sm" />
+              </div>
+              </div>
+              <div className="d-flex gap-3">
+                <div className="mb-3">
+                <label className="form-label ">Téléphone</label>
+                <input type="text" className="form-control form-control-sm" />
+              </div>
+              <div className="mb-3">
+                <label className="form-label ">Email</label>
                 <input type="email" className="form-control form-control-sm" />
               </div>
+              </div>
 
-              <div className="mb-2">
-                <label className="form-label small">Mot de passe</label>
+              
+              <div className="mb-3">
+                <label className="form-label ">Mot de passe</label>
                 <input type="password" className="form-control form-control-sm" />
               </div>
-
-              <div className="d-flex justify-content-end mb-3">
-                <a href="#" className="small ">
-                  Mot de passe oublié ?
-                </a>
+              <div className="mb-3">
+                <label className="form-label ">Confirmer mot de passe</label>
+                <input type="password" className="form-control form-control-sm" />
               </div>
+             
 
               <button
-                className="btn w-100 btn-sm text-white"
+                className="btn w-100  text-white"
                 style={{
                   background: "linear-gradient(135deg,#1A7A52,#27A869)",
                 }}
               >
-                Se connecter
+                S'inscrire
               </button>
             </form>
 
             <div className="text-center mt-3">
               <span className="small text-muted">
-                Vous n'avez pas de compte ?{" "}
+                Vous avez déja un compte ?{" "}
               </span>
               <a href="#" className="small text-decoration-none fw-semibold">
-                S'inscrire
+                Se connecter
               </a>
             </div>
 
@@ -125,10 +136,15 @@ function Login() {
 
           </div>
         </div>
+        <div className="col-md-6 d-none d-md-flex align-items-center justify-content-center bg-light p-4">
+          <img src={Img} style={{ width: "28rem" }} alt="illustration" />
+        </div>
+
+        
 
       </div>
     </div>
   );
 }
 
-export default Login;
+export default Inscription;
