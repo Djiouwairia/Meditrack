@@ -1,5 +1,6 @@
 package com.meditrack.service;
 
+import com.meditrack.model.Utilisateur;
 import com.meditrack.repository.UtilisateurRepository;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -25,8 +26,14 @@ public class JwtService {
     private String secretKey;
 
     public String generateAccessToken(String email) {
+        // Récupère le rôle depuis la base pour l'inclure dans le token
+        String role = utilisateurRepository.findByEmail(email)
+                .map(u -> u.getRole().name())          // ex: "ADMIN", "MEDECIN" …
+                .orElse("UNKNOWN");
+
         return Jwts.builder()
                 .setSubject(email)
+                .claim("role", role)                   // ← claim ajouté
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
@@ -53,7 +60,7 @@ public class JwtService {
     }
 
     /**
-     * CORRECTION : le token est valide s'il N'EST PAS expiré ET que le sujet correspond.
+     * Le token est valide s'il N'EST PAS expiré ET que le sujet correspond.
      */
     public boolean isTokenValid(String token, String email) {
         return !isTokenExpired(token) && extractUsername(token).equals(email);
