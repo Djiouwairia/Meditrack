@@ -2,8 +2,8 @@ import type { JSX } from "react";
 import React from "react";
 import { Link } from "react-router-dom";
 interface NavBarProps {
-  brandName: string;
-  imageSrcPath: string;
+    brandName: string;
+    imageSrcPath: string;
 }
 
 const css = `
@@ -160,117 +160,117 @@ html { scroll-behavior: smooth; }
 `;
 
 const icons: Record<string, JSX.Element> = {
-  house: (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#27A869" strokeWidth="2">
-      <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/>
-      <path d="M9 21V12h6v9"/>
-    </svg>
-  ),
-  sparkles: (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#27A869" strokeWidth="2">
-      <circle cx="12" cy="12" r="4"/>
-      <path d="M12 3v2m0 14v2M3 12H1m22 0h-2"/>
-    </svg>
-  ),
-  doctor: (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#27A869" strokeWidth="2">
-      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4z"/>
-      <path d="M12 14c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-    </svg>
-  ),
-  info: (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#27A869" strokeWidth="2">
-      <circle cx="12" cy="12" r="10"/>
-      <line x1="12" y1="8" x2="12" y2="8"/>
-      <line x1="12" y1="12" x2="12" y2="16"/>
-    </svg>
-  ),
-  envelope: (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#27A869" strokeWidth="2">
-      <rect x="2" y="4" width="20" height="16" rx="2"/>
-      <path d="m2 7 10 7 10-7"/>
-    </svg>
-  ),
-  signup: (
-  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
-    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-    <circle cx="12" cy="7" r="4"/>
-    <line x1="20" y1="8" x2="20" y2="14"/>
-    <line x1="23" y1="11" x2="17" y2="11"/>
-  </svg>
-),
-  login: (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
-      <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-      <path d="M10 17l5-5-5-5"/>
-      <path d="M15 12H3"/>
-    </svg>
-  ),
-  rdv: (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
-      <rect x="3" y="4" width="18" height="18" rx="2"/>
-      <path d="M8 2v4M16 2v4M3 10h18"/>
-      <path d="M8 14h8M8 18h5"/>
-    </svg>
-  ),
+    house: (
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#27A869" strokeWidth="2">
+            <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/>
+            <path d="M9 21V12h6v9"/>
+        </svg>
+    ),
+    sparkles: (
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#27A869" strokeWidth="2">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 3v2m0 14v2M3 12H1m22 0h-2"/>
+        </svg>
+    ),
+    doctor: (
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#27A869" strokeWidth="2">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4z"/>
+            <path d="M12 14c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+        </svg>
+    ),
+    info: (
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#27A869" strokeWidth="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="8"/>
+            <line x1="12" y1="12" x2="12" y2="16"/>
+        </svg>
+    ),
+    envelope: (
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#27A869" strokeWidth="2">
+            <rect x="2" y="4" width="20" height="16" rx="2"/>
+            <path d="m2 7 10 7 10-7"/>
+        </svg>
+    ),
+    signup: (
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+            <line x1="20" y1="8" x2="20" y2="14"/>
+            <line x1="23" y1="11" x2="17" y2="11"/>
+        </svg>
+    ),
+    login: (
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+            <path d="M10 17l5-5-5-5"/>
+            <path d="M15 12H3"/>
+        </svg>
+    ),
+    rdv: (
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
+            <rect x="3" y="4" width="18" height="18" rx="2"/>
+            <path d="M8 2v4M16 2v4M3 10h18"/>
+            <path d="M8 14h8M8 18h5"/>
+        </svg>
+    ),
 };
 
 function NavBar({ brandName, imageSrcPath }: NavBarProps) {
-  const [isOpen, setIsOpen] = React.useState(false);
+    const [isOpen, setIsOpen] = React.useState(false);
 
-  const toggleMenu = () => setIsOpen(!isOpen);
-  const closeMenu = () => setIsOpen(false);
+    const toggleMenu = () => setIsOpen(!isOpen);
+    const closeMenu = () => setIsOpen(false);
 
-  return (
-    <>
-      <style>{css}</style>
+    return (
+        <>
+            <style>{css}</style>
 
-      {/* sticky-top retiré ici */}
-      <nav className="mn navbar navbar-expand-lg shadow-sm">
-        <div className="container-fluid px-4">
+            {/* sticky-top retiré ici */}
+            <nav className="mn navbar navbar-expand-lg shadow-sm">
+                <div className="container-fluid px-4">
 
-          <a className="navbar-brand d-flex align-items-center gap-2" href="#">
-            <img src={imageSrcPath} alt="logo" height="54" />
-            <span className="brand-name">{brandName}</span>
-          </a>
+                    <a className="navbar-brand d-flex align-items-center gap-2" href="#">
+                        <img src={imageSrcPath} alt="logo" height="54" />
+                        <span className="brand-name">{brandName}</span>
+                    </a>
 
-          <button
-            className={`navbar-toggler ${isOpen ? "open" : ""}`}
-            onClick={toggleMenu}
-          >
-            <span className="burger-bar"></span>
-            <span className="burger-bar"></span>
-            <span className="burger-bar"></span>
-          </button>
+                    <button
+                        className={`navbar-toggler ${isOpen ? "open" : ""}`}
+                        onClick={toggleMenu}
+                    >
+                        <span className="burger-bar"></span>
+                        <span className="burger-bar"></span>
+                        <span className="burger-bar"></span>
+                    </button>
 
-          <div className={`collapse navbar-collapse ${isOpen ? "show" : ""}`}>
+                    <div className={`collapse navbar-collapse ${isOpen ? "show" : ""}`}>
 
-            <ul className="navbar-nav nav-center">
-              <li><a className="nav-link" href="#accueil" onClick={closeMenu}>{icons.house}Accueil</a></li>
-              <li><a className="nav-link" href="#fonctionnalites" onClick={closeMenu}>{icons.sparkles}Fonctionnalités</a></li>
-              <li><a className="nav-link" href="#specialites" onClick={closeMenu}>{icons.doctor}Nos spécialités</a></li>
-              <li><a className="nav-link" href="#apropos" onClick={closeMenu}>{icons.info}À propos</a></li>
-              <li><a className="nav-link" href="#contact" onClick={closeMenu}>{icons.envelope}Contact</a></li>
-            </ul>
+                        <ul className="navbar-nav nav-center">
+                            <li><a className="nav-link" href="#accueil" onClick={closeMenu}>{icons.house}Accueil</a></li>
+                            <li><a className="nav-link" href="#fonctionnalites" onClick={closeMenu}>{icons.sparkles}Fonctionnalités</a></li>
+                            <li><a className="nav-link" href="#specialites" onClick={closeMenu}>{icons.doctor}Nos spécialités</a></li>
+                            <li><a className="nav-link" href="#apropos" onClick={closeMenu}>{icons.info}À propos</a></li>
+                            <li><a className="nav-link" href="#contact" onClick={closeMenu}>{icons.envelope}Contact</a></li>
+                        </ul>
 
-            <div className="btn-connect-wrapper d-flex gap-2">
-              <a className="btn btn-connect btn-rdv" href="#rdv" onClick={closeMenu}>
-                {icons.rdv} Prendre RDV
-              </a>
-              <Link className="btn btn-connect"  to="/login" onClick={closeMenu}>
-                {icons.login} Se connecter
-              </Link>
-              <Link className="btn btn-connect"  to="/register" onClick={closeMenu}>
-                {icons.signup} S'inscrire
-              </Link>
-              
-            </div>
+                        <div className="btn-connect-wrapper d-flex gap-2">
+                            <a className="btn btn-connect btn-rdv" href="#rdv" onClick={closeMenu}>
+                                {icons.rdv} Prendre RDV
+                            </a>
+                            <Link className="btn btn-connect"  to="/login" onClick={closeMenu}>
+                                {icons.login} Se connecter
+                            </Link>
+                            <Link className="btn btn-connect"  to="/register" onClick={closeMenu}>
+                                {icons.signup} S'inscrire
+                            </Link>
 
-          </div>
-        </div>
-      </nav>
-    </>
-  );
+                        </div>
+
+                    </div>
+                </div>
+            </nav>
+        </>
+    );
 }
 
 export default NavBar;

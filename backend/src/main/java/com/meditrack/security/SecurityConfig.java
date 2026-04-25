@@ -12,6 +12,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 @EnableWebSecurity
 @Configuration
@@ -19,45 +20,48 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
+    private final CorsConfigurationSource corsConfigurationSource; // injecté depuis CorsConfig
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
+                // ── CORS ── branché sur CorsConfig (autorise localhost:5173)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // Endpoints publics
                         .requestMatchers("/login", "/refresh-token").permitAll()
-                        // Gestion des hôpitaux : ADMIN uniquement
+                        // Auto-inscription patient
+                        .requestMatchers(HttpMethod.POST, "/patients").permitAll()
+                        // Hôpitaux : ADMIN
                         .requestMatchers("/hopital/**").hasRole("ADMIN")
-                        // Gestion des médecins : ADMIN
+                        // Médecins : ADMIN pour créer/supprimer
                         .requestMatchers(HttpMethod.POST, "/medecins").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/medecins/**").hasRole("ADMIN")
-                        // Consultation médecins : tous les rôles authentifiés
                         .requestMatchers(HttpMethod.GET, "/medecins/**").authenticated()
                         .requestMatchers(HttpMethod.PATCH, "/medecins/**").hasAnyRole("ADMIN", "MEDECIN")
-                        // Gestion des patients : ADMIN, SECRETAIRE
-                        .requestMatchers(HttpMethod.POST, "/patients").hasAnyRole("ADMIN", "SECRETAIRE")
+                        // Patients
                         .requestMatchers(HttpMethod.GET, "/patients/**").hasAnyRole("ADMIN", "SECRETAIRE", "MEDECIN")
                         .requestMatchers(HttpMethod.PUT, "/patients/**").hasAnyRole("ADMIN", "SECRETAIRE")
                         .requestMatchers(HttpMethod.DELETE, "/patients/**").hasRole("ADMIN")
-                        // Rendez-vous : patient peut prendre rdv, secrétaire gère, médecin consulte/termine
+                        // Rendez-vous
                         .requestMatchers(HttpMethod.POST, "/rendez-vous").hasAnyRole("PATIENT", "SECRETAIRE", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/rendez-vous/**").hasAnyRole("ADMIN", "MEDECIN", "SECRETAIRE", "PATIENT")
                         .requestMatchers("/rendez-vous/*/confirmer", "/rendez-vous/*/annuler").hasAnyRole("SECRETAIRE", "ADMIN")
                         .requestMatchers("/rendez-vous/*/terminer").hasRole("MEDECIN")
-                        // Dossiers médicaux : médecin et patient (le sien)
+                        // Dossiers médicaux
                         .requestMatchers("/dossiers-medicaux/**").hasAnyRole("MEDECIN", "ADMIN", "SECRETAIRE", "PATIENT")
-                        // Ordonnances : médecin prescrit, patient consulte
+                        // Ordonnances
                         .requestMatchers(HttpMethod.POST, "/ordonnances").hasRole("MEDECIN")
                         .requestMatchers(HttpMethod.GET, "/ordonnances/**").hasAnyRole("MEDECIN", "PATIENT", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/ordonnances/**").hasRole("ADMIN")
-                        // Gestion secrétaires : ADMIN
+                        // Secrétaires
                         .requestMatchers(HttpMethod.POST, "/secretaires").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/secretaires/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/secretaires/**").hasAnyRole("ADMIN")
-                        // Utilisateurs génériques : ADMIN
+                        // Utilisateurs
                         .requestMatchers("/utilisateurs/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

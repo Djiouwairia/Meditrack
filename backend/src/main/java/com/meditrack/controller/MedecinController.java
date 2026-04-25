@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,6 +30,16 @@ public class MedecinController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "nom") String sortBy) {
         return ResponseEntity.ok(medecinService.getAllMedecins(page, size, sortBy));
+    }
+
+    /**
+     * Retourne le profil du médecin connecté (email extrait du JWT).
+     * Utilisé par le dashboard médecin pour éviter de parcourir toute la liste.
+     */
+    @GetMapping("/me")
+    public ResponseEntity<Medecin> getCurrentMedecin(Authentication auth) {
+        String email = auth.getName(); // = JWT "sub"
+        return ResponseEntity.ok(medecinService.getMedecinByEmail(email));
     }
 
     @GetMapping("/disponibles")

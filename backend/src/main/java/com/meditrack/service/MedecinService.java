@@ -12,6 +12,7 @@ import com.meditrack.repository.HopitalRepository;
 import com.meditrack.repository.MedecinRepository;
 import com.meditrack.repository.UtilisateurRepository;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -116,5 +117,9 @@ public class MedecinService {
 
     private String generateId() {
         return UUID.randomUUID().toString().replace("-", "").substring(0, 8);
+    }
+
+    public @Nullable Medecin getMedecinByEmail(String email) {
+        return null;
     }
 }
