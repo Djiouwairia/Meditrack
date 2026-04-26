@@ -8,6 +8,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.UuidGenerator;
 
 @Entity
 @Getter
@@ -16,8 +17,10 @@ import lombok.ToString;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Utilisateur {
     @Id
-    @EqualsAndHashCode.Include
+    @GeneratedValue(strategy = GenerationType.UUID) // Ou GenerationType.IDENTITY selon votre config
     private String id;
+    private boolean actif;
+    private boolean archive;
     @Column(nullable = false,length = 30)
     private String nom ;
     @Column(nullable = false,length = 50)
@@ -35,4 +38,13 @@ public class Utilisateur {
     @JoinColumn(name = "hopital_id")
     @JsonBackReference
     private Hopital hopital;
+
+    // IMPLÉMENTEZ LES SETTERS
+    public void setActif(boolean actif) {
+        this.actif = actif;
+    }
+
+    public void setArchive(boolean archive) {
+        this.archive = archive;
+    }
 }

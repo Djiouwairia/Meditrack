@@ -287,156 +287,156 @@ const style = `
 `;
 
 function Contact() {
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    alert("Message envoyé ! Nous vous répondrons dans les plus brefs délais.");
-  };
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        alert("Message envoyé ! Nous vous répondrons dans les plus brefs délais.");
+    };
 
-  return (
-    <>
-      <style>{style}</style>
+    return (
+        <>
+            <style>{style}</style>
 
-      <section id="contact" className="contact">
-        <div className="contact-container">
-          <div className="contact-header">
-            <div className="contact-badge">📞 Nous contacter</div>
-            <h2>Une question ? Un partenariat ?</h2>
-            <p className="contact-subtitle">
-              N'hésitez pas à nous écrire ou à nous appeler. Nous sommes à votre
-              disposition.
-            </p>
-          </div>
+            <section id="contact" className="contact">
+                <div className="contact-container">
+                    <div className="contact-header">
+                        <div className="contact-badge">📞 Nous contacter</div>
+                        <h2>Une question ? Un partenariat ?</h2>
+                        <p className="contact-subtitle">
+                            N'hésitez pas à nous écrire ou à nous appeler. Nous sommes à votre
+                            disposition.
+                        </p>
+                    </div>
 
-          <div className="contact-grid">
-            {/* Informations de contact */}
-            <div className="contact-info">
-              <div className="info-title">
-                <svg
-                  width="28"
-                  height="28"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#27A869"
-                  strokeWidth="1.5"
-                >
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                  <circle cx="12" cy="10" r="3" />
-                </svg>
-                Nos coordonnées
-              </div>
+                    <div className="contact-grid">
+                        {/* Informations de contact */}
+                        <div className="contact-info">
+                            <div className="info-title">
+                                <svg
+                                    width="28"
+                                    height="28"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="#27A869"
+                                    strokeWidth="1.5"
+                                >
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                                    <circle cx="12" cy="10" r="3" />
+                                </svg>
+                                Nos coordonnées
+                            </div>
 
-              <div className="info-item">
-                <div className="info-icon">
-                  <svg viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"
-                      strokeWidth="1.5"
-                    />
-                    <circle cx="12" cy="10" r="3" strokeWidth="1.5" />
-                  </svg>
-                </div>
-                <div className="info-content">
-                  <h4>Adresse</h4>
-                  <p>Ziguinchor, Sénégal</p>
-                </div>
-              </div>
+                            <div className="info-item">
+                                <div className="info-icon">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path
+                                            d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"
+                                            strokeWidth="1.5"
+                                        />
+                                        <circle cx="12" cy="10" r="3" strokeWidth="1.5" />
+                                    </svg>
+                                </div>
+                                <div className="info-content">
+                                    <h4>Adresse</h4>
+                                    <p>Ziguinchor, Sénégal</p>
+                                </div>
+                            </div>
 
-              <div className="info-item">
-                <div className="info-icon">
-                  <svg viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
-                      strokeWidth="1.5"
-                    />
-                    <polyline points="22,6 12,13 2,6" strokeWidth="1.5" />
-                  </svg>
-                </div>
-                <div className="info-content">
-                  <h4>Email</h4>
-                  <a href="mailto:contact@meditrack.sn">contact@meditrack.sn</a>
-                </div>
-              </div>
+                            <div className="info-item">
+                                <div className="info-icon">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path
+                                            d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+                                            strokeWidth="1.5"
+                                        />
+                                        <polyline points="22,6 12,13 2,6" strokeWidth="1.5" />
+                                    </svg>
+                                </div>
+                                <div className="info-content">
+                                    <h4>Email</h4>
+                                    <a href="mailto:contact@meditrack.sn">contact@meditrack.sn</a>
+                                </div>
+                            </div>
 
-              <div className="info-item">
-                <div className="info-icon">
-                  <svg viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"
-                      strokeWidth="1.5"
-                    />
-                  </svg>
-                </div>
-                <div className="info-content">
-                  <h4>Téléphone / WhatsApp</h4>
-                  <div className="whatsapp-number">
-                    <a href="tel:+221779830075">77 123 45 67 </a>
-                  </div>
-                </div>
-              </div>
+                            <div className="info-item">
+                                <div className="info-icon">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path
+                                            d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"
+                                            strokeWidth="1.5"
+                                        />
+                                    </svg>
+                                </div>
+                                <div className="info-content">
+                                    <h4>Téléphone / WhatsApp</h4>
+                                    <div className="whatsapp-number">
+                                        <a href="tel:+221779830075">77 123 45 67 </a>
+                                    </div>
+                                </div>
+                            </div>
 
-              <div className="info-item">
-                <div className="info-icon">
-                  <svg viewBox="0 0 24 24" fill="none">
-                    <circle cx="12" cy="12" r="10" strokeWidth="1.5" />
-                    <polyline points="12 6 12 12 16 14" strokeWidth="1.5" />
-                  </svg>
-                </div>
-                <div className="info-content">
-                  <h4>Horaires</h4>
-                  <ul className="hours-list">
-                    <li>
-                      <span>Lundi - Vendredi</span>
-                      <span>9h00 - 18h00</span>
-                    </li>
-                    <li>
-                      <span>Samedi</span>
-                      <span>10h00 - 14h00</span>
-                    </li>
-                    <li>
-                      <span>Dimanche</span>
-                      <span>Fermé</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
+                            <div className="info-item">
+                                <div className="info-icon">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <circle cx="12" cy="12" r="10" strokeWidth="1.5" />
+                                        <polyline points="12 6 12 12 16 14" strokeWidth="1.5" />
+                                    </svg>
+                                </div>
+                                <div className="info-content">
+                                    <h4>Horaires</h4>
+                                    <ul className="hours-list">
+                                        <li>
+                                            <span>Lundi - Vendredi</span>
+                                            <span>9h00 - 18h00</span>
+                                        </li>
+                                        <li>
+                                            <span>Samedi</span>
+                                            <span>10h00 - 14h00</span>
+                                        </li>
+                                        <li>
+                                            <span>Dimanche</span>
+                                            <span>Fermé</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
 
-            {/* Formulaire de contact */}
-            <div className="contact-form">
-              <div className="form-title">✉️ Envoyez-nous un message</div>
-              <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                  <input type="text" placeholder="Votre nom complet" required />
-                </div>
-                <div className="form-group">
-                  <input type="email" placeholder="Votre email" required />
-                </div>
-                <div className="form-group">
-                  <input type="tel" placeholder="Votre téléphone" />
-                </div>
-                <div className="form-group">
-                  <textarea placeholder="Votre message..." required></textarea>
-                </div>
-                <button type="submit" className="submit-btn">
-                  Envoyer le message
-                </button>
-              </form>
-            </div>
-          </div>
+                        {/* Formulaire de contact */}
+                        <div className="contact-form">
+                            <div className="form-title">✉️ Envoyez-nous un message</div>
+                            <form onSubmit={handleSubmit}>
+                                <div className="form-group">
+                                    <input type="text" placeholder="Votre nom complet" required />
+                                </div>
+                                <div className="form-group">
+                                    <input type="email" placeholder="Votre email" required />
+                                </div>
+                                <div className="form-group">
+                                    <input type="tel" placeholder="Votre téléphone" />
+                                </div>
+                                <div className="form-group">
+                                    <textarea placeholder="Votre message..." required></textarea>
+                                </div>
+                                <button type="submit" className="submit-btn">
+                                    Envoyer le message
+                                </button>
+                            </form>
+                        </div>
+                    </div>
 
-          {/* Carte Google Maps */}
-          <div className="map-container">
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d1570.5!2d-16.287888!3d12.547721!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sfr!2ssn!4v1700000000000!5m2!1sfr!2ssn"
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              title="Carte MediTrack Ziguinchor"
-            />
-          </div>
-        </div>
-      </section>
-    </>
-  );
+                    {/* Carte Google Maps */}
+                    <div className="map-container">
+                        <iframe
+                            src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d1570.5!2d-16.287888!3d12.547721!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sfr!2ssn!4v1700000000000!5m2!1sfr!2ssn"
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                            title="Carte MediTrack Ziguinchor"
+                        />
+                    </div>
+                </div>
+            </section>
+        </>
+    );
 }
 
 export default Contact;

@@ -183,90 +183,90 @@ const style = `
 `;
 
 function Apropos() {
-  return (
-    <>
-      <style>{style}</style>
+    return (
+        <>
+            <style>{style}</style>
 
-      <section id="apropos" className="apropos">
-        <div className="apropos-container">
-          <div className="apropos-header">
-            <div className="apropos-badge">✨ Qui sommes-nous ?</div>
-            <h2>À propos de MediTrack</h2>
-            <p className="apropos-subtitle">
-              Une plateforme innovante au service de votre santé
-            </p>
-          </div>
+            <section id="apropos" className="apropos">
+                <div className="apropos-container">
+                    <div className="apropos-header">
+                        <div className="apropos-badge">✨ Qui sommes-nous ?</div>
+                        <h2>À propos de MediTrack</h2>
+                        <p className="apropos-subtitle">
+                            Une plateforme innovante au service de votre santé
+                        </p>
+                    </div>
 
-          <div className="apropos-content">
-            <div className="apropos-text">
-              <p>
-                <strong>MediTrack</strong> est un système qui regroupe différents spécialistes de la médecine 
-                provenant de plusieurs hôpitaux à travers tout le pays.
-              </p>
-              <p>
-                Il permet à chaque patient, quelle que soit sa maladie, de trouver rapidement un médecin adapté 
-                et de fixer un rendez-vous en ligne sans perte de temps.
-              </p>
-              <div className="apropos-highlight">
-                <p>
-                  ✨ Lors de votre consultation chez un nouveau médecin, un <strong>QR code personnel</strong> vous permet 
-                  d'accéder instantanément à votre dossier médical, facilitant ainsi le suivi et la continuité des soins 
-                  en cas de besoin.
-                </p>
-              </div>
-            </div>
+                    <div className="apropos-content">
+                        <div className="apropos-text">
+                            <p>
+                                <strong>MediTrack</strong> est un système qui regroupe différents spécialistes de la médecine
+                                provenant de plusieurs hôpitaux à travers tout le pays.
+                            </p>
+                            <p>
+                                Il permet à chaque patient, quelle que soit sa maladie, de trouver rapidement un médecin adapté
+                                et de fixer un rendez-vous en ligne sans perte de temps.
+                            </p>
+                            <div className="apropos-highlight">
+                                <p>
+                                    ✨ Lors de votre consultation chez un nouveau médecin, un <strong>QR code personnel</strong> vous permet
+                                    d'accéder instantanément à votre dossier médical, facilitant ainsi le suivi et la continuité des soins
+                                    en cas de besoin.
+                                </p>
+                            </div>
+                        </div>
 
-            <div className="apropos-features">
-              <div className="apropos-card">
-                <div className="apropos-card-icon">
-                  <svg viewBox="0 0 24 24" fill="none">
-                    <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z" strokeWidth="1.5"/>
-                    <path d="M12 6v6l4 2" strokeWidth="1.5"/>
-                  </svg>
+                        <div className="apropos-features">
+                            <div className="apropos-card">
+                                <div className="apropos-card-icon">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z" strokeWidth="1.5"/>
+                                        <path d="M12 6v6l4 2" strokeWidth="1.5"/>
+                                    </svg>
+                                </div>
+                                <h3>Gain de temps</h3>
+                                <p>Trouvez un médecin et prenez rendez-vous en quelques clics</p>
+                            </div>
+
+                            <div className="apropos-card">
+                                <div className="apropos-card-icon">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <circle cx="12" cy="12" r="3" strokeWidth="1.5"/>
+                                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" strokeWidth="1.5"/>
+                                    </svg>
+                                </div>
+                                <h3>Multi-hôpitaux</h3>
+                                <p>Spécialistes de plusieurs hôpitaux à travers tout le pays</p>
+                            </div>
+
+                            <div className="apropos-card">
+                                <div className="apropos-card-icon">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <rect x="4" y="4" width="16" height="16" rx="2" strokeWidth="1.5"/>
+                                        <path d="M9 8h6M9 12h6M9 16h4" strokeWidth="1.5"/>
+                                        <circle cx="18" cy="6" r="1" fill="#27A869"/>
+                                    </svg>
+                                </div>
+                                <h3>Dossier médical</h3>
+                                <p>Accès instantané via QR code personnel</p>
+                            </div>
+
+                            <div className="apropos-card">
+                                <div className="apropos-card-icon">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" strokeWidth="1.5"/>
+                                        <polyline points="22 4 12 14.01 9 11.01" strokeWidth="1.5"/>
+                                    </svg>
+                                </div>
+                                <h3>Suivi simplifié</h3>
+                                <p>Continuité des soins facilitée</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <h3>Gain de temps</h3>
-                <p>Trouvez un médecin et prenez rendez-vous en quelques clics</p>
-              </div>
-
-              <div className="apropos-card">
-                <div className="apropos-card-icon">
-                  <svg viewBox="0 0 24 24" fill="none">
-                    <circle cx="12" cy="12" r="3" strokeWidth="1.5"/>
-                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" strokeWidth="1.5"/>
-                  </svg>
-                </div>
-                <h3>Multi-hôpitaux</h3>
-                <p>Spécialistes de plusieurs hôpitaux à travers tout le pays</p>
-              </div>
-
-              <div className="apropos-card">
-                <div className="apropos-card-icon">
-                  <svg viewBox="0 0 24 24" fill="none">
-                    <rect x="4" y="4" width="16" height="16" rx="2" strokeWidth="1.5"/>
-                    <path d="M9 8h6M9 12h6M9 16h4" strokeWidth="1.5"/>
-                    <circle cx="18" cy="6" r="1" fill="#27A869"/>
-                  </svg>
-                </div>
-                <h3>Dossier médical</h3>
-                <p>Accès instantané via QR code personnel</p>
-              </div>
-
-              <div className="apropos-card">
-                <div className="apropos-card-icon">
-                  <svg viewBox="0 0 24 24" fill="none">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" strokeWidth="1.5"/>
-                    <polyline points="22 4 12 14.01 9 11.01" strokeWidth="1.5"/>
-                  </svg>
-                </div>
-                <h3>Suivi simplifié</h3>
-                <p>Continuité des soins facilitée</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    </>
-  );
+            </section>
+        </>
+    );
 }
 
 export default Apropos;

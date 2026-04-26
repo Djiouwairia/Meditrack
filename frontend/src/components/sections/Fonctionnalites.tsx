@@ -142,96 +142,96 @@ const style = `
 `;
 
 function Fonctionnalites() {
-  return (
-    <>
-      <style>{style}</style>
+    return (
+        <>
+            <style>{style}</style>
 
-      <section id="fonctionnalites" className="fonctionnalites">
-        <h2>Fonctionnalités</h2>
-        <p className="sub">
-          Une plateforme simple et rapide pour gérer vos rendez-vous médicaux
-        </p>
+            <section id="fonctionnalites" className="fonctionnalites">
+                <h2>Fonctionnalités</h2>
+                <p className="sub">
+                    Une plateforme simple et rapide pour gérer vos rendez-vous médicaux
+                </p>
 
-        <div className="fonctionnalites-grid">
+                <div className="fonctionnalites-grid">
 
-          {/* Carte 1 - Recherche rapide */}
-          <div className="card">
-            <svg className="icon" viewBox="0 0 24 24" fill="none">
-              <circle cx="11" cy="11" r="8" strokeWidth="2"/>
-              <path d="M21 21l-4.3-4.3" strokeWidth="2"/>
-            </svg>
-            <div className="title">🔍 Recherche rapide</div>
-            <div className="desc">
-              Trouvez facilement un spécialiste selon votre besoin, par spécialité ou localisation.
-            </div>
-            <a href="#rdv" className="cta btn-primary">
-              Rechercher un médecin
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                <line x1="5" y1="12" x2="19" y2="12"/>
-                <polyline points="12 5 19 12 12 19"/>
-              </svg>
-            </a>
-          </div>
+                    {/* Carte 1 - Recherche rapide */}
+                    <div className="card">
+                        <svg className="icon" viewBox="0 0 24 24" fill="none">
+                            <circle cx="11" cy="11" r="8" strokeWidth="2"/>
+                            <path d="M21 21l-4.3-4.3" strokeWidth="2"/>
+                        </svg>
+                        <div className="title">🔍 Recherche rapide</div>
+                        <div className="desc">
+                            Trouvez facilement un spécialiste selon votre besoin, par spécialité ou localisation.
+                        </div>
+                        <a href="#rdv" className="cta btn-primary">
+                            Rechercher un médecin
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                                <polyline points="12 5 19 12 12 19"/>
+                            </svg>
+                        </a>
+                    </div>
 
-          {/* Carte 2 - Prise de rendez-vous */}
-          <div className="card">
-            <svg className="icon" viewBox="0 0 24 24" fill="none">
-              <path d="M8 7V3m8 4V3M4 11h16M5 21h14a2 2 0 0 0 2-2V7H3v12a2 2 0 0 0 2 2z" strokeWidth="2"/>
-            </svg>
-            <div className="title">📅 Prise de rendez-vous</div>
-            <div className="desc">
-              Réservez votre consultation en quelques clics, choisissez le créneau qui vous arrange.
-            </div>
-            <a href="#rdv" className="cta btn-secondary">
-              Prendre un RDV
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                <line x1="5" y1="12" x2="19" y2="12"/>
-                <polyline points="12 5 19 12 12 19"/>
-              </svg>
-            </a>
-          </div>
+                    {/* Carte 2 - Prise de rendez-vous */}
+                    <div className="card">
+                        <svg className="icon" viewBox="0 0 24 24" fill="none">
+                            <path d="M8 7V3m8 4V3M4 11h16M5 21h14a2 2 0 0 0 2-2V7H3v12a2 2 0 0 0 2 2z" strokeWidth="2"/>
+                        </svg>
+                        <div className="title">📅 Prise de rendez-vous</div>
+                        <div className="desc">
+                            Réservez votre consultation en quelques clics, choisissez le créneau qui vous arrange.
+                        </div>
+                        <a href="#rdv" className="cta btn-secondary">
+                            Prendre un RDV
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                                <polyline points="12 5 19 12 12 19"/>
+                            </svg>
+                        </a>
+                    </div>
 
-          {/* Carte 3 - Gain de temps */}
-          <div className="card">
-            <svg className="icon" viewBox="0 0 24 24" fill="none">
-              <path d="M12 8v4l3 3" strokeWidth="2"/>
-              <circle cx="12" cy="12" r="9" strokeWidth="2"/>
-            </svg>
-            <div className="title">⏱️ Gain de temps</div>
-            <div className="desc">
-              Évitez les déplacements inutiles et les longues attentes. Consultez en ligne.
-            </div>
-            <a href="#connexion" className="cta btn-outline">
-              Se connecter
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <line x1="5" y1="12" x2="19" y2="12"/>
-                <polyline points="12 5 19 12 12 19"/>
-              </svg>
-            </a>
-          </div>
+                    {/* Carte 3 - Gain de temps */}
+                    <div className="card">
+                        <svg className="icon" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 8v4l3 3" strokeWidth="2"/>
+                            <circle cx="12" cy="12" r="9" strokeWidth="2"/>
+                        </svg>
+                        <div className="title">⏱️ Gain de temps</div>
+                        <div className="desc">
+                            Évitez les déplacements inutiles et les longues attentes. Consultez en ligne.
+                        </div>
+                        <a href="#connexion" className="cta btn-outline">
+                            Se connecter
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                                <polyline points="12 5 19 12 12 19"/>
+                            </svg>
+                        </a>
+                    </div>
 
-          {/* Carte 4 - Suivi simplifié */}
-          <div className="card">
-            <svg className="icon" viewBox="0 0 24 24" fill="none">
-              <path d="M5 3h14v18H5V3zM9 7h6M9 11h6M9 15h4" strokeWidth="2"/>
-            </svg>
-            <div className="title">📂 Suivi simplifié</div>
-            <div className="desc">
-              Consultez vos rendez-vous et votre historique facilement. Recevez des rappels.
-            </div>
-            <a href="#connexion" className="cta btn-light">
-              Se connecter
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <line x1="5" y1="12" x2="19" y2="12"/>
-                <polyline points="12 5 19 12 12 19"/>
-              </svg>
-            </a>
-          </div>
+                    {/* Carte 4 - Suivi simplifié */}
+                    <div className="card">
+                        <svg className="icon" viewBox="0 0 24 24" fill="none">
+                            <path d="M5 3h14v18H5V3zM9 7h6M9 11h6M9 15h4" strokeWidth="2"/>
+                        </svg>
+                        <div className="title">📂 Suivi simplifié</div>
+                        <div className="desc">
+                            Consultez vos rendez-vous et votre historique facilement. Recevez des rappels.
+                        </div>
+                        <a href="#connexion" className="cta btn-light">
+                            Se connecter
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                                <polyline points="12 5 19 12 12 19"/>
+                            </svg>
+                        </a>
+                    </div>
 
-        </div>
-      </section>
-    </>
-  );
+                </div>
+            </section>
+        </>
+    );
 }
 
 export default Fonctionnalites;
