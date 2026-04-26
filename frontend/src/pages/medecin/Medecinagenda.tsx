@@ -57,7 +57,7 @@ export default function MedecinAgenda() {
     }, {});
 
     return (
-        <DashboardLayout navItems={NAV} title="Mon agenda" accentColor="#1A7A52">
+        <DashboardLayout navItems={NAV} title="Mon agenda" accentColor="#27A869">
             {/* Filters */}
             <div style={{ background: "#fff", borderRadius: 16, padding: "16px 24px", marginBottom: 20, display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap", boxShadow: "0 2px 12px rgba(0,0,0,0.05)", border: "1px solid #F0F2F7" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -68,12 +68,12 @@ export default function MedecinAgenda() {
                     <label style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>Au</label>
                     <input type="date" value={fin} onChange={e => setFin(e.target.value)} style={{ borderRadius: 8, border: "1px solid #E5E7EB", padding: "6px 10px", fontSize: 13 }} />
                 </div>
-                <button onClick={handleSearch} style={{ background: "linear-gradient(135deg,#1A7A52,#27A869)", color: "#fff", border: "none", borderRadius: 10, padding: "8px 20px", cursor: "pointer", fontSize: 13, fontWeight: 600 }}>
+                <button onClick={handleSearch} style={{ background: "linear-gradient(135deg,#27A869,#27A869)", color: "#fff", border: "none", borderRadius: 10, padding: "8px 20px", cursor: "pointer", fontSize: 13, fontWeight: 600 }}>
                     Rechercher
                 </button>
                 <div style={{ display: "flex", gap: 8, marginLeft: "auto", flexWrap: "wrap" }}>
                     {["TOUS", "EN_ATTENTE", "CONFIRME", "TERMINE", "ANNULE"].map(s => (
-                        <button key={s} onClick={() => setFilterStatut(s)} style={{ background: filterStatut === s ? "#1A7A52" : "#F3F4F6", color: filterStatut === s ? "#fff" : "#374151", border: "none", borderRadius: 20, padding: "5px 14px", fontSize: 12, fontWeight: 600, cursor: "pointer", transition: "all 0.15s" }}>
+                        <button key={s} onClick={() => setFilterStatut(s)} style={{ background: filterStatut === s ? "#27A869" : "#F3F4F6", color: filterStatut === s ? "#fff" : "#374151", border: "none", borderRadius: 20, padding: "5px 14px", fontSize: 12, fontWeight: 600, cursor: "pointer", transition: "all 0.15s" }}>
                             {s === "TOUS" ? "Tous" : s.replace("_", " ")}
                         </button>
                     ))}
@@ -82,7 +82,7 @@ export default function MedecinAgenda() {
 
             {loading ? (
                 <div className="d-flex justify-content-center" style={{ padding: 60 }}>
-                    <div className="spinner-border" style={{ color: "#1A7A52" }}></div>
+                    <div className="spinner-border" style={{ color: "#27A869" }}></div>
                 </div>
             ) : Object.keys(grouped).length === 0 ? (
                 <div style={{ textAlign: "center", padding: "64px 0", color: "#8A94A6", background: "#fff", borderRadius: 16 }}>
@@ -99,7 +99,7 @@ export default function MedecinAgenda() {
                 <span style={{ fontWeight: 700, fontSize: 14, color: "#0D1F2D" }}>
                   {new Date(date + "T00:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
                 </span>
-                                    <span style={{ marginLeft: 12, background: "#1A7A5222", color: "#1A7A52", fontSize: 12, fontWeight: 600, padding: "2px 10px", borderRadius: 20 }}>
+                                    <span style={{ marginLeft: 12, background: "#27A86922", color: "#27A869", fontSize: 12, fontWeight: 600, padding: "2px 10px", borderRadius: 20 }}>
                   {list.length} RDV
                 </span>
                                 </div>
@@ -107,9 +107,9 @@ export default function MedecinAgenda() {
                                     {list.sort((a, b) => a.heure.localeCompare(b.heure)).map(rdv => (
                                         <div key={rdv.id} style={{ display: "flex", alignItems: "center", gap: 16, padding: "12px 16px", borderRadius: 12, background: "#F8FAFC", border: "1px solid #EEF1F6" }}>
                                             <div style={{ width: 52, textAlign: "center" }}>
-                                                <span style={{ fontWeight: 700, color: "#1A7A52", fontSize: 16 }}>{rdv.heure?.slice(0, 5)}</span>
+                                                <span style={{ fontWeight: 700, color: "#27A869", fontSize: 16 }}>{rdv.heure?.slice(0, 5)}</span>
                                             </div>
-                                            <div style={{ width: 38, height: 38, borderRadius: "50%", background: "#1A7A5222", display: "flex", alignItems: "center", justifyContent: "center", color: "#1A7A52", fontWeight: 700, fontSize: 14, flexShrink: 0 }}>
+                                            <div style={{ width: 38, height: 38, borderRadius: "50%", background: "#27A86922", display: "flex", alignItems: "center", justifyContent: "center", color: "#27A869", fontWeight: 700, fontSize: 14, flexShrink: 0 }}>
                                                 {rdv.patient?.prenom?.[0]}{rdv.patient?.nom?.[0]}
                                             </div>
                                             <div style={{ flex: 1 }}>

@@ -1,22 +1,36 @@
-// @ts-ignore
-import React, { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import React, {
+    createContext,
+    useContext,
+    useState,
+    useEffect,
+    type ReactNode
+} from "react";
 import { authService, type AuthUser } from "../services/Authservice";
 
 interface AuthContextType {
     user: AuthUser | null;
+    isAuthenticated: boolean;
+    loading: boolean;
     login: (email: string, password: string) => Promise<void>;
     logout: () => void;
-    isAuthenticated: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<AuthUser | null>(null);
+    const [loading, setLoading] = useState(true);
 
+    // 🔥 BOOT RAPIDE + SAFE
     useEffect(() => {
-        const u = authService.getCurrentUser();
-        if (u && authService.isAuthenticated()) setUser(u);
+        const token = localStorage.getItem("accessToken");
+
+        if (token && authService.isAuthenticated()) {
+            const u = authService.getCurrentUser();
+            if (u) setUser(u);
+        }
+
+        setLoading(false);
     }, []);
 
     const login = async (email: string, password: string) => {
@@ -30,7 +44,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>
+        <AuthContext.Provider
+            value={{
+                user,
+                isAuthenticated: !!localStorage.getItem("accessToken"),
+                loading,
+                login,
+                logout
+            }}
+        >
             {children}
         </AuthContext.Provider>
     );

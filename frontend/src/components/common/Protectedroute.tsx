@@ -1,22 +1,34 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { authService } from "../../services/Authservice";
 
-interface Props {
-    children: React.ReactNode;
-    allowedRoles?: string[];
-}
+export default function ProtectedRoute({ children, allowedRoles }: any) {
+    const { user, isAuthenticated, loading } = useAuth();
 
-export default function ProtectedRoute({ children, allowedRoles }: Props) {
-    const { user, isAuthenticated } = useAuth();
+    console.log("AUTH DEBUG:", { user, isAuthenticated, loading });
 
-    if (!isAuthenticated) return <Navigate to="/login" replace />;
+    // ⛔ ATTENTE AUTH
+    if (loading) {
+        return <div>Chargement...</div>;
+    }
 
-    if (allowedRoles && user && !allowedRoles.includes(user.role.toUpperCase())) {
-        // Redirect to proper dashboard
-        import("../../services/Authservice").then(({ authService }) => {
-            window.location.href = authService.getDashboardPath(user.role);
-        });
-        return null;
+    // ❌ pas de token
+    if (!isAuthenticated) {
+        return <Navigate to="/login" replace />;
+    }
+
+    // ❌ role check
+    if (allowedRoles && user) {
+        const role = user.role.toUpperCase();
+
+        if (!allowedRoles.map((r: string) => r.toUpperCase()).includes(role)) {
+            return (
+                <Navigate
+                    to={authService.getDashboardPath(user.role)}
+                    replace
+                />
+            );
+        }
     }
 
     return <>{children}</>;

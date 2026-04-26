@@ -58,16 +58,16 @@ export default function MedecinProfil() {
     const inp = { width:"100%", borderRadius:8, border:"1px solid #E5E7EB", padding:"10px 14px", fontSize:14, boxSizing:"border-box" as const };
 
     return (
-        <DashboardLayout navItems={NAV} title="Mon profil" accentColor="#1A7A52">
+        <DashboardLayout navItems={NAV} title="Mon profil" accentColor="#27A869">
             {loading ? (
                 <div className="d-flex justify-content-center align-items-center" style={{ height:300 }}>
-                    <div className="spinner-border" style={{ color:"#1A7A52" }}></div>
+                    <div className="spinner-border" style={{ color:"#27A869" }}></div>
                 </div>
             ) : (
                 <div style={{ maxWidth:720, margin:"0 auto", display:"flex", flexDirection:"column", gap:20 }}>
 
                     {/* Banner */}
-                    <div style={{ background:"linear-gradient(135deg,#1A7A52,#27A869)", borderRadius:20, padding:"32px 36px", color:"#fff", display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:16 }}>
+                    <div style={{ background:"linear-gradient(135deg,#27A869,#27A869)", borderRadius:20, padding:"32px 36px", color:"#fff", display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:16 }}>
                         <div style={{ display:"flex", alignItems:"center", gap:20 }}>
                             <div style={{ width:80, height:80, borderRadius:"50%", background:"rgba(255,255,255,0.25)", border:"3px solid rgba(255,255,255,0.5)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:30, fontWeight:800 }}>
                                 {medecin?.prenom?.[0]}{medecin?.nom?.[0]}
@@ -94,14 +94,14 @@ export default function MedecinProfil() {
                             {saveSuccess && <span style={{ background:"#D1FAE5", color:"#065F46", fontSize:12, fontWeight:600, padding:"4px 12px", borderRadius:20 }}>✓ Sauvegardé</span>}
                             {!editing ? (
                                 <button onClick={()=>setEditing(true)}
-                                        style={{ background:"#E8F5EE", color:"#1A7A52", border:"none", borderRadius:10, padding:"8px 18px", cursor:"pointer", fontSize:13, fontWeight:600 }}>
+                                        style={{ background:"#E8F5EE", color:"#27A869", border:"none", borderRadius:10, padding:"8px 18px", cursor:"pointer", fontSize:13, fontWeight:600 }}>
                                     <i className="bi bi-pencil me-2"></i>Modifier
                                 </button>
                             ) : (
                                 <div style={{ display:"flex", gap:8 }}>
                                     <button onClick={()=>{setEditing(false);setError("");}} style={{ background:"#F3F4F6", border:"none", borderRadius:10, padding:"8px 16px", cursor:"pointer", fontSize:13 }}>Annuler</button>
                                     <button onClick={handleSave} disabled={saveLoading}
-                                            style={{ background:"linear-gradient(135deg,#1A7A52,#27A869)", color:"#fff", border:"none", borderRadius:10, padding:"8px 20px", cursor:"pointer", fontSize:13, fontWeight:600 }}>
+                                            style={{ background:"linear-gradient(135deg,#27A869,#27A869)", color:"#fff", border:"none", borderRadius:10, padding:"8px 20px", cursor:"pointer", fontSize:13, fontWeight:600 }}>
                                         {saveLoading?<span className="spinner-border spinner-border-sm"></span>:"Sauvegarder"}
                                     </button>
                                 </div>
@@ -128,7 +128,7 @@ export default function MedecinProfil() {
                         ) : (
                             <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16 }}>
                                 {[
-                                    { icon:"bi-person-fill",    label:"Nom complet",   value:`Dr. ${medecin?.prenom} ${medecin?.nom}`, color:"#1A7A52", bg:"#E8F5EE" },
+                                    { icon:"bi-person-fill",    label:"Nom complet",   value:`Dr. ${medecin?.prenom} ${medecin?.nom}`, color:"#27A869", bg:"#E8F5EE" },
                                     { icon:"bi-envelope-fill",  label:"Email",         value:medecin?.email,                           color:"#0EA5E9", bg:"#E0F2FE" },
                                     { icon:"bi-telephone-fill", label:"Téléphone",     value:medecin?.telephone,                       color:"#8B5CF6", bg:"#EDE9FE" },
                                     { icon:"bi-award-fill",     label:"Spécialité",    value:medecin?.specialite,                      color:"#F59E0B", bg:"#FEF3C7" },
