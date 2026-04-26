@@ -168,80 +168,80 @@ const css = `
 `;
 
 function ChatbotButton() {
-  const [open, setOpen] = useState(false);
-  const [hovered, setHovered] = useState(false);
+    const [open, setOpen] = useState(false);
+    const [hovered, setHovered] = useState(false);
 
-  return (
-    <>
-      <style>{css}</style>
+    return (
+        <>
+            <style>{css}</style>
 
-      <div className="chatbot-fab">
-        {hovered && !open && (
-          <div className="chatbot-tooltip">Assistant Meditrack</div>
-        )}
-        <button
-          className="chatbot-btn"
-          onClick={() => setOpen(true)}
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
-          aria-label="Ouvrir le chatbot"
-        >
-          <span className="chatbot-pulse" />
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-            <line x1="9" y1="10" x2="15" y2="10"/>
-            <line x1="9" y1="14" x2="13" y2="14"/>
-          </svg>
-        </button>
-      </div>
-
-      {open && (
-        <div
-          className="chatbot-modal-overlay"
-          onClick={() => setOpen(false)}
-        >
-          <div
-            className="chatbot-modal"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              className="chatbot-modal-x"
-              onClick={() => setOpen(false)}
-            >
-              ×
-            </button>
-
-            <div className="chatbot-modal-icon">
-              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                <line x1="9" y1="10" x2="15" y2="10"/>
-                <line x1="9" y1="14" x2="13" y2="14"/>
-              </svg>
+            <div className="chatbot-fab">
+                {hovered && !open && (
+                    <div className="chatbot-tooltip">Assistant Meditrack</div>
+                )}
+                <button
+                    className="chatbot-btn"
+                    onClick={() => setOpen(true)}
+                    onMouseEnter={() => setHovered(true)}
+                    onMouseLeave={() => setHovered(false)}
+                    aria-label="Ouvrir le chatbot"
+                >
+                    <span className="chatbot-pulse" />
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        <line x1="9" y1="10" x2="15" y2="10"/>
+                        <line x1="9" y1="14" x2="13" y2="14"/>
+                    </svg>
+                </button>
             </div>
 
-            <h3>Assistant Meditrack</h3>
+            {open && (
+                <div
+                    className="chatbot-modal-overlay"
+                    onClick={() => setOpen(false)}
+                >
+                    <div
+                        className="chatbot-modal"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button
+                            className="chatbot-modal-x"
+                            onClick={() => setOpen(false)}
+                        >
+                            ×
+                        </button>
 
-            <div className="chatbot-modal-badge">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="8" x2="12" y2="12"/>
-                <line x1="12" y1="16" x2="12.01" y2="16"/>
-              </svg>
-              En cours de développement
-            </div>
+                        <div className="chatbot-modal-icon">
+                            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                <line x1="9" y1="10" x2="15" y2="10"/>
+                                <line x1="9" y1="14" x2="13" y2="14"/>
+                            </svg>
+                        </div>
 
-            
-            <button
-              className="chatbot-modal-close"
-              onClick={() => setOpen(false)}
-            >
-              Compris !
-            </button>
-          </div>
-        </div>
-      )}
-    </>
-  );
+                        <h3>Assistant Meditrack</h3>
+
+                        <div className="chatbot-modal-badge">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="12" y1="8" x2="12" y2="12"/>
+                                <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                            En cours de développement
+                        </div>
+
+
+                        <button
+                            className="chatbot-modal-close"
+                            onClick={() => setOpen(false)}
+                        >
+                            Compris !
+                        </button>
+                    </div>
+                </div>
+            )}
+        </>
+    );
 }
 
 export default ChatbotButton;
