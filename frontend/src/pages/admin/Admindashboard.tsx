@@ -1,4 +1,4 @@
-=import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import DashboardLayout from "../../components/common/DashboardLayout";
 import StatCard from "../../components/common/Statcard";
 import { useAuth } from "../../context/AuthContext";
@@ -10,12 +10,13 @@ import {
 } from "../../services/Adminservice";
 
 import {
+
+
     medecinService,
     patientService,
     secretaireService
 } from "../../services/DomainServices";
 
-import "../../styles/admin-dashboard.css";
 
 const NAV = [
     { icon: "bi-speedometer2", label: "Tableau de bord", path: "/dashboard/admin" },
@@ -32,6 +33,7 @@ const COLORS = {
     successLight: "#E8F5EE",
 };
 
+// @ts-ignore
 function Modal({ title, onClose, children }: any) {
     return (
         <div className="modal-overlay">
@@ -47,7 +49,7 @@ function Modal({ title, onClose, children }: any) {
 }
 
 export default function AdminDashboard() {
-    const { user } = useAuth();
+    useAuth();
 
     const [tab, setTab] = useState<"hopitaux" | "utilisateurs">("hopitaux");
     const [loading, setLoading] = useState(true);
