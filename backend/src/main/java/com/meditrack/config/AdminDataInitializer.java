@@ -27,6 +27,7 @@ public class AdminDataInitializer implements CommandLineRunner {
             Utilisateur admin = new Utilisateur();
             admin.setNom("Admin");
             admin.setPrenom("Super");
+            admin.setTelephone("772777787");
             admin.setEmail("admin@meditrack.com");
             admin.setMotDePasse(passwordEncoder.encode("Admin@2024"));
             admin.setRole(Role.valueOf("ADMIN"));
