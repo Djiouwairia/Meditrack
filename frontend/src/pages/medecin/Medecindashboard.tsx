@@ -111,7 +111,7 @@ export default function MedecinDashboard() {
     };
 
     return (
-        <DashboardLayout navItems={NAV} title="Tableau de bord" accentColor={ACCENT}>
+        <DashboardLayout navItems={NAV} title="Tableau de bord" >
             {loading ? (
                 <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: 300 }}>
                     <div className="spinner-border" style={{ color: ACCENT }}></div>
@@ -125,37 +125,14 @@ export default function MedecinDashboard() {
                                 Bonjour 👋
                             </div>
                             <div style={{ fontSize: 18, fontWeight: 600, color: "#0F0F0F", letterSpacing: "-0.3px" }}>
-                                Dr. {medecin?.prenom} {medecin?.nom} Aziz Sylla
+                                Dr. {medecin?.prenom} {medecin?.nom} 
                             </div>
                             <div style={{ fontSize: 12.5, color: "#9E9E9E", marginTop: 3 }}>
                                 {medecin?.specialite} · {medecin?.hopital?.nom}
                             </div>
                         </div>
 
-                        {/* Disponibilité toggle */}
-                        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
-                            <div style={{ fontSize: 11, color: "#BDBDBD", fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                                Disponibilité
-                            </div>
-                            <button
-                                onClick={async () => { if (medecin) { await api.patch(`/medecins/${medecin.id}/disponibilite`); loadData(); } }}
-                                style={{
-                                    background: medecin?.disponible ? ACCENT_LIGHT : "#FEE2E2",
-                                    color: medecin?.disponible ? ACCENT : "#991B1B",
-                                    border: `0.5px solid ${medecin?.disponible ? "#A7D7BE" : "#FECACA"}`,
-                                    borderRadius: 20,
-                                    padding: "5px 14px",
-                                    fontSize: 12.5,
-                                    fontWeight: 600,
-                                    cursor: "pointer",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: 6
-                                }}>
-                                <div style={{ width: 6, height: 6, borderRadius: "50%", background: medecin?.disponible ? ACCENT : "#ef4444" }} />
-                                {medecin?.disponible ? "Disponible" : "Indisponible"}
-                            </button>
-                        </div>
+                        
                     </div>
 
                     {/* ── Stat cards ── */}

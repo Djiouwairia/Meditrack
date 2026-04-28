@@ -82,15 +82,15 @@ export default function PatientDashboard() {
     };
 
     return (
-        <DashboardLayout navItems={NAV} title="Tableau de bord" accentColor="#0EA5E9">
+        <DashboardLayout navItems={NAV} title="Tableau de bord" >
             {loading ? (
                 <div className="d-flex justify-content-center align-items-center" style={{ height: 300 }}>
-                    <div className="spinner-border" style={{ color: "#0EA5E9" }}></div>
+                    <div className="spinner-border" style={{ color: "#27A869" }}></div>
                 </div>
             ) : (
                 <>
                     {/* Welcome */}
-                    <div style={{ background: "linear-gradient(135deg, #0369A1 0%, #0EA5E9 100%)", borderRadius: 20, padding: "24px 32px", color: "#fff", marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div style={{ background: "#27A869", borderRadius: 20, padding: "24px 32px", color: "#fff", marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                         <div>
                             <div style={{ fontSize: 13, opacity: 0.85, marginBottom: 4 }}>Bienvenue 👋</div>
                             <div style={{ fontSize: 22, fontWeight: 700 }}>{patient?.prenom} {patient?.nom}</div>
@@ -106,7 +106,7 @@ export default function PatientDashboard() {
 
                     {/* Stats */}
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px,1fr))", gap: 16, marginBottom: 24 }}>
-                        <StatCard icon="bi-calendar-check" label="Total RDV" value={stats.total} color="#0EA5E9" bg="#E0F2FE" />
+                        <StatCard icon="bi-calendar-check" label="Total RDV" value={stats.total} color="#27A869" bg="#E0F2FE" />
                         <StatCard icon="bi-check-circle" label="Confirmés" value={stats.confirmes} color="#1A7A52" bg="#E8F5EE" />
                         <StatCard icon="bi-hourglass" label="En attente" value={stats.enAttente} color="#F59E0B" bg="#FEF3C7" />
                         <StatCard icon="bi-check2-all" label="Terminés" value={stats.termines} color="#8B5CF6" bg="#EDE9FE" />
@@ -116,13 +116,13 @@ export default function PatientDashboard() {
                         {/* Prochains RDV */}
                         <div style={{ background: "#fff", borderRadius: 20, padding: 24, boxShadow: "0 2px 12px rgba(0,0,0,0.05)", border: "1px solid #F0F2F7" }}>
                             <h2 style={{ margin: "0 0 20px", fontSize: 17, fontWeight: 700, color: "#0D1F2D" }}>
-                                <i className="bi bi-clock-history me-2" style={{ color: "#0EA5E9" }}></i>Prochains rendez-vous
+                                <i className="bi bi-clock-history me-2" style={{ color: "#27A869" }}></i>Prochains rendez-vous
                             </h2>
                             {prochains.length === 0 ? (
                                 <div style={{ textAlign: "center", padding: "40px 0", color: "#8A94A6" }}>
                                     <i className="bi bi-calendar-x" style={{ fontSize: 36 }}></i>
                                     <div style={{ marginTop: 10 }}>Aucun rendez-vous à venir</div>
-                                    <button onClick={openRdvModal} style={{ marginTop: 16, background: "#0EA5E9", color: "#fff", border: "none", borderRadius: 10, padding: "8px 20px", cursor: "pointer", fontSize: 13, fontWeight: 600 }}>
+                                    <button onClick={openRdvModal} style={{ marginTop: 16, background: "#27A869", color: "#fff", border: "none", borderRadius: 10, padding: "8px 20px", cursor: "pointer", fontSize: 13, fontWeight: 600 }}>
                                         Prendre un RDV
                                     </button>
                                 </div>
@@ -131,7 +131,7 @@ export default function PatientDashboard() {
                                     {prochains.map(rdv => (
                                         <div key={rdv.id} style={{ display: "flex", alignItems: "center", gap: 16, padding: "14px 16px", borderRadius: 12, background: "#F8FAFC", border: "1px solid #EEF1F6" }}>
                                             <div style={{ textAlign: "center", minWidth: 60, background: "#E0F2FE", borderRadius: 10, padding: "8px 4px" }}>
-                                                <div style={{ fontSize: 18, fontWeight: 700, color: "#0EA5E9" }}>{rdv.date?.slice(8, 10)}</div>
+                                                <div style={{ fontSize: 18, fontWeight: 700, color: "#27A869" }}>{rdv.date?.slice(8, 10)}</div>
                                                 <div style={{ fontSize: 11, color: "#0369A1", textTransform: "uppercase" }}>
                                                     {new Date(rdv.date + "T00:00:00").toLocaleDateString("fr-FR", { month: "short" })}
                                                 </div>
@@ -151,7 +151,7 @@ export default function PatientDashboard() {
                         {/* Dossier médical */}
                         <div style={{ background: "#fff", borderRadius: 20, padding: 24, boxShadow: "0 2px 12px rgba(0,0,0,0.05)", border: "1px solid #F0F2F7" }}>
                             <h2 style={{ margin: "0 0 20px", fontSize: 17, fontWeight: 700, color: "#0D1F2D" }}>
-                                <i className="bi bi-folder2-open me-2" style={{ color: "#0EA5E9" }}></i>Dossier médical
+                                <i className="bi bi-folder2-open me-2" style={{ color: "#27A869" }}></i>Dossier médical
                             </h2>
                             {dossier ? (
                                 <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -159,7 +159,7 @@ export default function PatientDashboard() {
                                         { icon: "bi-droplet-fill", label: "Groupe sanguin", value: patient?.groupeSanguin || "—", color: "#EF4444", bg: "#FEE2E2" },
                                         { icon: "bi-exclamation-triangle-fill", label: "Allergies", value: dossier.allergies || "Aucune", color: "#F59E0B", bg: "#FEF3C7" },
                                         { icon: "bi-activity", label: "Poids", value: dossier.poids ? `${dossier.poids} kg` : "—", color: "#1A7A52", bg: "#E8F5EE" },
-                                        { icon: "bi-arrows-vertical", label: "Taille", value: dossier.taille ? `${dossier.taille} cm` : "—", color: "#0EA5E9", bg: "#E0F2FE" },
+                                        { icon: "bi-arrows-vertical", label: "Taille", value: dossier.taille ? `${dossier.taille} cm` : "—", color: "#27A869", bg: "#E0F2FE" },
                                     ].map(item => (
                                         <div key={item.label} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", borderRadius: 12, background: "#F8FAFC" }}>
                                             <div style={{ width: 36, height: 36, borderRadius: 10, background: item.bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -226,7 +226,7 @@ export default function PatientDashboard() {
                                     <button
                                         onClick={handlePrendreRdv}
                                         disabled={rdvLoading || !rdvForm.medecinId || !rdvForm.date || !rdvForm.heure || !rdvForm.motif}
-                                        style={{ background: "linear-gradient(135deg,#0369A1,#0EA5E9)", color: "#fff", border: "none", borderRadius: 10, padding: "10px 24px", cursor: "pointer", fontSize: 14, fontWeight: 600 }}
+                                        style={{ background: "linear-gradient(135deg,#0369A1,#27A869)", color: "#fff", border: "none", borderRadius: 10, padding: "10px 24px", cursor: "pointer", fontSize: 14, fontWeight: 600 }}
                                     >
                                         {rdvLoading ? <span className="spinner-border spinner-border-sm"></span> : "Confirmer"}
                                     </button>

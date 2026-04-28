@@ -48,7 +48,7 @@ export default function SecretaireProfil() {
     const inp = { width:"100%", borderRadius:8, border:"1px solid #E5E7EB", padding:"10px 14px", fontSize:14, boxSizing:"border-box" as const };
 
     return (
-        <DashboardLayout navItems={NAV} title="Mon profil" accentColor="#7C3AED">
+        <DashboardLayout navItems={NAV} title="Mon profil" >
             {loading ? (
                 <div className="d-flex justify-content-center align-items-center" style={{ height:300 }}>
                     <div className="spinner-border" style={{ color:"#7C3AED" }}></div>

@@ -119,7 +119,10 @@ public class MedecinService {
         return UUID.randomUUID().toString().replace("-", "").substring(0, 8);
     }
 
-    public @Nullable Medecin getMedecinByEmail(String email) {
-        return null;
+    public Medecin getMedecinByEmail(String email) {
+        return medecinRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new MedecinNotFoundException("Médecin introuvable avec email : " + email)
+                );
     }
 }

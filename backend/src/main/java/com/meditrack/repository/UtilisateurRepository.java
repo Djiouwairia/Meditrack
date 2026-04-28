@@ -1,5 +1,6 @@
 package com.meditrack.repository;
 
+import com.meditrack.enums.Role;
 import com.meditrack.model.Utilisateur;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -9,6 +10,8 @@ import java.util.Optional;
 
 public interface UtilisateurRepository extends JpaRepository<Utilisateur, String> {
     Page<Utilisateur> findAll(Pageable pageable);
+
+    Page<Utilisateur> findUtilisateursByRoleNot(Role role, Pageable pageable);
     Optional<Utilisateur> findByEmail(String email);
 
     Optional<Utilisateur> findByTelephone(String contact);

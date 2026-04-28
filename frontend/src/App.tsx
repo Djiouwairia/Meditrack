@@ -35,6 +35,8 @@ import SecretaireProfil from "./pages/secretaire/Secretaireprofil";
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import imagePath from "./assets/logo.png";
+import AdminUtilisateurs from "./pages/admin/AdminUtilisateurs";
+import AdminHopitaux from "./pages/admin/AdminHopital";
 
 /* ───────────── REDIRECTION SELON RÔLE ───────────── */
 function RoleRedirect() {
@@ -104,6 +106,24 @@ function AppRoutes() {
                 }
             />
 
+             <Route
+                path="/dashboard/admin/utilisateurs"
+                element={
+                    <Protected roles={["ADMIN"]}>
+                        <AdminUtilisateurs />
+                    </Protected>
+                }
+            />
+
+            <Route
+                path="/dashboard/admin/hopitaux"
+                element={
+                    <Protected roles={["ADMIN"]}>
+                        <AdminHopitaux />
+                    </Protected>
+                }
+            />
+
             {/* ───────── MÉDECIN ───────── */}
             <Route
                 path="/dashboard/medecin"
@@ -159,6 +179,7 @@ function AppRoutes() {
                     </Protected>
                 }
             />
+            
 
             {/* ───────── SECRÉTAIRE ───────── */}
             <Route

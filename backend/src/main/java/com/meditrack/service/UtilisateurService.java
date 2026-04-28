@@ -31,7 +31,10 @@ public class UtilisateurService {
         if (utilisateurRepository.findByEmail(utilisateur.getEmail()).isPresent()) throw new EmailAlreadyUsedException("Cet email est déja utilisé !");
         if (utilisateurRepository.findByTelephone(utilisateur.getTelephone()).isPresent()) throw new TelephoneAlreadyUsedException("Ce contact est déjà utilisé !");
         utilisateur.setId(UUID.randomUUID().toString().replace("-", "").substring(1,8));
-        utilisateur.setMotDePasse(bCryptPasswordEncoder.encode(utilisateur.getMotDePasse()));
+        String password = UUID.randomUUID().toString().replace("-","").substring(1,8).toUpperCase();
+        System.out.println("Password : "  + password);
+        utilisateur.setMotDePasse(bCryptPasswordEncoder.encode(password));
+        utilisateur.setStatutUtilisateur(StatutUtilisateur.ACTIF);
         return utilisateurRepository.save(utilisateur);
     }
 
@@ -42,6 +45,7 @@ public class UtilisateurService {
         utilisateur.setId(UUID.randomUUID().toString().replace("-", "").substring(1,8));
         utilisateur.setMotDePasse(bCryptPasswordEncoder.encode(utilisateur.getMotDePasse()));
         utilisateur.setHopital(hopital);
+        utilisateur.setStatutUtilisateur(StatutUtilisateur.ACTIF);
         return utilisateurRepository.save(utilisateur);
     }
 

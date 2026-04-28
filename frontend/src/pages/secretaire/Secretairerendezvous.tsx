@@ -106,7 +106,7 @@ export default function SecretaireRendezVous() {
         });
 
     return (
-        <DashboardLayout navItems={NAV} title="Gestion des rendez-vous" accentColor="#7C3AED">
+        <DashboardLayout navItems={NAV} title="Gestion des rendez-vous" >
             {/* Toolbar */}
             <div style={{ background:"#fff", borderRadius:16, padding:"16px 20px", marginBottom:20, display:"flex", gap:14, alignItems:"center", flexWrap:"wrap", boxShadow:"0 2px 12px rgba(0,0,0,0.05)", border:"1px solid #F0F2F7" }}>
                 <div style={{ display:"flex", alignItems:"center", gap:8, flex:1, minWidth:180 }}>
@@ -117,13 +117,13 @@ export default function SecretaireRendezVous() {
                 <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
                     {["TOUS","EN_ATTENTE","CONFIRME","TERMINE","ANNULE"].map(s=>(
                         <button key={s} onClick={()=>setFilterStatut(s)}
-                                style={{ background:filterStatut===s?"#7C3AED":"#F3F4F6", color:filterStatut===s?"#fff":"#374151", border:"none", borderRadius:20, padding:"5px 14px", fontSize:12, fontWeight:600, cursor:"pointer", transition:"all 0.15s" }}>
+                                style={{ background:filterStatut===s?"#27A869":"#F3F4F6", color:filterStatut===s?"#fff":"#374151", border:"none", borderRadius:20, padding:"5px 14px", fontSize:12, fontWeight:600, cursor:"pointer", transition:"all 0.15s" }}>
                             {s==="TOUS"?"Tous":s.replace("_"," ")}
                         </button>
                     ))}
                 </div>
                 <button onClick={()=>setModal(true)}
-                        style={{ background:"linear-gradient(135deg,#5B21B6,#7C3AED)", color:"#fff", border:"none", borderRadius:12, padding:"10px 20px", fontWeight:700, cursor:"pointer", fontSize:13, flexShrink:0 }}>
+                        style={{ background:"linear-gradient(135deg,#27A869,#27A869)", color:"#fff", border:"none", borderRadius:12, padding:"10px 20px", fontWeight:700, cursor:"pointer", fontSize:13, flexShrink:0 }}>
                     <i className="bi bi-calendar-plus me-2"></i>Nouveau RDV
                 </button>
             </div>
@@ -131,7 +131,7 @@ export default function SecretaireRendezVous() {
             {/* Stats rapides */}
             <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:12, marginBottom:20 }}>
                 {[
-                    { label:"Total", value:rdvs.length, color:"#7C3AED", bg:"#EDE9FE" },
+                    { label:"Total", value:rdvs.length, color:"#27A869", bg:"#EDE9FE" },
                     { label:"En attente", value:rdvs.filter(r=>r.statut==="EN_ATTENTE").length, color:"#F59E0B", bg:"#FEF3C7" },
                     { label:"Confirmés", value:rdvs.filter(r=>r.statut==="CONFIRME").length, color:"#1A7A52", bg:"#E8F5EE" },
                     { label:"Terminés", value:rdvs.filter(r=>r.statut==="TERMINE").length, color:"#0EA5E9", bg:"#E0F2FE" },
@@ -146,7 +146,7 @@ export default function SecretaireRendezVous() {
             {/* Liste */}
             <div style={{ background:"#fff", borderRadius:20, padding:24, boxShadow:"0 2px 12px rgba(0,0,0,0.05)", border:"1px solid #F0F2F7" }}>
                 {loading ? (
-                    <div className="d-flex justify-content-center" style={{ padding:60 }}><div className="spinner-border" style={{ color:"#7C3AED" }}></div></div>
+                    <div className="d-flex justify-content-center" style={{ padding:60 }}><div className="spinner-border" style={{ color:"#27A869" }}></div></div>
                 ) : filtered.length === 0 ? (
                     <div style={{ textAlign:"center", padding:"60px 0", color:"#8A94A6" }}>
                         <i className="bi bi-calendar-x" style={{ fontSize:52 }}></i>
@@ -158,16 +158,16 @@ export default function SecretaireRendezVous() {
                             <div key={rdv.id} style={{ display:"flex", alignItems:"center", gap:14, padding:"14px 18px", borderRadius:14, background:"#F8FAFC", border:"1px solid #EEF1F6", flexWrap:"wrap" }}>
                                 {/* Date */}
                                 <div style={{ minWidth:60, textAlign:"center", background:"#EDE9FE", borderRadius:10, padding:"8px 6px" }}>
-                                    <div style={{ fontSize:20, fontWeight:800, color:"#7C3AED", lineHeight:1 }}>{rdv.date?.slice(8,10)}</div>
-                                    <div style={{ fontSize:10, color:"#5B21B6", textTransform:"uppercase", fontWeight:600 }}>
+                                    <div style={{ fontSize:20, fontWeight:800, color:"#27A869", lineHeight:1 }}>{rdv.date?.slice(8,10)}</div>
+                                    <div style={{ fontSize:10, color:"#27A869", textTransform:"uppercase", fontWeight:600 }}>
                                         {rdv.date?new Date(rdv.date+"T00:00:00").toLocaleDateString("fr-FR",{month:"short"}):""}
                                     </div>
-                                    <div style={{ fontSize:12, color:"#5B21B6", fontWeight:600, marginTop:2 }}>{rdv.heure?.slice(0,5)}</div>
+                                    <div style={{ fontSize:12, color:"#27A869", fontWeight:600, marginTop:2 }}>{rdv.heure?.slice(0,5)}</div>
                                 </div>
 
                                 {/* Patient */}
                                 <div style={{ display:"flex", alignItems:"center", gap:10, flex:"1 1 200px" }}>
-                                    <div style={{ width:38, height:38, borderRadius:"50%", background:"#EDE9FE", display:"flex", alignItems:"center", justifyContent:"center", color:"#7C3AED", fontWeight:700, fontSize:13, flexShrink:0 }}>
+                                    <div style={{ width:38, height:38, borderRadius:"50%", background:"#EDE9FE", display:"flex", alignItems:"center", justifyContent:"center", color:"#27A869", fontWeight:700, fontSize:13, flexShrink:0 }}>
                                         {rdv.patient?.prenom?.[0]}{rdv.patient?.nom?.[0]}
                                     </div>
                                     <div>
@@ -257,7 +257,7 @@ export default function SecretaireRendezVous() {
                                 <div style={{ display:"flex", gap:12, justifyContent:"flex-end", marginTop:20 }}>
                                     <button onClick={()=>setModal(false)} style={{ background:"#F3F4F6", border:"none", borderRadius:10, padding:"10px 20px", cursor:"pointer" }}>Annuler</button>
                                     <button onClick={handleCreate} disabled={formLoading||!form.patientId||!form.medecinId||!form.date||!form.heure}
-                                            style={{ background:"linear-gradient(135deg,#5B21B6,#7C3AED)", color:"#fff", border:"none", borderRadius:10, padding:"10px 24px", cursor:"pointer", fontWeight:600, fontSize:14 }}>
+                                            style={{ background:"linear-gradient(135deg,#27A869,#27A869)", color:"#fff", border:"none", borderRadius:10, padding:"10px 24px", cursor:"pointer", fontWeight:600, fontSize:14 }}>
                                         {formLoading?<span className="spinner-border spinner-border-sm"></span>:"Créer"}
                                     </button>
                                 </div>
@@ -280,7 +280,7 @@ export default function SecretaireRendezVous() {
                         <div style={{ display:"flex", gap:12, justifyContent:"flex-end", marginTop:20 }}>
                             <button onClick={()=>setTerminerRdv(null)} style={{ background:"#F3F4F6", border:"none", borderRadius:10, padding:"10px 20px", cursor:"pointer" }}>Annuler</button>
                             <button onClick={handleTerminer} disabled={diagLoading||!diag.trim()}
-                                    style={{ background:"linear-gradient(135deg,#5B21B6,#7C3AED)", color:"#fff", border:"none", borderRadius:10, padding:"10px 24px", cursor:"pointer", fontWeight:600, fontSize:14 }}>
+                                    style={{ background:"linear-gradient(135deg,#27A869,#27A869)", color:"#fff", border:"none", borderRadius:10, padding:"10px 24px", cursor:"pointer", fontWeight:600, fontSize:14 }}>
                                 {diagLoading?<span className="spinner-border spinner-border-sm"></span>:"Confirmer"}
                             </button>
                         </div>
