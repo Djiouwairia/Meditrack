@@ -57,7 +57,7 @@ function ChartCard({ title, icon, children }: { title: string; icon: string; chi
 }
 
 export default function AdminDashboard() {
-    const { user } = useAuth();
+    useAuth();
 
     const [hopitaux, setHopitaux]       = useState<Hopital[]>([]);
     const [utilisateurs, setUtilisateurs] = useState<Utilisateur[]>([]);
