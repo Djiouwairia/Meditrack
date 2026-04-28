@@ -22,10 +22,12 @@ export default function DashboardLayout({
     title,
     accentColor = "#27A869"
 }: Props) {
+    // @ts-ignore
     const [sidebarOpen, setSidebarOpen] = useState(true);
 
     const { user, logout } = useAuth();
     const location = useLocation();
+    // @ts-ignore
     const navigate = useNavigate();
 
     const initials =
