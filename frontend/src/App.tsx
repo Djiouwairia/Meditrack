@@ -69,6 +69,10 @@ function Protected({
     return <>{children}</>;
 }
 
+function Patientordonnances() {
+    return null;
+}
+
 /* ───────────── ROUTES APP ───────────── */
 function AppRoutes() {
     return (
@@ -175,7 +179,7 @@ function AppRoutes() {
 
             {/* ───────── PATIENT ───────── */}
             <Route
-                path="/dashboard/patient/ordonnances"
+                path="/dashboard/patient/"
                 element={
                     <Protected roles={["PATIENT"]}>
                         <PatientDashboard />
@@ -198,6 +202,15 @@ function AppRoutes() {
                 element={
                     <Protected roles={["PATIENT"]}>
                         <PatientProfil />
+                    </Protected>
+                }
+            />
+
+            <Route
+                path="/dashboard/patient/ordonance"
+                element={
+                    <Protected roles={["PATIENT"]}>
+                        <Patientordonnances />
                     </Protected>
                 }
             />

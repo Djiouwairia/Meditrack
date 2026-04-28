@@ -65,11 +65,9 @@ export default function PatientProfil() {
     const inp: React.CSSProperties = { width: "100%", borderRadius: 8, border: "0.5px solid #EBEBEB", padding: "10px 14px", fontSize: 14, boxSizing: "border-box", background: "#FAFAFA", outline: "none" };
 
     return (
-<<<<<<< Updated upstream
-        <DashboardLayout navItems={NAV} title="Mon profil" >
-=======
+
         <DashboardLayout navItems={NAV} title="Mon profil" accentColor={ACCENT}>
->>>>>>> Stashed changes
+ Stashed changes
             {loading ? (
                 <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: 300 }}>
                     <div className="spinner-border" style={{ color: ACCENT }}></div>

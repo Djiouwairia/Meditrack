@@ -42,7 +42,7 @@ export default function PatientDossier() {
         } finally { setLoading(false); }
     }, [user]);
 
-    useEffect(() => { load(); }, [load]);
+    useEffect(() => { void load(); }, [load]);
 
     const handleSave = async () => {
         if (!dossier) return;

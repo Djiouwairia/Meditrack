@@ -5,7 +5,7 @@ export interface Medecin { id: string; nom: string; prenom: string; email: strin
 export interface Patient { id: string; nom: string; prenom: string; email: string; telephone: string; adresse?: string; dateDeNaissance?: string; groupeSanguin?: string; hopital?: { id: string; nom: string }; }
 export interface RendezVous { id: string; date: string; heure: string; motif: string; statut: "EN_ATTENTE" | "CONFIRME" | "ANNULE" | "TERMINE"; diagnostic?: string; patient: Patient; medecin: Medecin; }
 export interface DossierMedical { id: string; allergies?: string; poids?: string; taille?: string; patient: Patient; ordonnances?: Ordonnance[]; }
-export interface Ordonnance { id: string; date: string; medicaments: Record<string, string>; rendezVous?: RendezVous; dossierMedical?: { id: string }; }
+export interface Ordonnance { id: string; date: string; dateCreation?: string; medicaments: Record<string, string>; medecin?: { id: string; nom: string; prenom: string }; rendezVous?: RendezVous; dossierMedical?: { id: string }; }
 export interface Secretaire { id: string; nom: string; prenom: string; email: string; telephone: string; hopital?: { id: string; nom: string }; }
 export interface Disponibilite { id: string; date: string; heureDebut: string; heureFin: string; estReserve: boolean; medecin?: { id: string; nom: string; prenom: string }; }
 
