@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import DashboardLayout from "../../components/common/DashboardLayout";
 import EmptyImg from "../../assets/Empty.gif";
-import { utilisateurService, type Utilisateur } from "../../services/DomainServices";
+
+import { utilisateurService, type Utilisateur } from "../../services/Adminservice";
 
 const NAV = [
     { icon: "bi-speedometer2",  label: "Tableau de bord", path: "/dashboard/admin" },
@@ -250,94 +251,94 @@ export default function AdminUtilisateurs() {
                     <>
                         <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 600 }}>
                             <thead>
-                                <tr style={{ borderBottom: "2px solid #F0F2F7" }}>
-                                    {["Utilisateur", "Email", "Sexe", "Téléphone", "Rôle", "État", "Actions"].map(h => (
-                                        <th
-                                            key={h}
-                                            style={{
-                                                textAlign: "left",
-                                                padding: "10px 14px",
-                                                fontSize: 11,
-                                                fontWeight: 700,
-                                                color: "#6B7280",
-                                                textTransform: "uppercase",
-                                                letterSpacing: 0.5
-                                            }}
-                                        >
-                                            {h}
-                                        </th>
-                                    ))}
-                                </tr>
+                            <tr style={{ borderBottom: "2px solid #F0F2F7" }}>
+                                {["Utilisateur", "Email", "Sexe", "Téléphone", "Rôle", "État", "Actions"].map(h => (
+                                    <th
+                                        key={h}
+                                        style={{
+                                            textAlign: "left",
+                                            padding: "10px 14px",
+                                            fontSize: 11,
+                                            fontWeight: 700,
+                                            color: "#6B7280",
+                                            textTransform: "uppercase",
+                                            letterSpacing: 0.5
+                                        }}
+                                    >
+                                        {h}
+                                    </th>
+                                ))}
+                            </tr>
                             </thead>
                             <tbody>
-                                {filtered.map(u => {
-                                    const initials = `${u?.prenom?.[0] ?? "?"}${u?.nom?.[0] ?? "?"}`.toUpperCase();
-                                    return (
-                                        <tr
-                                            key={u.id}
-                                            className="align-middle"
-                                            style={{ borderBottom: "1px solid #F0F2F7", transition: "background 0.12s" }}
-                                            onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#FAFAFA"}
-                                            onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
-                                        >
-                                            <td style={{ padding: "13px 14px" }}>
-                                                <div className="d-flex align-items-center gap-2">
-                                                    <div
-                                                        className="d-flex align-items-center justify-content-center"
-                                                        style={{ width: 36, height: 36, borderRadius: "50%", background: "#DCFCE7", color: "#27A869", fontWeight: 700, fontSize: 13 }}
-                                                    >
-                                                        {initials}
-                                                    </div>
-                                                    <div className="fw-semibold text-muted" style={{ fontSize: 14 }}>
-                                                        {u.prenom} {u.nom}
-                                                    </div>
+                            {filtered.map(u => {
+                                const initials = `${u?.prenom?.[0] ?? "?"}${u?.nom?.[0] ?? "?"}`.toUpperCase();
+                                return (
+                                    <tr
+                                        key={u.id}
+                                        className="align-middle"
+                                        style={{ borderBottom: "1px solid #F0F2F7", transition: "background 0.12s" }}
+                                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#FAFAFA"}
+                                        onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
+                                    >
+                                        <td style={{ padding: "13px 14px" }}>
+                                            <div className="d-flex align-items-center gap-2">
+                                                <div
+                                                    className="d-flex align-items-center justify-content-center"
+                                                    style={{ width: 36, height: 36, borderRadius: "50%", background: "#DCFCE7", color: "#27A869", fontWeight: 700, fontSize: 13 }}
+                                                >
+                                                    {initials}
                                                 </div>
-                                            </td>
-                                            <td style={{ padding: "13px 14px", fontSize: 13 }} className="text-muted">{u.email}</td>
-                                            <td style={{ padding: "13px 14px" }}>
-                                                {u.sexe ? (
-                                                    <span className="badge text-capitalize" style={{ background: getSexeColor(u.sexe).bg, color: getSexeColor(u.sexe).color, fontSize: 11, fontWeight: 700, borderRadius: 20 }}>
+                                                <div className="fw-semibold text-muted" style={{ fontSize: 14 }}>
+                                                    {u.prenom} {u.nom}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td style={{ padding: "13px 14px", fontSize: 13 }} className="text-muted">{u.email}</td>
+                                        <td style={{ padding: "13px 14px" }}>
+                                            {u.sexe ? (
+                                                <span className="badge text-capitalize" style={{ background: getSexeColor(u.sexe).bg, color: getSexeColor(u.sexe).color, fontSize: 11, fontWeight: 700, borderRadius: 20 }}>
                                                         {u.sexe === "HOMME" && <i className="bi bi-gender-male me-1"></i>}
-                                                        {u.sexe === "FEMME" && <i className="bi bi-gender-female me-1"></i>}
-                                                        {u.sexe}
+                                                    {u.sexe === "FEMME" && <i className="bi bi-gender-female me-1"></i>}
+                                                    {u.sexe}
                                                     </span>
-                                                ) : <span className="text-secondary">—</span>}
-                                            </td>
-                                            <td style={{ padding: "13px 14px", fontSize: 13 }}>{u.telephone || <span className="text-secondary">—</span>}</td>
-                                            <td style={{ padding: "13px 14px" }}>
-                                                {u.role ? (
-                                                    <span className="badge" style={{ background: getRoleColor(u.role).bg, color: getRoleColor(u.role).color, fontSize: 11, borderRadius: 10 }}>{u.role}</span>
-                                                ) : <span className="text-secondary">—</span>}
-                                            </td>
-                                            <td style={{ padding: "13px 14px" }}>
-                                                {u.statutUtilisateur ? (
-                                                    <span className="badge text-lowercase" style={{ background: getStatutColor(u.statutUtilisateur).bg, color: getStatutColor(u.statutUtilisateur).color, fontSize: 11, borderRadius: 10 }}>
+                                            ) : <span className="text-secondary">—</span>}
+                                        </td>
+                                        <td style={{ padding: "13px 14px", fontSize: 13 }}>{u.telephone || <span className="text-secondary">—</span>}</td>
+                                        <td style={{ padding: "13px 14px" }}>
+                                            {u.role ? (
+                                                <span className="badge" style={{ background: getRoleColor(u.role).bg, color: getRoleColor(u.role).color, fontSize: 11, borderRadius: 10 }}>{u.role}</span>
+                                            ) : <span className="text-secondary">—</span>}
+                                        </td>
+                                        <td style={{ padding: "13px 14px" }}>
+                                            {u.statutUtilisateur ? (
+                                                <span className="badge text-lowercase" style={{ background: getStatutColor(u.statutUtilisateur).bg, color: getStatutColor(u.statutUtilisateur).color, fontSize: 11, borderRadius: 10 }}>
                                                         {u.statutUtilisateur}
                                                     </span>
-                                                ) : <span className="text-secondary">—</span>}
-                                            </td>
-                                            <td style={{ padding: "13px 14px" }}>
-                                                <div className="d-flex gap-2">
-                                                    {u.statutUtilisateur === "ACTIF" ? (
-                                                        <button className="btn text-danger btn-sm" title="Désactiver" onClick={() => handleDeactivate(u.id)}>
-                                                            <i className="bi bi-x-octagon"></i>
-                                                        </button>
-                                                    ) : (
-                                                        <button className="btn btn-sm" title="Activer" onClick={() => handleActivate(u.id)} style={{ color: "#27A869" }}>
-                                                            <i className="bi bi-check-circle"></i>
-                                                        </button>
-                                                    )}
-                                                    <button onClick={() => openEdit(u)} className="btn text-primary btn-sm" title="Modifier">
-                                                        <i className="bi bi-pencil"></i>
+                                            ) : <span className="text-secondary">—</span>}
+                                        </td>
+                                        <td style={{ padding: "13px 14px" }}>
+                                            <div className="d-flex gap-2">
+                                                {u.statutUtilisateur === "ACTIF" ? (
+                                                    <button className="btn text-danger btn-sm" title="Désactiver" onClick={() => handleDeactivate(u.id)}>
+                                                        <i className="bi bi-x-octagon"></i>
                                                     </button>
-                                                    <button onClick={() => setDeleteId(u.id)} className="btn text-secondary btn-sm" title="Supprimer">
-                                                        <i className="bi bi-trash"></i>
+                                                ) : (
+                                                    <button className="btn btn-sm" title="Activer" onClick={() => handleActivate(u.id)} style={{ color: "#27A869" }}>
+                                                        <i className="bi bi-check-circle"></i>
                                                     </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
+                                                )}
+                                                <button onClick={() => openEdit(u)} className="btn text-primary btn-sm" title="Modifier">
+                                                    <i className="bi bi-pencil"></i>
+                                                </button>
+                                                <button onClick={() => setDeleteId(u.id)} className="btn text-secondary btn-sm" title="Supprimer">
+                                                    <i className="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                             </tbody>
                         </table>
 

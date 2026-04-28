@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import DashboardLayout from "../../components/common/DashboardLayout";
 import StatCard from "../../components/common/Statcard";
 import { useAuth } from "../../context/AuthContext";
@@ -57,7 +57,7 @@ function ChartCard({ title, icon, children }: { title: string; icon: string; chi
 }
 
 export default function AdminDashboard() {
-    useAuth();
+    const { user } = useAuth();
 
     const [hopitaux, setHopitaux]       = useState<Hopital[]>([]);
     const [utilisateurs, setUtilisateurs] = useState<Utilisateur[]>([]);
@@ -117,7 +117,7 @@ export default function AdminDashboard() {
 
     // 2. Barres — utilisateurs par statut
     const statutCount = utilisateurs.reduce<Record<string, number>>((acc, u) => {
-        const s = u.statutUtilisateur || "INCONNU";
+        const s = u.actif === false ? "INACTIF" : u.archive ? "ARCHIVÉ" : "ACTIF";
         acc[s] = (acc[s] || 0) + 1;
         return acc;
     }, {});

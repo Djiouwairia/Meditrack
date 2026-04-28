@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import DashboardLayout from "../../components/common/DashboardLayout";
 import EmptyImg from "../../assets/Empty.gif";
-import { hopitalService, type Hopital } from "../../services/DomainServices";
+import { hopitalService, type Hopital } from "../../services/Adminservice";
 
 const NAV = [
     { icon: "bi-speedometer2", label: "Tableau de bord", path: "/dashboard/admin" },

@@ -7,15 +7,18 @@ export interface Hopital {
     adresse?: string;
     telephone?: string;
     email?: string;
+    contact?: string;
 }
 
 export interface Utilisateur {
+    statutUtilisateur: string;
     id: string;
     nom: string;
     prenom: string;
     email: string;
     telephone?: string;
     role?: string;
+    sexe?: string;
     actif?: boolean;
     archive?: boolean;
     hopital?: { id: string; nom: string };
