@@ -1,4 +1,4 @@
-=import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import DashboardLayout from "../../components/common/DashboardLayout";
 import StatCard from "../../components/common/Statcard";
 import { useAuth } from "../../context/AuthContext";
@@ -8,40 +8,50 @@ import {
     type Hopital,
     type Utilisateur
 } from "../../services/Adminservice";
-
+import { medecinService, patientService, secretaireService } from "../../services/DomainServices";
 import {
-    medecinService,
-    patientService,
-    secretaireService
-} from "../../services/DomainServices";
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    ArcElement,
+    LineElement,
+    PointElement,
+    Tooltip,
+    Legend,
+    Filler,
+    Title,
+} from "chart.js";
+import { Bar, Doughnut, Line } from "react-chartjs-2";
 
-import "../../styles/admin-dashboard.css";
+ChartJS.register(
+    CategoryScale, LinearScale, BarElement, ArcElement,
+    LineElement, PointElement, Tooltip, Legend, Filler, Title
+);
 
 const NAV = [
     { icon: "bi-speedometer2", label: "Tableau de bord", path: "/dashboard/admin" },
-    { icon: "bi-hospital", label: "Hôpitaux", path: "/dashboard/admin/hopitaux" },
-    { icon: "bi-people", label: "Utilisateurs", path: "/dashboard/admin/utilisateurs" },
-    { icon: "bi-person-badge", label: "Médecins", path: "/dashboard/admin/medecins" },
-    { icon: "bi-person-gear", label: "Mon profil", path: "/dashboard/admin/profil" },
+    { icon: "bi-hospital",     label: "Hôpitaux",        path: "/dashboard/admin/hopitaux" },
+    { icon: "bi-people",       label: "Utilisateurs",    path: "/dashboard/admin/utilisateurs" },
+    { icon: "bi-person-badge", label: "Médecins",        path: "/dashboard/admin/medecins" },
+    { icon: "bi-person-gear",  label: "Mon profil",      path: "/dashboard/admin/profil" },
 ];
 
-const COLORS = {
-    primary: "#DC2626",
-    primaryLight: "#FEE2E2",
-    success: "#1A7A52",
-    successLight: "#E8F5EE",
-};
-
-function Modal({ title, onClose, children }: any) {
+// ── Carte graphique ──
+function ChartCard({ title, icon, children }: { title: string; icon: string; children: React.ReactNode }) {
     return (
-        <div className="modal-overlay">
-            <div className="modal-content">
-                <div className="modal-header">
-                    <h3>{title}</h3>
-                    <button onClick={onClose}>✕</button>
-                </div>
-                {children}
+        <div style={{
+            background: "#fff",
+            borderRadius: 16,
+            padding: "20px 24px",
+            border: "1px solid #EBEBEB",
+            boxShadow: "0 1px 4px rgba(0,0,0,0.05)"
+        }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
+                <i className={`bi ${icon}`} style={{ color: "#27A869", fontSize: 16 }}></i>
+                <span style={{ fontWeight: 700, fontSize: 14, color: "#111827" }}>{title}</span>
             </div>
+            {children}
         </div>
     );
 }
@@ -49,13 +59,9 @@ function Modal({ title, onClose, children }: any) {
 export default function AdminDashboard() {
     const { user } = useAuth();
 
-    const [tab, setTab] = useState<"hopitaux" | "utilisateurs">("hopitaux");
-    const [loading, setLoading] = useState(true);
-
-    const [hopitaux, setHopitaux] = useState<Hopital[]>([]);
+    const [hopitaux, setHopitaux]       = useState<Hopital[]>([]);
     const [utilisateurs, setUtilisateurs] = useState<Utilisateur[]>([]);
-
-    const [search, setSearch] = useState("");
+    const [loading, setLoading]         = useState(true);
 
     const [stats, setStats] = useState({
         hopitaux: 0,
@@ -64,26 +70,23 @@ export default function AdminDashboard() {
         secretaires: 0
     });
 
-    /* ───── LOAD DATA ───── */
     const load = useCallback(async () => {
         setLoading(true);
         try {
-            const [h, u, m, p, s] = await Promise.all([
+            const [hops, users, meds, pats, secs] = await Promise.all([
                 hopitalService.getAll(0, 100),
                 utilisateurService.getAll(0, 200),
                 medecinService.getAll(0, 1),
                 patientService.getAll(0, 1),
                 secretaireService.getAll(0, 1),
             ]);
-
-            setHopitaux(h.content);
-            setUtilisateurs(u.content);
-
+            setHopitaux(hops.content);
+            setUtilisateurs(users.content);
             setStats({
-                hopitaux: h.totalElements,
-                medecins: m.totalElements,
-                patients: p.totalElements,
-                secretaires: s.totalElements,
+                hopitaux:    hops.totalElements,
+                medecins:    meds.totalElements,
+                patients:    pats.totalElements,
+                secretaires: secs.totalElements,
             });
         } finally {
             setLoading(false);
@@ -92,132 +95,208 @@ export default function AdminDashboard() {
 
     useEffect(() => { load(); }, [load]);
 
-    /* ───── FILTERS ───── */
-    const filteredHopitaux = hopitaux.filter(h =>
-        h.nom?.toLowerCase().includes(search.toLowerCase())
-    );
+    // ── Données graphiques ──
 
-    const filteredUsers = utilisateurs.filter(u =>
-        `${u.nom} ${u.prenom} ${u.email} ${u.role}`
-            .toLowerCase()
-            .includes(search.toLowerCase())
-    );
+    // 1. Donut — répartition des rôles
+    const roleCount = utilisateurs.reduce<Record<string, number>>((acc, u) => {
+        const r = u.role || "AUTRE";
+        acc[r] = (acc[r] || 0) + 1;
+        return acc;
+    }, {});
+
+    const doughnutData = {
+        labels: Object.keys(roleCount),
+        datasets: [{
+            data: Object.values(roleCount),
+            backgroundColor: ["#27A869", "#3B82F6", "#F59E0B", "#EF4444", "#8B5CF6"],
+            borderWidth: 2,
+            borderColor: "#fff",
+            hoverOffset: 6,
+        }]
+    };
+
+    // 2. Barres — utilisateurs par statut
+    const statutCount = utilisateurs.reduce<Record<string, number>>((acc, u) => {
+        const s = u.statutUtilisateur || "INCONNU";
+        acc[s] = (acc[s] || 0) + 1;
+        return acc;
+    }, {});
+
+    const barData = {
+        labels: Object.keys(statutCount),
+        datasets: [{
+            label: "Utilisateurs",
+            data: Object.values(statutCount),
+            backgroundColor: ["#27A869", "#EF4444", "#F59E0B", "#6B7280"],
+            borderRadius: 8,
+            borderSkipped: false,
+        }]
+    };
+
+    // 3. Line — vue d'ensemble des entités
+    const lineData = {
+        labels: ["Hôpitaux", "Médecins", "Patients", "Secrétaires"],
+        datasets: [{
+            label: "Total",
+            data: [stats.hopitaux, stats.medecins, stats.patients, stats.secretaires],
+            borderColor: "#27A869",
+            backgroundColor: "rgba(39,168,105,0.12)",
+            borderWidth: 2.5,
+            pointBackgroundColor: "#27A869",
+            pointRadius: 5,
+            pointHoverRadius: 7,
+            fill: true,
+            tension: 0.4,
+        }]
+    };
+
+    // 4. Barres horizontales — top hôpitaux (nombre de caractères nom = placeholder visuel)
+    const topHopitaux = hopitaux.slice(0, 6);
+    const hBarData = {
+        labels: topHopitaux.map(h => h.nom?.length > 20 ? h.nom.slice(0, 18) + "…" : h.nom),
+        datasets: [{
+            label: "Hôpitaux enregistrés",
+            data: topHopitaux.map((_, i) => i + 1),
+            backgroundColor: "rgba(39,168,105,0.75)",
+            borderRadius: 6,
+            borderSkipped: false,
+        }]
+    };
+
+    const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: { display: false },
+            tooltip: { backgroundColor: "#1F2937", titleColor: "#fff", bodyColor: "#D1FAE5", padding: 10, cornerRadius: 8 },
+        },
+        scales: {
+            x: { grid: { display: false }, ticks: { color: "#6B7280", font: { size: 11 } } },
+            y: { grid: { color: "#F3F4F6" }, ticks: { color: "#6B7280", font: { size: 11 } } },
+        }
+    };
+
+    const now = new Date();
+    const greeting = now.getHours() < 12 ? "Bonjour" : now.getHours() < 18 ? "Bon après-midi" : "Bonsoir";
 
     return (
-        <DashboardLayout navItems={NAV} title="Administration" accentColor={COLORS.primary}>
+        <DashboardLayout navItems={NAV} title="Administration">
 
-            {/* ───── HEADER ───── */}
-            <div className="admin-header">
+            {/* ── Banner ── */}
+            <div style={{
+                background: "#fff",
+                borderRadius: 14,
+                padding: "20px 24px",
+                marginBottom: 20,
+                display: "flex",
+                justifyContent: "space-between",
+                border: "1px solid #EBEBEB"
+            }}>
                 <div>
-                    <div className="kicker">Administration</div>
-                    <div className="title">Vue globale du système</div>
+                    <div style={{ fontSize: 12, opacity: 0.85 }}>{greeting} 👋</div>
+                    <div style={{ fontSize: 20, fontWeight: 700, marginTop: 2 }}>
+                        {user?.prenom} {user?.nom}
+                    </div>
+                    <div style={{ fontSize: 12, opacity: 0.75, marginTop: 4 }}>
+                        Administrateur
+                    </div>
                 </div>
-
-                <div className="stats-inline">
-                    <div><strong>{stats.hopitaux}</strong><span>Hôpitaux</span></div>
-                    <div><strong>{stats.medecins}</strong><span>Médecins</span></div>
-                    <div><strong>{stats.patients}</strong><span>Patients</span></div>
-                    <div><strong>{stats.secretaires}</strong><span>Secrétaires</span></div>
-                </div>
+                <i className="bi bi-shield-check" style={{ fontSize: 42, opacity: 0.3 }}></i>
             </div>
 
-            {/* ───── STAT CARDS ───── */}
-            <div className="grid-cards">
-                <StatCard icon="bi-hospital" label="Hôpitaux" value={stats.hopitaux} color={COLORS.primary} bg={COLORS.primaryLight} />
-                <StatCard icon="bi-person-badge" label="Médecins" value={stats.medecins} color={COLORS.success} bg={COLORS.successLight} />
-                <StatCard icon="bi-people" label="Patients" value={stats.patients} color="#0EA5E9" bg="#E0F2FE" />
+            {/* ── Stats ── */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px,1fr))", gap: 16, marginBottom: 28 }}>
+                <StatCard icon="bi-hospital"          label="Hôpitaux"    value={stats.hopitaux}    color="#DC2626" bg="#FEE2E2" />
+                <StatCard icon="bi-person-badge"      label="Médecins"    value={stats.medecins}    color="#1A7A52" bg="#E8F5EE" />
+                <StatCard icon="bi-people"            label="Patients"    value={stats.patients}    color="#0EA5E9" bg="#E0F2FE" />
                 <StatCard icon="bi-person-lines-fill" label="Secrétaires" value={stats.secretaires} color="#7C3AED" bg="#EDE9FE" />
             </div>
 
-            {/* ───── TABS ───── */}
-            <div className="tabs">
-                <button
-                    className={tab === "hopitaux" ? "active" : ""}
-                    onClick={() => setTab("hopitaux")}
-                >
-                    🏥 Hôpitaux
-                </button>
-
-                <button
-                    className={tab === "utilisateurs" ? "active" : ""}
-                    onClick={() => setTab("utilisateurs")}
-                >
-                    👥 Utilisateurs
-                </button>
-            </div>
-
-            {/* ───── SEARCH ───── */}
-            <div className="search-bar">
-                <i className="bi bi-search"></i>
-                <input
-                    placeholder={
-                        tab === "hopitaux"
-                            ? "Rechercher un hôpital..."
-                            : "Rechercher un utilisateur..."
-                    }
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                />
-            </div>
-
-            {/* ───── CONTENT ───── */}
             {loading ? (
-                <div className="loading">
-                    <div className="spinner-border" />
-                </div>
-            ) : tab === "hopitaux" ? (
-                <div className="grid-hospital">
-                    {filteredHopitaux.map(h => (
-                        <div key={h.id} className="hospital-card">
-                            <div className="hospital-header">
-                                <div className="icon">🏥</div>
-                                <div className="name">{h.nom}</div>
-                            </div>
-
-                            <div className="hospital-info">
-                                <span>{h.adresse}</span>
-                                <span>{h.telephone}</span>
-                                <span>{h.email}</span>
-                            </div>
-                        </div>
-                    ))}
+                <div className="d-flex justify-content-center py-5">
+                    <div className="spinner-border" style={{ color: "#27A869" }}></div>
                 </div>
             ) : (
-                <div className="table-wrapper">
-                    <table>
-                        <thead>
-                        <tr>
-                            <th>Utilisateur</th>
-                            <th>Email</th>
-                            <th>Rôle</th>
-                            <th>Hôpital</th>
-                        </tr>
-                        </thead>
+                <>
+                    {/* ── Ligne 1 : Line + Donut ── */}
+                    <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 20, marginBottom: 20 }}>
 
-                        <tbody>
-                        {filteredUsers.map(u => (
-                            <tr key={u.id}>
-                                <td>
-                                    <div className="user">
-                                        <div className="avatar">
-                                            {u.prenom?.[0]}{u.nom?.[0]}
-                                        </div>
-                                        <span>{u.prenom} {u.nom}</span>
-                                    </div>
-                                </td>
-                                <td>{u.email}</td>
-                                <td>
-                                    <span className={`badge role-${u.role}`}>
-                                        {u.role}
-                                    </span>
-                                </td>
-                                <td>{u.hopital?.nom || "—"}</td>
-                            </tr>
-                        ))}
-                        </tbody>
-                    </table>
-                </div>
+                        <ChartCard title="Vue d'ensemble des entités" icon="bi-graph-up">
+                            <Line
+                                data={lineData}
+                                options={{
+                                    ...commonOptions,
+                                    plugins: {
+                                        ...commonOptions.plugins,
+                                        legend: { display: false },
+                                    }
+                                }}
+                                height={100}
+                            />
+                        </ChartCard>
+
+                        <ChartCard title="Répartition des rôles" icon="bi-pie-chart">
+                            <Doughnut
+                                data={doughnutData}
+                                options={{
+                                    responsive: true,
+                                    maintainAspectRatio: true,
+                                    cutout: "68%",
+                                    plugins: {
+                                        legend: {
+                                            display: true,
+                                            position: "bottom",
+                                            labels: { color: "#374151", font: { size: 11 }, padding: 12, boxWidth: 12, borderRadius: 4 }
+                                        },
+                                        tooltip: { backgroundColor: "#1F2937", titleColor: "#fff", bodyColor: "#D1FAE5", padding: 10, cornerRadius: 8 },
+                                    }
+                                }}
+                            />
+                        </ChartCard>
+
+                    </div>
+
+                    {/* ── Ligne 2 : Bar statuts + Bar hôpitaux ── */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+
+                        <ChartCard title="Utilisateurs par statut" icon="bi-bar-chart">
+                            <Bar
+                                data={barData}
+                                options={{
+                                    ...commonOptions,
+                                    plugins: {
+                                        ...commonOptions.plugins,
+                                        legend: { display: false },
+                                    }
+                                }}
+                                height={140}
+                            />
+                        </ChartCard>
+
+                        <ChartCard title="Hôpitaux enregistrés" icon="bi-building">
+                            <Bar
+                                data={hBarData}
+                                options={{
+                                    indexAxis: "y" as const,
+                                    responsive: true,
+                                    maintainAspectRatio: true,
+                                    plugins: {
+                                        legend: { display: false },
+                                        tooltip: { backgroundColor: "#1F2937", titleColor: "#fff", bodyColor: "#D1FAE5", padding: 10, cornerRadius: 8 },
+                                    },
+                                    scales: {
+                                        x: { grid: { color: "#F3F4F6" }, ticks: { color: "#6B7280", font: { size: 11 } } },
+                                        y: { grid: { display: false }, ticks: { color: "#374151", font: { size: 11 } } },
+                                    }
+                                }}
+                                height={140}
+                            />
+                        </ChartCard>
+
+                    </div>
+                </>
             )}
+
         </DashboardLayout>
     );
 }

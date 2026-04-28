@@ -29,8 +29,7 @@ export default function DashboardLayout({
     const navigate = useNavigate();
 
     const initials =
-        user?.email?.slice(0, 2).toUpperCase() || "??";
-
+  `${user?.prenom?.[0] ?? "?"}${user?.nom?.[0] ?? "?"}`.toUpperCase();
     return (
         <div
             style={{
@@ -202,7 +201,7 @@ export default function DashboardLayout({
                         <>
                             <div style={{ flex: 1 }}>
                                 <div style={{ fontSize: 12, fontWeight: 500 }}>
-                                    {user?.email}
+                                    {user?.prenom} {" "} {user?.nom}
                                 </div>
                                 <div style={{ fontSize: 11, color: "#BDBDBD" }}>
                                     {user?.role}
@@ -322,7 +321,7 @@ export default function DashboardLayout({
                     {initials}
                 </div>
 
-                <span className="small">{user?.role}</span>
+                <span className="small">{user?.prenom} {user?.nom}</span>
             </button>
 
             <ul className="dropdown-menu dropdown-menu-end shadow-sm">

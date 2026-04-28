@@ -13,6 +13,7 @@ import java.util.List;
 @Getter
 @Setter
 @ToString(callSuper = true)
+@PrimaryKeyJoinColumn(name = "id")
 public class Patient extends Utilisateur {
 
     private String adresse;

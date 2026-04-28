@@ -49,7 +49,6 @@ public class HopitalService {
         Optional<Hopital> hopitalOptional = hopitalRepository.findById(id);
         if (hopitalOptional.isPresent()) {
             Hopital hopitalToUpdate = hopitalOptional.get();
-            hopitalToUpdate.setId(hopital.getId());
             hopitalToUpdate.setContact(hopital.getContact());
             hopitalToUpdate.setEmail(hopital.getEmail());
             hopitalToUpdate.setAdresse(hopital.getAdresse());

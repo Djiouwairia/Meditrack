@@ -12,6 +12,7 @@ import java.util.List;
 @Getter
 @Setter
 @ToString(callSuper = true)
+@PrimaryKeyJoinColumn(name = "id")
 public class Medecin extends Utilisateur {
 
     private String specialite;

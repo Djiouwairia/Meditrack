@@ -2,6 +2,7 @@ package com.meditrack.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.meditrack.enums.Role;
+import com.meditrack.enums.Sexe;
 import com.meditrack.enums.StatutUtilisateur;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
@@ -15,13 +16,10 @@ import org.hibernate.annotations.UuidGenerator;
 @Setter
 @ToString
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Inheritance(strategy = InheritanceType.JOINED)
 public class Utilisateur {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID) // Ou GenerationType.IDENTITY selon votre config
     private String id;
-    private boolean actif;
-    private boolean archive;
-    @Column(nullable = false,length = 30)
     private String nom ;
     @Column(nullable = false,length = 50)
     private String prenom;
@@ -34,17 +32,12 @@ public class Utilisateur {
     private Role role ;
     @Enumerated(EnumType.STRING)
     private StatutUtilisateur statutUtilisateur;
+    @Enumerated(EnumType.STRING)
+    private Sexe sexe;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hopital_id")
     @JsonBackReference
     private Hopital hopital;
 
-    // IMPLÉMENTEZ LES SETTERS
-    public void setActif(boolean actif) {
-        this.actif = actif;
-    }
 
-    public void setArchive(boolean archive) {
-        this.archive = archive;
-    }
 }
