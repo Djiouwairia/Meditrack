@@ -12,7 +12,6 @@ import com.meditrack.repository.HopitalRepository;
 import com.meditrack.repository.MedecinRepository;
 import com.meditrack.repository.UtilisateurRepository;
 import lombok.RequiredArgsConstructor;
-import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,9 +24,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class MedecinService {
 
-    private final MedecinRepository medecinRepository;
+    private final MedecinRepository    medecinRepository;
     private final UtilisateurRepository utilisateurRepository;
-    private final HopitalRepository hopitalRepository;
+    private final HopitalRepository    hopitalRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Transactional
@@ -77,19 +76,28 @@ public class MedecinService {
                 .orElseThrow(() -> new MedecinNotFoundException("Médecin introuvable avec l'id : " + id));
     }
 
+    /**
+     * Retourne le médecin dont l'email correspond au "sub" du JWT connecté.
+     * Utilisé par GET /medecins/me
+     */
+    public Medecin getMedecinByEmail(String email) {
+        return medecinRepository.findByEmail(email)
+                .orElseThrow(() -> new MedecinNotFoundException(
+                        "Aucun médecin trouvé pour l'email : " + email));
+    }
+
     @Transactional
     public Medecin updateMedecin(String id, MedecinRequestDTO dto) {
         Medecin medecin = medecinRepository.findById(id)
                 .orElseThrow(() -> new MedecinNotFoundException("Médecin introuvable avec l'id : " + id));
 
         if (!medecin.getEmail().equals(dto.getEmail()) &&
-                utilisateurRepository.findByEmail(dto.getEmail()).isPresent()) {
+                utilisateurRepository.findByEmail(dto.getEmail()).isPresent())
             throw new EmailAlreadyUsedException("Cet email est déjà utilisé !");
-        }
+
         if (!medecin.getTelephone().equals(dto.getTelephone()) &&
-                utilisateurRepository.findByTelephone(dto.getTelephone()).isPresent()) {
+                utilisateurRepository.findByTelephone(dto.getTelephone()).isPresent())
             throw new TelephoneAlreadyUsedException("Ce numéro est déjà utilisé !");
-        }
 
         medecin.setNom(dto.getNom());
         medecin.setPrenom(dto.getPrenom());
@@ -118,6 +126,7 @@ public class MedecinService {
     private String generateId() {
         return UUID.randomUUID().toString().replace("-", "").substring(0, 8);
     }
+<<<<<<< Updated upstream
 
     public Medecin getMedecinByEmail(String email) {
         return medecinRepository.findByEmail(email)
@@ -125,4 +134,6 @@ public class MedecinService {
                         new MedecinNotFoundException("Médecin introuvable avec email : " + email)
                 );
     }
+=======
+>>>>>>> Stashed changes
 }

@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -27,6 +28,16 @@ public class PatientController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "nom") String sortBy) {
         return ResponseEntity.ok(patientService.getAllPatients(page, size, sortBy));
+    }
+
+    /**
+     * Retourne le profil du patient connecté depuis son JWT.
+     * Évite de faire getAll(0,200).find(email) côté frontend.
+     */
+    @GetMapping("/me")
+    public ResponseEntity<Patient> getCurrentPatient(Authentication auth) {
+        String email = auth.getName(); // = JWT "sub"
+        return ResponseEntity.ok(patientService.getPatientByEmail(email));
     }
 
     @GetMapping("/{id}")

@@ -16,8 +16,6 @@ const NAV = [
 
 const ACCENT       = "#1A7A52";
 const ACCENT_LIGHT = "#E8F5EE";
-const ACCENT_DARK  = "#145C3D";
-
 const inp = {
     width: "100%",
     borderRadius: 8,
