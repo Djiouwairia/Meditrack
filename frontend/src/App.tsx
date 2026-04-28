@@ -37,6 +37,9 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import imagePath from "./assets/logo.png";
 import AdminUtilisateurs from "./pages/admin/AdminUtilisateurs";
 import AdminHopitaux from "./pages/admin/AdminHopital";
+import PatientRendezVous from "./pages/patient/Patientrendezvous";
+import PatientProfil from "./pages/patient/Patientprofil";
+import PatientDossier from "./pages/patient/Patientdossier";
 
 /* ───────────── REDIRECTION SELON RÔLE ───────────── */
 function RoleRedirect() {
@@ -172,10 +175,39 @@ function AppRoutes() {
 
             {/* ───────── PATIENT ───────── */}
             <Route
-                path="/dashboard/patient"
+                path="/dashboard/patient/ordonnances"
                 element={
                     <Protected roles={["PATIENT"]}>
                         <PatientDashboard />
+                    </Protected>
+                }
+            />
+
+            <Route
+                path="dashboard/patient/rendez-vous"
+                element={
+                    <Protected roles={["PATIENT"]}>
+                        <PatientRendezVous />
+                    </Protected>
+                }
+            />
+
+        
+            <Route
+                path="/dashboard/patient/profil"
+                element={
+                    <Protected roles={["PATIENT"]}>
+                        <PatientProfil />
+                    </Protected>
+                }
+            />
+
+            {/* ───────── PATIENT ───────── */}
+            <Route
+                path="/dashboard/patient/dossier"
+                element={
+                    <Protected roles={["PATIENT"]}>
+                        <PatientDossier />
                     </Protected>
                 }
             />

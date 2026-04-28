@@ -51,7 +51,7 @@ export default function PatientProfil() {
     const inp = { width: "100%", borderRadius: 8, border: "1px solid #E5E7EB", padding: "10px 14px", fontSize: 14, boxSizing: "border-box" as const, background: "#fff" };
 
     return (
-        <DashboardLayout navItems={NAV} title="Mon profil" accentColor="#0EA5E9">
+        <DashboardLayout navItems={NAV} title="Mon profil" >
             {loading ? (
                 <div className="d-flex justify-content-center align-items-center" style={{ height: 300 }}>
                     <div className="spinner-border" style={{ color: "#0EA5E9" }}></div>
