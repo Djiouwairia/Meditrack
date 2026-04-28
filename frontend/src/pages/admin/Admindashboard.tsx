@@ -115,23 +115,23 @@ export default function AdminDashboard() {
         }]
     };
 
-    // 2. Barres — utilisateurs par statut
-    const statutCount = utilisateurs.reduce<Record<string, number>>((acc, u) => {
-        const s = u.statutUtilisateur || "INCONNU";
-        acc[s] = (acc[s] || 0) + 1;
-        return acc;
-    }, {});
+    // // 2. Barres — utilisateurs par statut
+    // const statutCount = utilisateurs.reduce<Record<string, number>>((acc, u) => {
+    //     const s = u.statutUtilisateur || "INCONNU";
+    //     acc[s] = (acc[s] || 0) + 1;
+    //     return acc;
+    // }, {});
 
-    const barData = {
-        labels: Object.keys(statutCount),
-        datasets: [{
-            label: "Utilisateurs",
-            data: Object.values(statutCount),
-            backgroundColor: ["#27A869", "#EF4444", "#F59E0B", "#6B7280"],
-            borderRadius: 8,
-            borderSkipped: false,
-        }]
-    };
+    // const barData = {
+    //     labels: Object.keys(statutCount),
+    //     datasets: [{
+    //         label: "Utilisateurs",
+    //         data: Object.values(statutCount),
+    //         backgroundColor: ["#27A869", "#EF4444", "#F59E0B", "#6B7280"],
+    //         borderRadius: 8,
+    //         borderSkipped: false,
+    //     }]
+    // };
 
     // 3. Line — vue d'ensemble des entités
     const lineData = {
@@ -259,7 +259,7 @@ export default function AdminDashboard() {
                     {/* ── Ligne 2 : Bar statuts + Bar hôpitaux ── */}
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
 
-                        <ChartCard title="Utilisateurs par statut" icon="bi-bar-chart">
+                        {/* <ChartCard title="Utilisateurs par statut" icon="bi-bar-chart">
                             <Bar
                                 data={barData}
                                 options={{
@@ -271,7 +271,7 @@ export default function AdminDashboard() {
                                 }}
                                 height={140}
                             />
-                        </ChartCard>
+                        </ChartCard> */}
 
                         <ChartCard title="Hôpitaux enregistrés" icon="bi-building">
                             <Bar
