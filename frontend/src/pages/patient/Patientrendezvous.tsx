@@ -1,81 +1,129 @@
 import { useState, useEffect, useCallback } from "react";
 import DashboardLayout from "../../components/common/DashboardLayout";
 import StatusBadge from "../../components/common/StatusBadge";
-import { useAuth } from "../../context/AuthContext";
 import {
-    patientService, rendezVousService, medecinService,
-    type Patient, type RendezVous, type Medecin,
+    patientService, rendezVousService, medecinService, disponibiliteService,
+    type Patient, type RendezVous, type Medecin, type Disponibilite,
 } from "../../services/DomainServices";
 
 const NAV = [
-    { icon: "bi-speedometer2",        label: "Tableau de bord",   path: "/dashboard/patient" },
-    { icon: "bi-calendar-check",      label: "Mes rendez-vous",   path: "/dashboard/patient/rendez-vous" },
-    { icon: "bi-folder2-open",        label: "Mon dossier",       path: "/dashboard/patient/dossier" },
-    { icon: "bi-file-earmark-medical",label: "Ordonnances",       path: "/dashboard/patient/ordonnances" },
-    { icon: "bi-person-gear",         label: "Mon profil",        path: "/dashboard/patient/profil" },
+    { icon: "bi-speedometer2",         label: "Tableau de bord",  path: "/dashboard/patient" },
+    { icon: "bi-calendar-check",       label: "Mes rendez-vous",  path: "/dashboard/patient/rendez-vous" },
+    { icon: "bi-folder2-open",         label: "Mon dossier",      path: "/dashboard/patient/dossier" },
+    { icon: "bi-file-earmark-medical", label: "Ordonnances",      path: "/dashboard/patient/ordonnances" },
+    { icon: "bi-person-gear",          label: "Mon profil",       path: "/dashboard/patient/profil" },
 ];
 
+const ACCENT = "#0EA5E9";
+const fmt = (t: string) => t?.slice(0, 5) ?? "";
+const inp: React.CSSProperties = { borderRadius: 8, border: "0.5px solid #EBEBEB", padding: "9px 12px", fontSize: 14, width: "100%", boxSizing: "border-box", outline: "none", background: "#FAFAFA" };
+
 export default function PatientRendezVous() {
-    const { user } = useAuth();
-    const [patient, setPatient]         = useState<Patient | null>(null);
-    const [rdvs, setRdvs]               = useState<RendezVous[]>([]);
-    const [loading, setLoading]         = useState(true);
-    const [page, setPage]               = useState(0);
-    const [totalPages, setTotalPages]   = useState(0);
+    const [patient, setPatient]           = useState<Patient | null>(null);
+    const [rdvs, setRdvs]                 = useState<RendezVous[]>([]);
+    // ✅ FIX: loading commence à false — on le passe à true explicitement dans loadAll
+    const [loading, setLoading]           = useState(false);
+    const [page, setPage]                 = useState(0);
+    const [totalPages, setTotalPages]     = useState(0);
     const [filterStatut, setFilterStatut] = useState("TOUS");
     const [actionLoading, setActionLoading] = useState<string | null>(null);
+    const [initError, setInitError]       = useState("");
 
-    /* modal prise de RDV */
-    const [rdvModal, setRdvModal]   = useState(false);
-    const [medecins, setMedecins]   = useState<Medecin[]>([]);
-    const [form, setForm]           = useState({ medecinId:"", date:"", heure:"", motif:"" });
-    const [formLoading, setFormLoading] = useState(false);
-    const [formError, setFormError]     = useState("");
-    const [formSuccess, setFormSuccess] = useState(false);
+    // Modal
+    const [modal, setModal]               = useState(false);
+    const [step, setStep]                 = useState<1|2>(1);
+    const [medecins, setMedecins]         = useState<Medecin[]>([]);
+    const [selMedecin, setSelMedecin]     = useState<Medecin | null>(null);
+    const [dispos, setDispos]             = useState<Disponibilite[]>([]);
+    const [disposLoading, setDisposLoading] = useState(false);
+    const [selDispo, setSelDispo]         = useState<Disponibilite | null>(null);
+    const [motif, setMotif]               = useState("");
+    const [formLoading, setFormLoading]   = useState(false);
+    const [formError, setFormError]       = useState("");
+    const [formSuccess, setFormSuccess]   = useState(false);
 
-    const resolvePatient = useCallback(async () => {
-        if (!user?.email) return null;
-        const p = await patientService.getAll(0, 200);
-        const pat = p.content.find(x => x.email === user.email) ?? null;
-        setPatient(pat);
-        return pat;
-    }, [user]);
-
-    const loadRdvs = useCallback(async (pat: Patient | null, pg: number) => {
-        if (!pat) return;
+    // ── FIX: une seule fonction init qui gère loading ET les erreurs ──────────
+    const loadRdvs = useCallback(async (pat: Patient, pg: number) => {
         setLoading(true);
         try {
             const data = await rendezVousService.getByPatient(pat.id, pg, 8);
             setRdvs(data.content);
             setTotalPages(data.totalPages);
             setPage(pg);
-        } finally { setLoading(false); }
+        } catch (e) {
+            console.error("Erreur chargement RDV:", e);
+        } finally {
+            setLoading(false);
+        }
     }, []);
 
+    // ✅ FIX: try/catch global — si getMe() échoue, loading repasse à false
     useEffect(() => {
-        resolvePatient().then(pat => loadRdvs(pat, 0));
-    }, []);
+        (async () => {
+            setLoading(true);
+            try {
+                const pat = await patientService.getMe();
+                setPatient(pat);
+                await loadRdvs(pat, 0);
+            } catch (e: any) {
+                console.error("Erreur init patient:", e);
+                setInitError(e?.response?.data?.message || "Impossible de charger vos informations.");
+                setLoading(false); // ← crucial : évite le spinner infini
+            }
+        })();
+    }, [loadRdvs]);
 
+    // ── Actions ───────────────────────────────────────────────────────────────
     const handleAnnuler = async (id: string) => {
         setActionLoading(id);
-        try { await rendezVousService.annuler(id); await loadRdvs(patient, page); }
+        try { await rendezVousService.annuler(id); if (patient) await loadRdvs(patient, page); }
         finally { setActionLoading(null); }
     };
 
+    // ── Ouverture modal ───────────────────────────────────────────────────────
     const openModal = async () => {
-        setRdvModal(true);
-        const data = await medecinService.getDisponibles();
-        setMedecins(data);
+        setModal(true); setStep(1); setSelMedecin(null); setDispos([]); setSelDispo(null);
+        setMotif(""); setFormError(""); setFormSuccess(false);
+        try {
+            const data = await medecinService.getDisponibles();
+            setMedecins(data);
+        } catch (e) {
+            console.error("Erreur chargement médecins:", e);
+            setMedecins([]);
+        }
     };
 
+    // ── Sélection médecin → charge créneaux libres ────────────────────────────
+    const handleSelectMedecin = async (med: Medecin) => {
+        setSelMedecin(med);
+        setSelDispo(null);
+        setDisposLoading(true);
+        setStep(2);
+        try {
+            const data = await disponibiliteService.getLibres(med.id);
+            setDispos(data);
+        } catch (e) {
+            console.error("Erreur chargement créneaux:", e);
+            setDispos([]);
+        } finally { setDisposLoading(false); }
+    };
+
+    // ── Prise de RDV ─────────────────────────────────────────────────────────
     const handlePrendreRdv = async () => {
-        if (!patient) return;
+        if (!patient || !selMedecin || !selDispo) return;
         setFormLoading(true); setFormError("");
         try {
-            await rendezVousService.prendre({ patientId: patient.id, ...form });
+            await rendezVousService.prendre({
+                patientId:       patient.id,
+                medecinId:       selMedecin.id,
+                date:            selDispo.date,
+                heure:           selDispo.heureDebut,
+                motif,
+                disponibiliteId: selDispo.id,
+            });
             setFormSuccess(true);
             await loadRdvs(patient, 0);
-            setTimeout(() => { setRdvModal(false); setFormSuccess(false); setForm({ medecinId:"", date:"", heure:"", motif:"" }); }, 1500);
+            setTimeout(() => { setModal(false); setFormSuccess(false); }, 1800);
         } catch (e: any) {
             setFormError(e?.response?.data?.message || "Erreur lors de la prise de rendez-vous");
         } finally { setFormLoading(false); }
@@ -83,151 +131,212 @@ export default function PatientRendezVous() {
 
     const filtered = filterStatut === "TOUS" ? rdvs : rdvs.filter(r => r.statut === filterStatut);
 
-    const inp = { borderRadius:8, border:"1px solid #E5E7EB", padding:"8px 12px", fontSize:14, width:"100%", boxSizing:"border-box" as const };
-
     return (
-        <DashboardLayout navItems={NAV} title="Mes rendez-vous" accentColor="#0EA5E9">
+        <DashboardLayout navItems={NAV} title="Mes rendez-vous" accentColor={ACCENT}>
+
             {/* Toolbar */}
-            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20, flexWrap:"wrap", gap:12 }}>
-                <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18, flexWrap: "wrap", gap: 12 }}>
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                     {["TOUS","EN_ATTENTE","CONFIRME","TERMINE","ANNULE"].map(s => (
                         <button key={s} onClick={() => setFilterStatut(s)}
-                                style={{ background: filterStatut===s?"#0EA5E9":"#F3F4F6", color: filterStatut===s?"#fff":"#374151", border:"none", borderRadius:20, padding:"6px 16px", fontSize:12, fontWeight:600, cursor:"pointer", transition:"all 0.15s" }}>
-                            {s === "TOUS" ? "Tous" : s.replace("_"," ")}
+                                style={{ background: filterStatut === s ? ACCENT : "#F5F5F5", color: filterStatut === s ? "#fff" : "#6B6B6B", border: "none", borderRadius: 20, padding: "5px 16px", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
+                            {s === "TOUS" ? "Tous" : s.replace("_", " ")}
                         </button>
                     ))}
                 </div>
                 <button onClick={openModal}
-                        style={{ background:"linear-gradient(135deg,#0369A1,#0EA5E9)", color:"#fff", border:"none", borderRadius:12, padding:"10px 22px", fontWeight:700, cursor:"pointer", fontSize:14 }}>
-                    <i className="bi bi-calendar-plus me-2"></i>Nouveau RDV
+                        style={{ background: `linear-gradient(135deg,#0369A1,${ACCENT})`, color: "#fff", border: "none", borderRadius: 10, padding: "10px 20px", fontWeight: 700, cursor: "pointer", fontSize: 13.5, display: "flex", alignItems: "center", gap: 8 }}>
+                    <i className="bi bi-calendar-plus"></i>Nouveau RDV
                 </button>
             </div>
 
-            {/* Liste */}
-            <div style={{ background:"#fff", borderRadius:20, padding:24, boxShadow:"0 2px 12px rgba(0,0,0,0.05)", border:"1px solid #F0F2F7" }}>
+            {/* Erreur init */}
+            {initError && (
+                <div className="alert alert-danger mb-3" style={{ borderRadius: 12 }}>
+                    <i className="bi bi-exclamation-triangle me-2"></i>{initError}
+                </div>
+            )}
+
+            {/* Liste RDV */}
+            <div style={{ background: "#fff", borderRadius: 14, padding: 20, border: "0.5px solid #EBEBEB", display: "flex", flexDirection: "column", gap: 10 }}>
                 {loading ? (
-                    <div className="d-flex justify-content-center" style={{ padding:60 }}>
-                        <div className="spinner-border" style={{ color:"#0EA5E9" }}></div>
+                    <div style={{ display: "flex", justifyContent: "center", padding: 60 }}>
+                        <div className="spinner-border" style={{ color: ACCENT }}></div>
                     </div>
                 ) : filtered.length === 0 ? (
-                    <div style={{ textAlign:"center", padding:"64px 0", color:"#8A94A6" }}>
-                        <i className="bi bi-calendar-x" style={{ fontSize:48 }}></i>
-                        <div style={{ marginTop:16, fontSize:16 }}>Aucun rendez-vous trouvé</div>
+                    <div style={{ textAlign: "center", padding: "60px 0", color: "#BDBDBD" }}>
+                        <i className="bi bi-calendar-x" style={{ fontSize: 48 }}></i>
+                        <div style={{ marginTop: 16, fontSize: 16 }}>Aucun rendez-vous trouvé</div>
                     </div>
-                ) : (
-                    <>
-                        <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
-                            {filtered.map(rdv => (
-                                <div key={rdv.id} style={{ display:"flex", alignItems:"center", gap:16, padding:"16px 20px", borderRadius:14, background:"#F8FAFC", border:"1px solid #EEF1F6", transition:"box-shadow 0.15s" }}
-                                     onMouseEnter={e => (e.currentTarget as HTMLElement).style.boxShadow="0 4px 16px rgba(0,0,0,0.07)"}
-                                     onMouseLeave={e => (e.currentTarget as HTMLElement).style.boxShadow="none"}>
-
-                                    {/* Date block */}
-                                    <div style={{ textAlign:"center", minWidth:56, background:"#E0F2FE", borderRadius:12, padding:"10px 6px" }}>
-                                        <div style={{ fontSize:22, fontWeight:800, color:"#0EA5E9", lineHeight:1 }}>{rdv.date?.slice(8,10)}</div>
-                                        <div style={{ fontSize:11, color:"#0369A1", textTransform:"uppercase", fontWeight:600, marginTop:2 }}>
-                                            {rdv.date ? new Date(rdv.date+"T00:00:00").toLocaleDateString("fr-FR",{month:"short"}) : ""}
-                                        </div>
-                                        <div style={{ fontSize:12, color:"#0369A1", marginTop:4, fontWeight:600 }}>{rdv.heure?.slice(0,5)}</div>
-                                    </div>
-
-                                    {/* Médecin avatar */}
-                                    <div style={{ width:44, height:44, borderRadius:"50%", background:"#0EA5E922", display:"flex", alignItems:"center", justifyContent:"center", color:"#0EA5E9", fontWeight:700, fontSize:15, flexShrink:0 }}>
-                                        {rdv.medecin?.prenom?.[0]}{rdv.medecin?.nom?.[0]}
-                                    </div>
-
-                                    <div style={{ flex:1, minWidth:0 }}>
-                                        <div style={{ fontWeight:700, fontSize:15, color:"#0D1F2D" }}>Dr. {rdv.medecin?.prenom} {rdv.medecin?.nom}</div>
-                                        <div style={{ fontSize:13, color:"#6B7280", marginTop:2 }}>{rdv.medecin?.specialite}</div>
-                                        <div style={{ fontSize:12, color:"#9CA3AF", marginTop:4, display:"flex", alignItems:"center", gap:4 }}>
-                                            <i className="bi bi-chat-text"></i> {rdv.motif}
-                                        </div>
-                                        {rdv.diagnostic && (
-                                            <div style={{ fontSize:12, color:"#6366F1", marginTop:4, display:"flex", alignItems:"center", gap:4 }}>
-                                                <i className="bi bi-clipboard2-pulse"></i> {rdv.diagnostic}
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <StatusBadge status={rdv.statut} />
-
-                                    {(rdv.statut === "EN_ATTENTE" || rdv.statut === "CONFIRME") && (
-                                        <button onClick={() => handleAnnuler(rdv.id)} disabled={!!actionLoading}
-                                                style={{ background:"#FEE2E2", color:"#991B1B", border:"none", borderRadius:10, padding:"8px 16px", fontSize:13, fontWeight:600, cursor:"pointer", flexShrink:0 }}>
-                                            {actionLoading === rdv.id ? <span className="spinner-border spinner-border-sm"></span> : "Annuler"}
-                                        </button>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Pagination */}
-                        {totalPages > 1 && (
-                            <div style={{ display:"flex", justifyContent:"center", gap:8, marginTop:20 }}>
-                                <button onClick={() => loadRdvs(patient,page-1)} disabled={page===0}
-                                        style={{ background:"#F3F4F6", border:"none", borderRadius:8, padding:"7px 14px", cursor:"pointer", color:"#374151" }}>‹</button>
-                                {Array.from({length:totalPages},(_,i)=>(
-                                    <button key={i} onClick={() => loadRdvs(patient,i)}
-                                            style={{ width:34, height:34, borderRadius:8, border:"none", background:page===i?"#0EA5E9":"#F3F4F6", color:page===i?"#fff":"#374151", cursor:"pointer", fontWeight:600 }}>{i+1}</button>
-                                ))}
-                                <button onClick={() => loadRdvs(patient,page+1)} disabled={page===totalPages-1}
-                                        style={{ background:"#F3F4F6", border:"none", borderRadius:8, padding:"7px 14px", cursor:"pointer", color:"#374151" }}>›</button>
+                ) : filtered.map(rdv => (
+                    <div key={rdv.id} style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", borderRadius: 12, background: "#FAFAFA", border: "0.5px solid #EBEBEB", flexWrap: "wrap" }}>
+                        <div style={{ textAlign: "center", minWidth: 52, background: "#E0F2FE", borderRadius: 10, padding: "8px 6px" }}>
+                            <div style={{ fontSize: 20, fontWeight: 800, color: ACCENT, lineHeight: 1 }}>{rdv.date?.slice(8, 10)}</div>
+                            <div style={{ fontSize: 10, color: "#0369A1", textTransform: "uppercase", fontWeight: 600 }}>
+                                {rdv.date ? new Date(rdv.date + "T00:00:00").toLocaleDateString("fr-FR", { month: "short" }) : ""}
                             </div>
+                            <div style={{ fontSize: 12, color: "#0369A1", fontWeight: 600, marginTop: 2 }}>{fmt(rdv.heure)}</div>
+                        </div>
+                        <div style={{ width: 40, height: 40, borderRadius: "50%", background: `${ACCENT}18`, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, color: ACCENT, fontSize: 14, flexShrink: 0 }}>
+                            {rdv.medecin?.prenom?.[0]}{rdv.medecin?.nom?.[0]}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                            <div style={{ fontWeight: 700, fontSize: 14 }}>Dr. {rdv.medecin?.prenom} {rdv.medecin?.nom}</div>
+                            <div style={{ fontSize: 12, color: "#9E9E9E" }}>{rdv.medecin?.specialite}</div>
+                            <div style={{ fontSize: 12, color: "#BDBDBD", marginTop: 2 }}><i className="bi bi-chat-text me-1"></i>{rdv.motif}</div>
+                        </div>
+                        <StatusBadge status={rdv.statut} />
+                        {(rdv.statut === "EN_ATTENTE" || rdv.statut === "CONFIRME") && (
+                            <button onClick={() => handleAnnuler(rdv.id)} disabled={!!actionLoading}
+                                    style={{ background: "#FEE2E2", color: "#991B1B", border: "none", borderRadius: 8, padding: "6px 14px", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
+                                {actionLoading === rdv.id ? <span className="spinner-border spinner-border-sm"></span> : "Annuler"}
+                            </button>
                         )}
-                    </>
+                    </div>
+                ))}
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                    <div style={{ display: "flex", justifyContent: "center", gap: 8, marginTop: 12 }}>
+                        <button onClick={() => patient && loadRdvs(patient, page - 1)} disabled={page === 0}
+                                style={{ background: "#F5F5F5", border: "none", borderRadius: 8, padding: "7px 14px", cursor: "pointer" }}>‹</button>
+                        {Array.from({ length: totalPages }, (_, i) => (
+                            <button key={i} onClick={() => patient && loadRdvs(patient, i)}
+                                    style={{ width: 32, height: 32, borderRadius: 8, border: "none", background: page === i ? ACCENT : "#F5F5F5", color: page === i ? "#fff" : "#374151", cursor: "pointer", fontWeight: 600 }}>{i + 1}</button>
+                        ))}
+                        <button onClick={() => patient && loadRdvs(patient, page + 1)} disabled={page === totalPages - 1}
+                                style={{ background: "#F5F5F5", border: "none", borderRadius: 8, padding: "7px 14px", cursor: "pointer" }}>›</button>
+                    </div>
                 )}
             </div>
 
-            {/* Modal prise RDV */}
-            {rdvModal && (
-                <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.5)", zIndex:1000, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                    <div style={{ background:"#fff", borderRadius:20, padding:32, width:480, maxWidth:"90vw" }}>
-                        {formSuccess ? (
-                            <div style={{ textAlign:"center", padding:"32px 0" }}>
-                                <div style={{ fontSize:52 }}>✅</div>
-                                <div style={{ fontSize:18, fontWeight:700, color:"#1A7A52", marginTop:12 }}>Rendez-vous pris !</div>
+            {/* ── Modal prise RDV ── */}
+            {modal && (
+                <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <div style={{ background: "#fff", borderRadius: 18, width: 520, maxWidth: "90vw", maxHeight: "90vh", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+
+                        {/* En-tête modal */}
+                        <div style={{ background: `linear-gradient(135deg,#0369A1,${ACCENT})`, padding: "18px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", color: "#fff" }}>
+                            <div>
+                                <div style={{ fontWeight: 700, fontSize: 16 }}>Nouveau rendez-vous</div>
+                                <div style={{ opacity: 0.8, fontSize: 13, marginTop: 2 }}>
+                                    {step === 1 ? "Étape 1 — Choisir un médecin" : `Étape 2 — Créneaux de Dr. ${selMedecin?.prenom} ${selMedecin?.nom}`}
+                                </div>
                             </div>
-                        ) : (
-                            <>
-                                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
-                                    <h3 style={{ margin:0, fontSize:18, fontWeight:700 }}>Nouveau rendez-vous</h3>
-                                    <button onClick={() => setRdvModal(false)} style={{ background:"none", border:"none", fontSize:20, cursor:"pointer", color:"#6B7280" }}>✕</button>
+                            <button onClick={() => setModal(false)} style={{ background: "rgba(255,255,255,0.2)", border: "none", borderRadius: 8, width: 30, height: 30, cursor: "pointer", color: "#fff", fontSize: 15, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
+                        </div>
+
+                        <div style={{ overflowY: "auto", padding: 24, flex: 1 }}>
+                            {formSuccess ? (
+                                <div style={{ textAlign: "center", padding: "48px 0" }}>
+                                    <div style={{ fontSize: 56 }}>✅</div>
+                                    <div style={{ fontSize: 18, fontWeight: 700, color: "#1A7A52", marginTop: 12 }}>Rendez-vous pris !</div>
+                                    <div style={{ fontSize: 13, color: "#9E9E9E", marginTop: 6 }}>{selDispo?.date} à {fmt(selDispo?.heureDebut || "")}</div>
                                 </div>
-                                {formError && <div className="alert alert-danger py-2 small mb-3">{formError}</div>}
-                                <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
-                                    <div>
-                                        <label style={{ fontSize:13, fontWeight:600, color:"#374151", display:"block", marginBottom:6 }}>Médecin disponible</label>
-                                        <select value={form.medecinId} onChange={e => setForm(f=>({...f,medecinId:e.target.value}))} style={inp}>
-                                            <option value="">Sélectionner un médecin</option>
-                                            {medecins.map(m=>(
-                                                <option key={m.id} value={m.id}>Dr. {m.prenom} {m.nom} — {m.specialite}</option>
-                                            ))}
-                                        </select>
+                            ) : step === 1 ? (
+                                /* ── Étape 1 : Sélectionner un médecin ── */
+                                <>
+                                    {formError && <div className="alert alert-danger py-2 small mb-3">{formError}</div>}
+                                    <p style={{ fontSize: 13, color: "#9E9E9E", marginBottom: 16 }}>Sélectionnez un médecin parmi ceux qui ont des créneaux disponibles :</p>
+                                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                                        {medecins.length === 0 ? (
+                                            <div style={{ textAlign: "center", padding: 40, color: "#BDBDBD" }}>
+                                                <i className="bi bi-person-x" style={{ fontSize: 40 }}></i>
+                                                <div style={{ marginTop: 12 }}>Aucun médecin disponible pour le moment</div>
+                                            </div>
+                                        ) : medecins.map(m => (
+                                            <div key={m.id} onClick={() => handleSelectMedecin(m)}
+                                                 style={{ display: "flex", alignItems: "center", gap: 14, padding: "13px 16px", borderRadius: 12, border: "0.5px solid #EBEBEB", cursor: "pointer", transition: "all 0.15s" }}
+                                                 onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = ACCENT; el.style.background = "#F0F9FF"; }}
+                                                 onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "#EBEBEB"; el.style.background = ""; }}>
+                                                <div style={{ width: 44, height: 44, borderRadius: 10, background: `${ACCENT}18`, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, color: ACCENT, fontSize: 15, flexShrink: 0 }}>
+                                                    {m.prenom?.[0]}{m.nom?.[0]}
+                                                </div>
+                                                <div style={{ flex: 1 }}>
+                                                    <div style={{ fontWeight: 600, fontSize: 14 }}>Dr. {m.prenom} {m.nom}</div>
+                                                    <div style={{ fontSize: 12, color: "#9E9E9E" }}>{m.specialite}</div>
+                                                    {m.hopital?.nom && <div style={{ fontSize: 11, color: "#BDBDBD" }}><i className="bi bi-hospital me-1"></i>{m.hopital.nom}</div>}
+                                                </div>
+                                                <i className="bi bi-chevron-right" style={{ color: "#BDBDBD" }}></i>
+                                            </div>
+                                        ))}
                                     </div>
-                                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
-                                        <div>
-                                            <label style={{ fontSize:13, fontWeight:600, color:"#374151", display:"block", marginBottom:6 }}>Date</label>
-                                            <input type="date" value={form.date} min={new Date().toISOString().slice(0,10)} onChange={e=>setForm(f=>({...f,date:e.target.value}))} style={inp}/>
-                                        </div>
-                                        <div>
-                                            <label style={{ fontSize:13, fontWeight:600, color:"#374151", display:"block", marginBottom:6 }}>Heure</label>
-                                            <input type="time" value={form.heure} onChange={e=>setForm(f=>({...f,heure:e.target.value}))} style={inp}/>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label style={{ fontSize:13, fontWeight:600, color:"#374151", display:"block", marginBottom:6 }}>Motif</label>
-                                        <textarea value={form.motif} onChange={e=>setForm(f=>({...f,motif:e.target.value}))} rows={3} placeholder="Décrivez le motif..." style={{...inp,resize:"vertical"}}/>
-                                    </div>
-                                </div>
-                                <div style={{ display:"flex", gap:12, marginTop:20, justifyContent:"flex-end" }}>
-                                    <button onClick={()=>setRdvModal(false)} style={{ background:"#F3F4F6", border:"none", borderRadius:10, padding:"10px 20px", cursor:"pointer" }}>Annuler</button>
-                                    <button onClick={handlePrendreRdv} disabled={formLoading||!form.medecinId||!form.date||!form.heure||!form.motif}
-                                            style={{ background:"linear-gradient(135deg,#0369A1,#0EA5E9)", color:"#fff", border:"none", borderRadius:10, padding:"10px 24px", cursor:"pointer", fontWeight:600, fontSize:14 }}>
-                                        {formLoading?<span className="spinner-border spinner-border-sm"></span>:"Confirmer"}
+                                </>
+                            ) : (
+                                /* ── Étape 2 : Sélectionner un créneau ── */
+                                <>
+                                    <button onClick={() => { setStep(1); setSelDispo(null); }}
+                                            style={{ background: "#F5F5F5", border: "none", borderRadius: 8, padding: "6px 14px", fontSize: 13, cursor: "pointer", marginBottom: 16 }}>
+                                        ← Changer de médecin
                                     </button>
-                                </div>
-                            </>
-                        )}
+
+                                    {formError && <div className="alert alert-danger py-2 small mb-3">{formError}</div>}
+
+                                    {disposLoading ? (
+                                        <div style={{ display: "flex", justifyContent: "center", padding: 40 }}>
+                                            <div className="spinner-border" style={{ color: ACCENT }}></div>
+                                        </div>
+                                    ) : dispos.length === 0 ? (
+                                        <div style={{ textAlign: "center", padding: "40px 0", color: "#BDBDBD" }}>
+                                            <i className="bi bi-calendar-x" style={{ fontSize: 40 }}></i>
+                                            <div style={{ marginTop: 12, fontSize: 15 }}>Aucun créneau disponible</div>
+                                            <div style={{ fontSize: 13, marginTop: 6 }}>Ce médecin n'a pas encore renseigné ses disponibilités</div>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <p style={{ fontSize: 13, color: "#9E9E9E", marginBottom: 14 }}>Choisissez un créneau :</p>
+
+                                            {Object.entries(
+                                                dispos.reduce<Record<string, Disponibilite[]>>((acc, d) => {
+                                                    (acc[d.date] = acc[d.date] || []).push(d); return acc;
+                                                }, {})
+                                            ).sort(([a], [b]) => a.localeCompare(b)).map(([date, slots]) => (
+                                                <div key={date} style={{ marginBottom: 16 }}>
+                                                    <div style={{ fontSize: 12, fontWeight: 600, color: "#9E9E9E", textTransform: "uppercase", marginBottom: 8 }}>
+                                                        {new Date(date + "T00:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
+                                                    </div>
+                                                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                                                        {slots.sort((a, b) => a.heureDebut.localeCompare(b.heureDebut)).map(d => {
+                                                            const isSelected = selDispo?.id === d.id;
+                                                            return (
+                                                                <button key={d.id} onClick={() => setSelDispo(d)}
+                                                                        style={{ background: isSelected ? ACCENT : "#F0F9FF", color: isSelected ? "#fff" : "#0369A1", border: `2px solid ${isSelected ? ACCENT : "#BAE6FD"}`, borderRadius: 10, padding: "8px 14px", fontSize: 13, fontWeight: 600, cursor: "pointer", transition: "all 0.15s" }}>
+                                                                    {fmt(d.heureDebut)} – {fmt(d.heureFin)}
+                                                                </button>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            ))}
+
+                                            {/* Motif */}
+                                            {selDispo && (
+                                                <div style={{ marginTop: 8 }}>
+                                                    <label style={{ fontSize: 12.5, fontWeight: 600, color: "#6B6B6B", display: "block", marginBottom: 6 }}>Motif de consultation</label>
+                                                    <textarea value={motif} onChange={e => setMotif(e.target.value)} rows={3}
+                                                              placeholder="Décrivez le motif..." style={{ ...inp, resize: "vertical" }} />
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
+
+                                    {selDispo && (
+                                        <div style={{ marginTop: 20 }}>
+                                            <div style={{ background: "#F0FDF4", border: "0.5px solid #BBF7D0", borderRadius: 12, padding: "12px 16px", marginBottom: 16, fontSize: 13 }}>
+                                                <div style={{ fontWeight: 600, color: "#065F46", marginBottom: 4 }}>Récapitulatif</div>
+                                                <div style={{ color: "#047857" }}>
+                                                    Dr. {selMedecin?.prenom} {selMedecin?.nom} · {selDispo.date} · {fmt(selDispo.heureDebut)}–{fmt(selDispo.heureFin)}
+                                                </div>
+                                            </div>
+                                            <button onClick={handlePrendreRdv} disabled={formLoading || !motif.trim()}
+                                                    style={{ background: `linear-gradient(135deg,#0369A1,${ACCENT})`, color: "#fff", border: "none", borderRadius: 10, padding: "11px 0", fontWeight: 700, cursor: formLoading || !motif.trim() ? "not-allowed" : "pointer", fontSize: 14, width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                                                {formLoading ? <><span className="spinner-border spinner-border-sm"></span> En cours...</> : <><i className="bi bi-check-circle"></i> Confirmer le rendez-vous</>}
+                                            </button>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}

@@ -22,7 +22,6 @@ export const medecinService = {
 };
 
 export const patientService = {
-    /** Patient connecté via JWT — plus besoin de getAll().find() */
     getMe: () => api.get<Patient>("/patients/me").then(r => r.data),
     getAll: (page = 0, size = 10, sortBy = "nom") => api.get<PageResponse<Patient>>(`/patients?page=${page}&size=${size}&sortBy=${sortBy}`).then(r => r.data),
     getById: (id: string) => api.get<Patient>(`/patients/${id}`).then(r => r.data),
@@ -32,6 +31,8 @@ export const patientService = {
 };
 
 export const secretaireService = {
+    /** Secrétaire connectée via JWT */
+    getMe: () => api.get<Secretaire>("/secretaires/me").then(r => r.data),
     getAll: (page = 0, size = 10, sortBy = "nom") => api.get<PageResponse<Secretaire>>(`/secretaires?page=${page}&size=${size}&sortBy=${sortBy}`).then(r => r.data),
     getById: (id: string) => api.get<Secretaire>(`/secretaires/${id}`).then(r => r.data),
     create: (dto: any) => api.post<Secretaire>("/secretaires", dto).then(r => r.data),

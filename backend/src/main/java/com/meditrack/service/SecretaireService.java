@@ -23,9 +23,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class SecretaireService {
 
-    private final SecretaireRepository secretaireRepository;
+    private final SecretaireRepository  secretaireRepository;
     private final UtilisateurRepository utilisateurRepository;
-    private final HopitalRepository hopitalRepository;
+    private final HopitalRepository     hopitalRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Transactional
@@ -46,49 +46,54 @@ public class SecretaireService {
         secretaire.setStatutUtilisateur(StatutUtilisateur.ACTIF);
 
         if (dto.getHopitalId() != null) {
-            Hopital hopital = hopitalRepository.findById(dto.getHopitalId())
+            Hopital h = hopitalRepository.findById(dto.getHopitalId())
                     .orElseThrow(() -> new RuntimeException("Hôpital introuvable"));
-            secretaire.setHopital(hopital);
+            secretaire.setHopital(h);
         }
-
         return secretaireRepository.save(secretaire);
     }
 
     public Page<Secretaire> getAllSecretaires(int page, int size, String sortBy) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
-        return secretaireRepository.findAll(pageable);
+        return secretaireRepository.findAll(PageRequest.of(page, size, Sort.by(sortBy)));
     }
 
     public Secretaire getSecretaireById(String id) {
         return secretaireRepository.findById(id)
-                .orElseThrow(() -> new SecretaireNotFoundException("Secrétaire introuvable avec l'id : " + id));
+                .orElseThrow(() -> new SecretaireNotFoundException("Secrétaire introuvable : " + id));
+    }
+
+    /**
+     * Retourne la secrétaire dont l'email correspond au JWT connecté.
+     * Utilisé par GET /secretaires/me
+     */
+    public Secretaire getSecretaireByEmail(String email) {
+        return secretaireRepository.findByEmail(email)
+                .orElseThrow(() -> new SecretaireNotFoundException(
+                        "Aucune secrétaire trouvée pour l'email : " + email));
     }
 
     @Transactional
     public Secretaire updateSecretaire(String id, SecretaireRequestDTO dto) {
-        Secretaire secretaire = secretaireRepository.findById(id)
-                .orElseThrow(() -> new SecretaireNotFoundException("Secrétaire introuvable avec l'id : " + id));
+        Secretaire s = getSecretaireById(id);
 
-        if (!secretaire.getEmail().equals(dto.getEmail()) &&
-                utilisateurRepository.findByEmail(dto.getEmail()).isPresent()) {
+        if (!s.getEmail().equals(dto.getEmail()) &&
+                utilisateurRepository.findByEmail(dto.getEmail()).isPresent())
             throw new EmailAlreadyUsedException("Cet email est déjà utilisé !");
-        }
-        if (!secretaire.getTelephone().equals(dto.getTelephone()) &&
-                utilisateurRepository.findByTelephone(dto.getTelephone()).isPresent()) {
+
+        if (!s.getTelephone().equals(dto.getTelephone()) &&
+                utilisateurRepository.findByTelephone(dto.getTelephone()).isPresent())
             throw new TelephoneAlreadyUsedException("Ce numéro est déjà utilisé !");
-        }
 
-        secretaire.setNom(dto.getNom());
-        secretaire.setPrenom(dto.getPrenom());
-        secretaire.setEmail(dto.getEmail());
-        secretaire.setTelephone(dto.getTelephone());
-
-        return secretaireRepository.save(secretaire);
+        s.setNom(dto.getNom());
+        s.setPrenom(dto.getPrenom());
+        s.setEmail(dto.getEmail());
+        s.setTelephone(dto.getTelephone());
+        return secretaireRepository.save(s);
     }
 
     public void deleteSecretaire(String id) {
         if (!secretaireRepository.existsById(id))
-            throw new SecretaireNotFoundException("Secrétaire introuvable avec l'id : " + id);
+            throw new SecretaireNotFoundException("Secrétaire introuvable : " + id);
         secretaireRepository.deleteById(id);
     }
 

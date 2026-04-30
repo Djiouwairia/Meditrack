@@ -7,13 +7,13 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
+@Data @AllArgsConstructor @NoArgsConstructor
 public class RendezVousRequestDTO {
-    private String patientId;
-    private String medecinId;
+    private String    patientId;
+    private String    medecinId;
     private LocalDate date;
     private LocalTime heure;
-    private String motif;
+    private String    motif;
+    /** Si fourni : date/heure extraites du créneau + créneau marqué RÉSERVÉ */
+    private String    disponibiliteId;
 }
