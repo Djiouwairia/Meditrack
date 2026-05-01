@@ -69,10 +69,10 @@ export default function PatientDossier() {
     );
 
     return (
-        <DashboardLayout navItems={NAV} title="Mon dossier médical" accentColor="#0EA5E9">
+        <DashboardLayout navItems={NAV} title="Mon dossier médical" accentColor="#27A869">
             {loading ? (
                 <div className="d-flex justify-content-center align-items-center" style={{ height:300 }}>
-                    <div className="spinner-border" style={{ color:"#0EA5E9" }}></div>
+                    <div className="spinner-border" style={{ color:"#27A869" }}></div>
                 </div>
             ) : !dossier ? (
                 <div style={{ textAlign:"center", padding:"64px 0", color:"#8A94A6", background:"#fff", borderRadius:20 }}>
@@ -88,7 +88,7 @@ export default function PatientDossier() {
                         {/* Infos patient */}
                         <div style={{ background:"#fff", borderRadius:20, padding:28, boxShadow:"0 2px 12px rgba(0,0,0,0.05)", border:"1px solid #F0F2F7" }}>
                             <div style={{ display:"flex", alignItems:"center", gap:16, marginBottom:24 }}>
-                                <div style={{ width:60, height:60, borderRadius:"50%", background:"linear-gradient(135deg,#0369A1,#0EA5E9)", display:"flex", alignItems:"center", justifyContent:"center", color:"#fff", fontWeight:800, fontSize:22 }}>
+                                <div style={{ width:60, height:60, borderRadius:"50%", background:"linear-gradient(135deg,#1A7A52,#27A869)", display:"flex", alignItems:"center", justifyContent:"center", color:"#fff", fontWeight:800, fontSize:22 }}>
                                     {patient?.prenom?.[0]}{patient?.nom?.[0]}
                                 </div>
                                 <div>
@@ -97,7 +97,7 @@ export default function PatientDossier() {
                                 </div>
                             </div>
                             <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
-                                <InfoRow icon="bi-telephone-fill" label="Téléphone"      value={patient?.telephone}     color="#0EA5E9" bg="#E0F2FE"/>
+                                <InfoRow icon="bi-telephone-fill" label="Téléphone"      value={patient?.telephone}     color="#27A869" bg="#E8F5EE"/>
                                 <InfoRow icon="bi-geo-alt-fill"   label="Adresse"        value={patient?.adresse}       color="#8B5CF6" bg="#EDE9FE"/>
                                 <InfoRow icon="bi-cake2-fill"     label="Date naissance" value={patient?.dateDeNaissance ? new Date(patient.dateDeNaissance).toLocaleDateString("fr-FR") : null} color="#F59E0B" bg="#FEF3C7"/>
                                 <InfoRow icon="bi-droplet-fill"   label="Groupe sanguin" value={patient?.groupeSanguin} color="#EF4444" bg="#FEE2E2"/>
@@ -108,14 +108,14 @@ export default function PatientDossier() {
                         <div style={{ background:"#fff", borderRadius:20, padding:28, boxShadow:"0 2px 12px rgba(0,0,0,0.05)", border:"1px solid #F0F2F7" }}>
                             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
                                 <h2 style={{ margin:0, fontSize:17, fontWeight:700, color:"#0D1F2D" }}>
-                                    <i className="bi bi-activity me-2" style={{ color:"#0EA5E9" }}></i>Données médicales
+                                    <i className="bi bi-activity me-2" style={{ color:"#27A869" }}></i>Données médicales
                                 </h2>
                                 {saveSuccess && (
                                     <span style={{ background:"#D1FAE5", color:"#065F46", fontSize:12, fontWeight:600, padding:"4px 12px", borderRadius:20 }}>✓ Sauvegardé</span>
                                 )}
                                 {!editing ? (
                                     <button onClick={() => setEditing(true)}
-                                            style={{ background:"#E0F2FE", color:"#0369A1", border:"none", borderRadius:10, padding:"8px 16px", cursor:"pointer", fontSize:13, fontWeight:600 }}>
+                                            style={{ background:"#E8F5EE", color:"#1A7A52", border:"none", borderRadius:10, padding:"8px 16px", cursor:"pointer", fontSize:13, fontWeight:600 }}>
                                         <i className="bi bi-pencil me-2"></i>Modifier
                                     </button>
                                 ) : (
@@ -123,7 +123,7 @@ export default function PatientDossier() {
                                         <button onClick={() => setEditing(false)}
                                                 style={{ background:"#F3F4F6", border:"none", borderRadius:10, padding:"8px 16px", cursor:"pointer", fontSize:13 }}>Annuler</button>
                                         <button onClick={handleSave} disabled={saveLoading}
-                                                style={{ background:"linear-gradient(135deg,#0369A1,#0EA5E9)", color:"#fff", border:"none", borderRadius:10, padding:"8px 16px", cursor:"pointer", fontSize:13, fontWeight:600 }}>
+                                                style={{ background:"linear-gradient(135deg,#1A7A52,#27A869)", color:"#fff", border:"none", borderRadius:10, padding:"8px 16px", cursor:"pointer", fontSize:13, fontWeight:600 }}>
                                             {saveLoading ? <span className="spinner-border spinner-border-sm"></span> : "Sauvegarder"}
                                         </button>
                                     </div>
@@ -150,7 +150,7 @@ export default function PatientDossier() {
                                         <InfoRow icon="bi-exclamation-triangle-fill" label="Allergies" value={dossier.allergies || "Aucune allergie connue"} color="#F59E0B" bg="#FEF3C7"/>
                                     </div>
                                     <InfoRow icon="bi-speedometer" label="Poids" value={dossier.poids ? `${dossier.poids} kg` : null} color="#1A7A52" bg="#E8F5EE"/>
-                                    <InfoRow icon="bi-arrows-vertical" label="Taille" value={dossier.taille ? `${dossier.taille} cm` : null} color="#0EA5E9" bg="#E0F2FE"/>
+                                    <InfoRow icon="bi-arrows-vertical" label="Taille" value={dossier.taille ? `${dossier.taille} cm` : null} color="#27A869" bg="#E8F5EE"/>
                                 </div>
                             )}
                         </div>
@@ -159,7 +159,7 @@ export default function PatientDossier() {
                     {/* Colonne ordonnances récentes */}
                     <div style={{ background:"#fff", borderRadius:20, padding:24, boxShadow:"0 2px 12px rgba(0,0,0,0.05)", border:"1px solid #F0F2F7" }}>
                         <h2 style={{ margin:"0 0 16px", fontSize:17, fontWeight:700, color:"#0D1F2D" }}>
-                            <i className="bi bi-file-earmark-medical me-2" style={{ color:"#0EA5E9" }}></i>Ordonnances récentes
+                            <i className="bi bi-file-earmark-medical me-2" style={{ color:"#27A869" }}></i>Ordonnances récentes
                         </h2>
                         {ordonnances.length === 0 ? (
                             <div style={{ textAlign:"center", color:"#8A94A6", padding:"32px 0" }}>
@@ -171,7 +171,7 @@ export default function PatientDossier() {
                                 {ordonnances.map(o => (
                                     <div key={o.id} onClick={() => setSelOrdo(o)}
                                          style={{ padding:"12px 14px", borderRadius:12, background:"#F8FAFC", border:"1px solid #EEF1F6", cursor:"pointer", transition:"all 0.15s" }}
-                                         onMouseEnter={e => (e.currentTarget as HTMLElement).style.background="#E0F2FE"}
+                                         onMouseEnter={e => (e.currentTarget as HTMLElement).style.background="#E8F5EE"}
                                          onMouseLeave={e => (e.currentTarget as HTMLElement).style.background="#F8FAFC"}>
                                         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
                                             <div style={{ fontWeight:600, fontSize:13 }}>

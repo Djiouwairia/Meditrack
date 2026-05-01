@@ -20,6 +20,11 @@ import AdminDashboard from "./pages/admin/Admindashboard";
 import MedecinDashboard from "./pages/medecin/Medecindashboard";
 import MedecinAgenda from "./pages/medecin/Medecinagenda";
 import PatientDashboard from "./pages/patient/Patientdashboard";
+import PatientRendezVous from "./pages/patient/Patientrendezvous";
+import PatientDossier from "./pages/patient/Patientdossier";
+import PatientOrdonnances from "./pages/patient/Patientordonnances";
+import PatientProfil from "./pages/patient/Patientprofil";
+
 import SecretaireDashboard from "./pages/secretaire/SecretaireDashboard";
 
 /* 🟩 MÉDECIN PAGES */
@@ -100,7 +105,7 @@ function AppRoutes() {
             <Route
                 path="/dashboard/admin"
                 element={
-                    <Protected roles={["ADMIN"]}>
+                    <Protected roles={["ADMIN", "ADMIN_HOPITAL"]}>
                         <AdminDashboard />
                     </Protected>
                 }
@@ -109,7 +114,7 @@ function AppRoutes() {
              <Route
                 path="/dashboard/admin/utilisateurs"
                 element={
-                    <Protected roles={["ADMIN"]}>
+                    <Protected roles={["ADMIN", "ADMIN_HOPITAL"]}>
                         <AdminUtilisateurs />
                     </Protected>
                 }
@@ -176,6 +181,42 @@ function AppRoutes() {
                 element={
                     <Protected roles={["PATIENT"]}>
                         <PatientDashboard />
+                    </Protected>
+                }
+            />
+
+            <Route
+                path="/dashboard/patient/rendez-vous"
+                element={
+                    <Protected roles={["PATIENT"]}>
+                        <PatientRendezVous />
+                    </Protected>
+                }
+            />
+
+            <Route
+                path="/dashboard/patient/dossier"
+                element={
+                    <Protected roles={["PATIENT"]}>
+                        <PatientDossier />
+                    </Protected>
+                }
+            />
+
+            <Route
+                path="/dashboard/patient/ordonnances"
+                element={
+                    <Protected roles={["PATIENT"]}>
+                        <PatientOrdonnances />
+                    </Protected>
+                }
+            />
+
+            <Route
+                path="/dashboard/patient/profil"
+                element={
+                    <Protected roles={["PATIENT"]}>
+                        <PatientProfil />
                     </Protected>
                 }
             />

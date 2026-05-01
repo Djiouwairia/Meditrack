@@ -41,10 +41,10 @@ export default function PatientOrdonnances() {
     useEffect(() => { load(0); }, [load]);
 
     return (
-        <DashboardLayout navItems={NAV} title="Mes ordonnances" accentColor="#0EA5E9">
+        <DashboardLayout navItems={NAV} title="Mes ordonnances" accentColor="#27A869">
             {loading ? (
                 <div className="d-flex justify-content-center align-items-center" style={{ height: 300 }}>
-                    <div className="spinner-border" style={{ color: "#0EA5E9" }}></div>
+                    <div className="spinner-border" style={{ color: "#27A869" }}></div>
                 </div>
             ) : ordonnances.length === 0 ? (
                 <div style={{ textAlign: "center", padding: "80px 0", color: "#8A94A6", background: "#fff", borderRadius: 20 }}>
@@ -58,19 +58,19 @@ export default function PatientOrdonnances() {
                         {ordonnances.map(o => (
                             <div key={o.id} onClick={() => setSelected(o)}
                                  style={{ background: "#fff", borderRadius: 18, padding: 22, boxShadow: "0 2px 12px rgba(0,0,0,0.06)", border: "1px solid #F0F2F7", cursor: "pointer", transition: "all 0.18s" }}
-                                 onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.transform = "translateY(-3px)"; el.style.boxShadow = "0 8px 28px rgba(14,165,233,0.15)"; el.style.borderColor = "#0EA5E9"; }}
+                                 onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.transform = "translateY(-3px)"; el.style.boxShadow = "0 8px 28px rgba(14,165,233,0.15)"; el.style.borderColor = "#27A869"; }}
                                  onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.transform = ""; el.style.boxShadow = "0 2px 12px rgba(0,0,0,0.06)"; el.style.borderColor = "#F0F2F7"; }}>
 
                                 {/* Header */}
                                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
-                                    <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg,#0369A1,#0EA5E9)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 15 }}>
+                                    <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg,#1A7A52,#27A869)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 15 }}>
                                         {o.medecin?.prenom?.[0]}{o.medecin?.nom?.[0]}
                                     </div>
                                     <div>
                                         <div style={{ fontWeight: 700, fontSize: 14, color: "#0D1F2D" }}>Dr. {o.medecin?.prenom} {o.medecin?.nom}</div>
                                         <div style={{ fontSize: 12, color: "#8A94A6" }}>{o.medecin?.specialite}</div>
                                     </div>
-                                    <div style={{ marginLeft: "auto", background: "#E0F2FE", color: "#0369A1", fontSize: 11, fontWeight: 600, padding: "4px 10px", borderRadius: 20 }}>
+                                    <div style={{ marginLeft: "auto", background: "#E8F5EE", color: "#1A7A52", fontSize: 11, fontWeight: 600, padding: "4px 10px", borderRadius: 20 }}>
                                         {o.dateCreation ? new Date(o.dateCreation).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" }) : "—"}
                                     </div>
                                 </div>
@@ -93,7 +93,7 @@ export default function PatientOrdonnances() {
                                     )}
                                 </div>
 
-                                <div style={{ marginTop: 14, fontSize: 12, color: "#0EA5E9", fontWeight: 600, textAlign: "right" }}>
+                                <div style={{ marginTop: 14, fontSize: 12, color: "#27A869", fontWeight: 600, textAlign: "right" }}>
                                     Voir le détail →
                                 </div>
                             </div>

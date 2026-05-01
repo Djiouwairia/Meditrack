@@ -51,16 +51,16 @@ export default function PatientProfil() {
     const inp = { width: "100%", borderRadius: 8, border: "1px solid #E5E7EB", padding: "10px 14px", fontSize: 14, boxSizing: "border-box" as const, background: "#fff" };
 
     return (
-        <DashboardLayout navItems={NAV} title="Mon profil" accentColor="#0EA5E9">
+        <DashboardLayout navItems={NAV} title="Mon profil" accentColor="#27A869">
             {loading ? (
                 <div className="d-flex justify-content-center align-items-center" style={{ height: 300 }}>
-                    <div className="spinner-border" style={{ color: "#0EA5E9" }}></div>
+                    <div className="spinner-border" style={{ color: "#27A869" }}></div>
                 </div>
             ) : (
                 <div style={{ maxWidth: 720, margin: "0 auto", display: "flex", flexDirection: "column", gap: 20 }}>
 
                     {/* Avatar card */}
-                    <div style={{ background: "linear-gradient(135deg,#0369A1,#0EA5E9)", borderRadius: 20, padding: "32px 36px", color: "#fff", display: "flex", alignItems: "center", gap: 24 }}>
+                    <div style={{ background: "linear-gradient(135deg,#1A7A52,#27A869)", borderRadius: 20, padding: "32px 36px", color: "#fff", display: "flex", alignItems: "center", gap: 24 }}>
                         <div style={{ width: 80, height: 80, borderRadius: "50%", background: "rgba(255,255,255,0.25)", border: "3px solid rgba(255,255,255,0.5)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30, fontWeight: 800, flexShrink: 0 }}>
                             {patient?.prenom?.[0]}{patient?.nom?.[0]}
                         </div>
@@ -84,7 +84,7 @@ export default function PatientProfil() {
                             <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: "#0D1F2D" }}>Informations personnelles</h2>
                             {!editing ? (
                                 <button onClick={() => setEditing(true)}
-                                        style={{ background: "#E0F2FE", color: "#0369A1", border: "none", borderRadius: 10, padding: "8px 18px", cursor: "pointer", fontSize: 13, fontWeight: 600 }}>
+                                        style={{ background: "#E8F5EE", color: "#1A7A52", border: "none", borderRadius: 10, padding: "8px 18px", cursor: "pointer", fontSize: 13, fontWeight: 600 }}>
                                     <i className="bi bi-pencil me-2"></i>Modifier
                                 </button>
                             ) : (
@@ -92,7 +92,7 @@ export default function PatientProfil() {
                                     <button onClick={() => { setEditing(false); setError(""); }}
                                             style={{ background: "#F3F4F6", border: "none", borderRadius: 10, padding: "8px 16px", cursor: "pointer", fontSize: 13 }}>Annuler</button>
                                     <button onClick={handleSave} disabled={saveLoading}
-                                            style={{ background: "linear-gradient(135deg,#0369A1,#0EA5E9)", color: "#fff", border: "none", borderRadius: 10, padding: "8px 20px", cursor: "pointer", fontSize: 13, fontWeight: 600 }}>
+                                            style={{ background: "linear-gradient(135deg,#1A7A52,#27A869)", color: "#fff", border: "none", borderRadius: 10, padding: "8px 20px", cursor: "pointer", fontSize: 13, fontWeight: 600 }}>
                                         {saveLoading ? <span className="spinner-border spinner-border-sm"></span> : "Sauvegarder"}
                                     </button>
                                 </div>
@@ -126,7 +126,7 @@ export default function PatientProfil() {
                         ) : (
                             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                                 {[
-                                    { icon: "bi-person-fill",    label: "Nom",              value: `${patient?.prenom} ${patient?.nom}`,   color: "#0EA5E9", bg: "#E0F2FE" },
+                                    { icon: "bi-person-fill",    label: "Nom",              value: `${patient?.prenom} ${patient?.nom}`,   color: "#27A869", bg: "#E8F5EE" },
                                     { icon: "bi-envelope-fill",  label: "Email",            value: patient?.email,                          color: "#8B5CF6", bg: "#EDE9FE" },
                                     { icon: "bi-telephone-fill", label: "Téléphone",        value: patient?.telephone,                      color: "#1A7A52", bg: "#E8F5EE" },
                                     { icon: "bi-droplet-fill",   label: "Groupe sanguin",   value: patient?.groupeSanguin,                  color: "#EF4444", bg: "#FEE2E2" },

@@ -3,7 +3,7 @@ import DashboardLayout from "../../components/common/DashboardLayout";
 import StatCard from "../../components/common/Statcard";
 import StatusBadge from "../../components/common/StatusBadge";
 import { useAuth } from '../../context/AuthContext';
-import { rendezVousService, ordonnanceService, type RendezVous, type Medecin } from "../../services/DomainServices";
+import { rendezVousService, ordonnanceService, dossierService, type RendezVous, type Medecin, type Patient, type DossierMedical, type Ordonnance } from "../../services/DomainServices";
 import api from "../../services/api";
 
 const NAV = [
@@ -51,6 +51,12 @@ export default function MedecinDashboard() {
     const [terminerRdv, setTerminerRdv]     = useState<RendezVous | null>(null);
     const [terminerDiag, setTerminerDiag]   = useState("");
 
+    const [selPatient, setSelPatient]           = useState<Patient | null>(null);
+    const [dossier, setDossier]                 = useState<DossierMedical | null>(null);
+    const [dossierLoading, setDossierLoading]   = useState(false);
+    const [selOrdo, setSelOrdo]                 = useState<Ordonnance | null>(null);
+    const [selRdvMotif, setSelRdvMotif]         = useState("");
+
     const loadData = useCallback(async () => {
         if (!user?.email) return;
         setLoading(true);
@@ -58,7 +64,7 @@ export default function MedecinDashboard() {
             const med: Medecin = await api.get("/medecins/me").then(r => r.data);
             setMedecin(med);
             const rdvs = await rendezVousService.getAujourdhui(med.id);
-            setRdvAujourdhui(rdvs);
+            setRdvAujourdhui(rdvs.filter(r => r.statut === "CONFIRME" || r.statut === "TERMINE"));
         } catch (e) {
             console.error("Erreur chargement dashboard médecin:", e);
         } finally {
@@ -68,16 +74,26 @@ export default function MedecinDashboard() {
 
     useEffect(() => { loadData(); }, [loadData]);
 
-    const handleConfirmer = async (rdvId: string) => {
-        setActionLoading(rdvId + "_confirmer");
-        try { await rendezVousService.confirmer(rdvId); await loadData(); }
-        finally { setActionLoading(null); }
-    };
-
     const handleAnnuler = async (rdvId: string) => {
         setActionLoading(rdvId + "_annuler");
         try { await rendezVousService.annuler(rdvId); await loadData(); }
         finally { setActionLoading(null); }
+    };
+
+    const openDossier = async (pat: Patient, motif: string) => {
+        setSelPatient(pat);
+        setSelRdvMotif(motif);
+        setDossier(null);
+        setSelOrdo(null);
+        setDossierLoading(true);
+        try {
+            const dos = await dossierService.getByPatient(pat.id);
+            setDossier(dos);
+        } catch (e) {
+            console.error("Dossier introuvable:", e);
+        } finally {
+            setDossierLoading(false);
+        }
     };
 
     const handleTerminer = async () => {
@@ -106,7 +122,6 @@ export default function MedecinDashboard() {
     const stats = {
         total:     rdvAujourdhui.length,
         confirmes: rdvAujourdhui.filter(r => r.statut === "CONFIRME").length,
-        enAttente: rdvAujourdhui.filter(r => r.statut === "EN_ATTENTE").length,
         termines:  rdvAujourdhui.filter(r => r.statut === "TERMINE").length,
     };
 
@@ -139,7 +154,6 @@ export default function MedecinDashboard() {
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px,1fr))", gap: 12, marginBottom: 20 }}>
                         <StatCard icon="bi-calendar-day"    label="RDV aujourd'hui" value={stats.total}     color={ACCENT}    bg={ACCENT_LIGHT} />
                         <StatCard icon="bi-check-circle"    label="Confirmés"       value={stats.confirmes} color="#0EA5E9"   bg="#E0F2FE" />
-                        <StatCard icon="bi-hourglass-split" label="En attente"      value={stats.enAttente} color="#F59E0B"   bg="#FEF3C7" />
                         <StatCard icon="bi-check2-all"      label="Terminés"        value={stats.termines}  color="#8B5CF6"   bg="#EDE9FE" />
                     </div>
 
@@ -185,9 +199,10 @@ export default function MedecinDashboard() {
                                             </div>
 
                                             {/* Infos */}
-                                            <div style={{ flex: 1 }}>
-                                                <div style={{ fontWeight: 500, fontSize: 13.5, color: "#0F0F0F" }}>
+                                            <div style={{ flex: 1, cursor: "pointer" }} onClick={() => openDossier(rdv.patient, rdv.motif)}>
+                                                <div style={{ fontWeight: 500, fontSize: 13.5, color: "#0F0F0F", display: "flex", alignItems: "center", gap: 6 }}>
                                                     {rdv.patient?.prenom} {rdv.patient?.nom}
+                                                    <i className="bi bi-folder2-open" style={{ color: ACCENT, fontSize: 13 }} title="Voir le dossier médical"></i>
                                                 </div>
                                                 <div style={{ fontSize: 12, color: "#9E9E9E", marginTop: 2 }}>{rdv.motif}</div>
                                             </div>
@@ -196,19 +211,11 @@ export default function MedecinDashboard() {
 
                                             {/* Actions */}
                                             <div style={{ display: "flex", gap: 6 }}>
-                                                {rdv.statut === "EN_ATTENTE" && (
-                                                    <button onClick={() => handleConfirmer(rdv.id)} disabled={!!actionLoading}
-                                                        style={{ background: "#D1FAE5", color: "#065F46", border: "none", borderRadius: 7, padding: "5px 11px", fontSize: 11.5, fontWeight: 600, cursor: "pointer" }}>
-                                                        {actionLoading === rdv.id + "_confirmer"
-                                                            ? <span className="spinner-border spinner-border-sm"></span>
-                                                            : "✓ Confirmer"}
-                                                    </button>
-                                                )}
-                                                {(rdv.statut === "EN_ATTENTE" || rdv.statut === "CONFIRME") && (
+                                                {rdv.statut === "CONFIRME" && (
                                                     <>
                                                         <button onClick={() => { setTerminerRdv(rdv); setTerminerModal(true); }} disabled={!!actionLoading}
-                                                            style={{ background: "#E0E7FF", color: "#3730A3", border: "none", borderRadius: 7, padding: "5px 11px", fontSize: 11.5, fontWeight: 600, cursor: "pointer" }}>
-                                                            Terminer
+                                                                style={{ background: "#E0E7FF", color: "#3730A3", border: "none", borderRadius: 7, padding: "5px 11px", fontSize: 11.5, fontWeight: 600, cursor: "pointer" }}>
+                                                                Terminer
                                                         </button>
                                                         <button onClick={() => handleAnnuler(rdv.id)} disabled={!!actionLoading}
                                                             style={{ background: "#FEE2E2", color: "#991B1B", border: "none", borderRadius: 7, padding: "5px 11px", fontSize: 11.5, fontWeight: 600, cursor: "pointer" }}>
@@ -326,6 +333,104 @@ export default function MedecinDashboard() {
                                 </div>
                             </>
                         )}
+                    </div>
+                </div>
+            )}
+
+            {/* ── Modal dossier ── */}
+            {selPatient && (
+                <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <div style={{ background: "#fff", borderRadius: 18, width: 520, maxWidth: "90vw", maxHeight: "90vh", overflow: "hidden", display: "flex", flexDirection: "column", border: "0.5px solid #EBEBEB" }}>
+
+                        {/* En-tête modal */}
+                        <div style={{ background: `linear-gradient(135deg, ${ACCENT}, #27A869)`, padding: "20px 24px", display: "flex", alignItems: "center", gap: 14, color: "#fff" }}>
+                            <div style={{ width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.25)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 17 }}>
+                                {selPatient.prenom?.[0]}{selPatient.nom?.[0]}
+                            </div>
+                            <div style={{ flex: 1 }}>
+                                <div style={{ fontWeight: 700, fontSize: 16 }}>{selPatient.prenom} {selPatient.nom}</div>
+                                <div style={{ opacity: 0.85, fontSize: 13 }}>{selPatient.email}</div>
+                            </div>
+                            <button onClick={() => { setSelPatient(null); setDossier(null); }}
+                                    style={{ background: "rgba(255,255,255,0.2)", border: "none", borderRadius: 8, width: 30, height: 30, cursor: "pointer", color: "#fff", fontSize: 15, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
+                        </div>
+
+                        <div style={{ overflowY: "auto", padding: 24, flex: 1 }}>
+                            {selRdvMotif && (
+                                <div style={{ background: "#FEF9C3", padding: "12px 16px", borderRadius: 12, border: "0.5px solid #FEF08A", marginBottom: 20 }}>
+                                    <div style={{ fontSize: 11.5, fontWeight: 700, color: "#CA8A04", textTransform: "uppercase", marginBottom: 4 }}>Symptômes actuels</div>
+                                    <div style={{ fontSize: 14, color: "#854D0E", fontWeight: 500 }}>{selRdvMotif}</div>
+                                </div>
+                            )}
+
+                            {dossierLoading ? (
+                                <div style={{ display: "flex", justifyContent: "center", padding: 40 }}>
+                                    <div className="spinner-border" style={{ color: ACCENT }}></div>
+                                </div>
+                            ) : !dossier ? (
+                                <div style={{ textAlign: "center", padding: "40px 0", color: "#BDBDBD" }}>
+                                    <i className="bi bi-folder-x" style={{ fontSize: 44 }}></i>
+                                    <div style={{ marginTop: 12, fontSize: 15 }}>Dossier médical introuvable</div>
+                                </div>
+                            ) : selOrdo ? (
+                                <>
+                                    <button onClick={() => setSelOrdo(null)} style={{ background: "#F5F5F5", border: "none", borderRadius: 8, padding: "6px 14px", fontSize: 13, cursor: "pointer", marginBottom: 16 }}>
+                                        ← Retour au dossier
+                                    </button>
+                                    <div style={{ background: "#F0FDF4", borderRadius: 12, padding: 16, border: "0.5px solid #BBF7D0", marginBottom: 12 }}>
+                                        <div style={{ fontSize: 12, color: "#9E9E9E", marginBottom: 4 }}>Date de prescription</div>
+                                        <div style={{ fontWeight: 600, fontSize: 14 }}>{selOrdo.date ? new Date(selOrdo.date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) : "—"}</div>
+                                    </div>
+                                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                                        {Object.entries(selOrdo.medicaments || {}).map(([med, pos]) => (
+                                            <div key={med} style={{ padding: "12px 14px", borderRadius: 10, background: "#F0FDF4", border: "0.5px solid #BBF7D0" }}>
+                                                <div style={{ fontWeight: 700, color: "#065F46", fontSize: 14 }}><i className="bi bi-capsule me-2"></i>{med}</div>
+                                                <div style={{ fontSize: 13, color: "#047857", marginTop: 3 }}>{pos}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 20 }}>
+                                        {[
+                                            { icon: "bi-lungs", label: "Allergies", value: dossier.allergies, color: "#EF4444", bg: "#FEE2E2" },
+                                            { icon: "bi-activity", label: "Poids", value: dossier.poids ? `${dossier.poids} kg` : undefined, color: "#0EA5E9", bg: "#E0F2FE" },
+                                            { icon: "bi-arrows-vertical", label: "Taille", value: dossier.taille ? `${dossier.taille} cm` : undefined, color: "#8B5CF6", bg: "#EDE9FE" },
+                                        ].map(item => (
+                                            <div key={item.label} style={{ background: item.bg, borderRadius: 10, padding: "12px 14px", textAlign: "center" }}>
+                                                <i className={`bi ${item.icon}`} style={{ color: item.color, fontSize: 20 }}></i>
+                                                <div style={{ fontSize: 11, color: "#9E9E9E", marginTop: 6 }}>{item.label}</div>
+                                                <div style={{ fontWeight: 700, fontSize: 14, color: "#0F0F0F", marginTop: 2 }}>{item.value || "—"}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div style={{ fontSize: 13, fontWeight: 600, color: "#9E9E9E", marginBottom: 10, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                                        Ordonnances ({dossier.ordonnances?.length ?? 0})
+                                    </div>
+                                    {!dossier.ordonnances?.length ? (
+                                        <div style={{ textAlign: "center", padding: "24px 0", color: "#BDBDBD", fontSize: 14 }}>Aucune ordonnance</div>
+                                    ) : (
+                                        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                                            {dossier.ordonnances.map(o => (
+                                                <div key={o.id} onClick={() => setSelOrdo(o)}
+                                                     style={{ padding: "12px 14px", borderRadius: 10, background: "#FAFAFA", border: "0.5px solid #EBEBEB", cursor: "pointer", display: "flex", alignItems: "center", gap: 10 }}
+                                                     onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = ACCENT}
+                                                     onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = "#EBEBEB"}>
+                                                    <i className="bi bi-file-earmark-medical" style={{ color: ACCENT, fontSize: 18 }}></i>
+                                                    <div style={{ flex: 1 }}>
+                                                        <div style={{ fontWeight: 600, fontSize: 13 }}>{Object.keys(o.medicaments || {}).length} médicament(s)</div>
+                                                        <div style={{ fontSize: 12, color: "#9E9E9E" }}>{o.date ? new Date(o.date).toLocaleDateString("fr-FR") : "—"}</div>
+                                                    </div>
+                                                    <i className="bi bi-chevron-right" style={{ color: "#BDBDBD" }}></i>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}

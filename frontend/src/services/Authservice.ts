@@ -140,6 +140,7 @@ export const authService = {
 
         switch (role?.toUpperCase()) {
             case "ADMIN":
+            case "ADMIN_HOPITAL":
                 return "/dashboard/admin";
             case "MEDECIN":
                 return "/dashboard/medecin";

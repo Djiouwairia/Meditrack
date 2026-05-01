@@ -19,40 +19,41 @@ interface Medecin {
 interface Creneau {
     date: string;
     heure: string;
+    isoDate: string;
 }
 
 const SLOTS_POOL: Creneau[][] = [
     [
-        { date: "Sam 09 Mai",  heure: "09:00" },
-        { date: "Sam 09 Mai",  heure: "10:30" },
-        { date: "Lun 11 Mai",  heure: "08:00" },
-        { date: "Lun 11 Mai",  heure: "14:00" },
-        { date: "Mer 13 Mai",  heure: "11:00" },
-        { date: "Jeu 14 Mai",  heure: "15:30" },
+        { date: "Sam 09 Mai",  heure: "09:00", isoDate: "2026-05-09" },
+        { date: "Sam 09 Mai",  heure: "10:30", isoDate: "2026-05-09" },
+        { date: "Lun 11 Mai",  heure: "08:00", isoDate: "2026-05-11" },
+        { date: "Lun 11 Mai",  heure: "14:00", isoDate: "2026-05-11" },
+        { date: "Mer 13 Mai",  heure: "11:00", isoDate: "2026-05-13" },
+        { date: "Jeu 14 Mai",  heure: "15:30", isoDate: "2026-05-14" },
     ],
     [
-        { date: "Sam 09 Mai",  heure: "08:30" },
-        { date: "Lun 11 Mai",  heure: "09:00" },
-        { date: "Lun 11 Mai",  heure: "16:00" },
-        { date: "Mar 12 Mai",  heure: "10:00" },
-        { date: "Jeu 14 Mai",  heure: "08:00" },
-        { date: "Ven 15 Mai",  heure: "13:00" },
+        { date: "Sam 09 Mai",  heure: "08:30", isoDate: "2026-05-09" },
+        { date: "Lun 11 Mai",  heure: "09:00", isoDate: "2026-05-11" },
+        { date: "Lun 11 Mai",  heure: "16:00", isoDate: "2026-05-11" },
+        { date: "Mar 12 Mai",  heure: "10:00", isoDate: "2026-05-12" },
+        { date: "Jeu 14 Mai",  heure: "08:00", isoDate: "2026-05-14" },
+        { date: "Ven 15 Mai",  heure: "13:00", isoDate: "2026-05-15" },
     ],
     [
-        { date: "Dim 10 Mai",  heure: "10:00" },
-        { date: "Lun 11 Mai",  heure: "11:30" },
-        { date: "Mar 12 Mai",  heure: "08:00" },
-        { date: "Mer 13 Mai",  heure: "09:30" },
-        { date: "Ven 15 Mai",  heure: "14:00" },
-        { date: "Sam 16 Mai",  heure: "09:00" },
+        { date: "Dim 10 Mai",  heure: "10:00", isoDate: "2026-05-10" },
+        { date: "Lun 11 Mai",  heure: "11:30", isoDate: "2026-05-11" },
+        { date: "Mar 12 Mai",  heure: "08:00", isoDate: "2026-05-12" },
+        { date: "Mer 13 Mai",  heure: "09:30", isoDate: "2026-05-13" },
+        { date: "Ven 15 Mai",  heure: "14:00", isoDate: "2026-05-15" },
+        { date: "Sam 16 Mai",  heure: "09:00", isoDate: "2026-05-16" },
     ],
     [
-        { date: "Sam 09 Mai",  heure: "11:00" },
-        { date: "Lun 11 Mai",  heure: "08:30" },
-        { date: "Mar 12 Mai",  heure: "15:00" },
-        { date: "Mer 13 Mai",  heure: "10:00" },
-        { date: "Jeu 14 Mai",  heure: "09:00" },
-        { date: "Ven 15 Mai",  heure: "16:30" },
+        { date: "Sam 09 Mai",  heure: "11:00", isoDate: "2026-05-09" },
+        { date: "Lun 11 Mai",  heure: "08:30", isoDate: "2026-05-11" },
+        { date: "Mar 12 Mai",  heure: "15:00", isoDate: "2026-05-12" },
+        { date: "Mer 13 Mai",  heure: "10:00", isoDate: "2026-05-13" },
+        { date: "Jeu 14 Mai",  heure: "09:00", isoDate: "2026-05-14" },
+        { date: "Ven 15 Mai",  heure: "16:30", isoDate: "2026-05-15" },
     ],
 ];
 
@@ -400,6 +401,18 @@ function RDV() {
     const handleReserver = (medecin: Medecin) => {
         const creneau = selected[medecin.id];
         if (!creneau) return;
+        
+        sessionStorage.setItem("pendingRdv", JSON.stringify({
+            medecinId: medecin.id,
+            medecinNom: medecin.nom,
+            medecinPrenom: medecin.prenom,
+            medecinSpecialite: medecin.specialite,
+            date: creneau.isoDate,
+            dateDisplay: creneau.date,
+            heure: creneau.heure,
+            motif: "Consultation en cabinet"
+        }));
+
         setToast(
             `✓ Créneau sélectionné avec Dr. ${medecin.prenom} ${medecin.nom} — ${creneau.date} à ${creneau.heure}. Connectez-vous pour confirmer.`
         );

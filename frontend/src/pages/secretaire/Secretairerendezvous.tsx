@@ -50,13 +50,21 @@ export default function SecretaireRendezVous() {
             setPatients(patPage.content);
             setMedecins(medPage.content);
 
-            // Charger les RDV de tous les patients
+            // Charger les RDV de l'hôpital via le nouvel endpoint
             const allRdvs: RendezVous[] = [];
-            for (const p of patPage.content.slice(0, 30)) {
-                const data = await rendezVousService.getByPatient(p.id, 0, 50).catch(() => ({ content: [] }));
-                allRdvs.push(...data.content);
+            const statuses = ["EN_ATTENTE", "CONFIRME", "TERMINE", "ANNULE"];
+            for (const st of statuses) {
+                try {
+                    const data = await rendezVousService.getByHopitalStatut(st, 0, 100);
+                    if (data && data.content) {
+                        allRdvs.push(...data.content);
+                    }
+                } catch (e) {
+                    console.error("Failed to load rdvs for status", st, e);
+                }
             }
-            // Déduplique par ID
+            
+            // Déduplique par ID au cas où
             const seen = new Set<string>();
             const unique = allRdvs.filter(r => { if (seen.has(r.id)) return false; seen.add(r.id); return true; });
             setRdvs(unique.sort((a, b) => b.date.localeCompare(a.date) || b.heure.localeCompare(a.heure)));
@@ -189,7 +197,7 @@ export default function SecretaireRendezVous() {
                                     {rdv.statut === "EN_ATTENTE" && (
                                         <button onClick={()=>handleConfirmer(rdv)} disabled={!!actionLoading}
                                                 style={{ background:"#D1FAE5", color:"#065F46", border:"none", borderRadius:8, padding:"6px 12px", fontSize:12, fontWeight:600, cursor:"pointer" }}>
-                                            {actionLoading===rdv.id+"_conf"?<span className="spinner-border spinner-border-sm"></span>:"✓ Confirmer"}
+                                            {actionLoading===rdv.id+"_conf"?<span className="spinner-border spinner-border-sm"></span>:"✓ Valider"}
                                         </button>
                                     )}
                                     {(rdv.statut==="EN_ATTENTE"||rdv.statut==="CONFIRME") && (
