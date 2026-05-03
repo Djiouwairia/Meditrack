@@ -22,14 +22,26 @@ public class DossierMedicalService {
     private final PatientRepository patientRepository;
 
     public DossierMedical getDossierByPatientId(String patientId) {
-        return dossierMedicalRepository.findByPatientId(patientId)
+        DossierMedical dossier = dossierMedicalRepository.findByPatientId(patientId)
                 .orElseThrow(() -> new DossierMedicalNotFoundException(
                         "Dossier médical introuvable pour le patient : " + patientId));
+        
+        if (dossier.getCodeAccess() == null || dossier.getCodeAccess().trim().isEmpty()) {
+            dossier.setCodeAccess(generateCodeAccess());
+            dossierMedicalRepository.save(dossier);
+        }
+        return dossier;
     }
 
     public DossierMedical getDossierById(String id) {
-        return dossierMedicalRepository.findById(id)
+        DossierMedical dossier = dossierMedicalRepository.findById(id)
                 .orElseThrow(() -> new DossierMedicalNotFoundException("Dossier médical introuvable : " + id));
+        
+        if (dossier.getCodeAccess() == null || dossier.getCodeAccess().trim().isEmpty()) {
+            dossier.setCodeAccess(generateCodeAccess());
+            dossierMedicalRepository.save(dossier);
+        }
+        return dossier;
     }
 
     @Transactional
@@ -46,6 +58,7 @@ public class DossierMedicalService {
         DossierMedical dossier = new DossierMedical();
         dossier.setId(generateId());
         dossier.setNumero("DM-" + System.currentTimeMillis());
+        dossier.setCodeAccess(generateCodeAccess());
         dossier.setDateDeCreation(LocalDate.now());
         dossier.setPatient(patient);
         return dossierMedicalRepository.save(dossier);
@@ -75,5 +88,15 @@ public class DossierMedicalService {
 
     private String generateId() {
         return UUID.randomUUID().toString().replace("-", "").substring(0, 8);
+    }
+
+    private String generateCodeAccess() {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        StringBuilder sb = new StringBuilder();
+        java.util.Random rnd = new java.util.Random();
+        for (int i = 0; i < 5; i++) {
+            sb.append(chars.charAt(rnd.nextInt(chars.length())));
+        }
+        return sb.toString();
     }
 }

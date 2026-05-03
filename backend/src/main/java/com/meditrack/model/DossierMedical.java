@@ -24,6 +24,9 @@ public class DossierMedical {
     @Column(nullable = false, unique = true)
     private String numero;
 
+    @Column(nullable = false, length = 10)
+    private String codeAccess;
+
     private LocalDate dateDeCreation;
     private String allergies;
     private String poids;

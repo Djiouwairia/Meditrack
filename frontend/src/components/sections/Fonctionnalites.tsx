@@ -141,6 +141,8 @@ const style = `
 }
 `;
 
+import { Link } from "react-router-dom";
+
 function Fonctionnalites() {
     return (
         <>
@@ -201,13 +203,13 @@ function Fonctionnalites() {
                         <div className="desc">
                             Évitez les déplacements inutiles et les longues attentes. Consultez en ligne.
                         </div>
-                        <a href="#connexion" className="cta btn-outline">
+                        <Link to="/login" className="cta btn-outline">
                             Se connecter
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <line x1="5" y1="12" x2="19" y2="12"/>
                                 <polyline points="12 5 19 12 12 19"/>
                             </svg>
-                        </a>
+                        </Link>
                     </div>
 
                     {/* Carte 4 - Suivi simplifié */}
@@ -219,13 +221,13 @@ function Fonctionnalites() {
                         <div className="desc">
                             Consultez vos rendez-vous et votre historique facilement. Recevez des rappels.
                         </div>
-                        <a href="#connexion" className="cta btn-light">
+                        <Link to="/login" className="cta btn-light">
                             Se connecter
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <line x1="5" y1="12" x2="19" y2="12"/>
                                 <polyline points="12 5 19 12 12 19"/>
                             </svg>
-                        </a>
+                        </Link>
                     </div>
 
                 </div>

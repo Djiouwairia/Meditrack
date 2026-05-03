@@ -106,6 +106,22 @@ export default function PatientDossier() {
 
                         {/* Données médicales */}
                         <div style={{ background:"#fff", borderRadius:20, padding:28, boxShadow:"0 2px 12px rgba(0,0,0,0.05)", border:"1px solid #F0F2F7" }}>
+                            {dossier.codeAccess && (
+                                <div style={{ background: "#E8F5EE", padding: "16px", borderRadius: 12, marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid #C8E8D4" }}>
+                                    <div>
+                                        <div style={{ fontSize: 13, fontWeight: 700, color: "#1A7A52", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                                            <i className="bi bi-shield-lock-fill me-2"></i>Code d'accès sécurisé
+                                        </div>
+                                        <div style={{ fontSize: 13, color: "#3A6B4F", marginTop: 4 }}>
+                                            Communiquez ce code à votre médecin pour l'autoriser à consulter votre dossier.
+                                        </div>
+                                    </div>
+                                    <div style={{ background: "#fff", border: "2px dashed #27A869", color: "#1A7A52", padding: "8px 20px", borderRadius: 8, fontSize: 22, fontWeight: 800, letterSpacing: "2px" }}>
+                                        {dossier.codeAccess}
+                                    </div>
+                                </div>
+                            )}
+
                             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
                                 <h2 style={{ margin:0, fontSize:17, fontWeight:700, color:"#0D1F2D" }}>
                                     <i className="bi bi-activity me-2" style={{ color:"#27A869" }}></i>Données médicales

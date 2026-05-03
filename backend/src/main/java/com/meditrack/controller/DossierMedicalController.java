@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,8 +20,11 @@ public class DossierMedicalController {
      * Récupérer le dossier médical par son ID
      */
     @GetMapping("/{id}")
-    public ResponseEntity<DossierMedical> getDossierById(@PathVariable String id) {
-        return ResponseEntity.ok(dossierMedicalService.getDossierById(id));
+    public ResponseEntity<DossierMedical> getDossierById(@PathVariable String id, 
+                                                         @RequestParam(required = false) String code,
+                                                         Authentication auth) {
+        DossierMedical dossier = dossierMedicalService.getDossierById(id);
+        return verifierAcces(dossier, code, auth);
     }
 
     /**
@@ -28,13 +32,30 @@ public class DossierMedicalController {
      * Retourne 204 No Content si le dossier n'existe pas encore
      */
     @GetMapping("/patient/{patientId}")
-    public ResponseEntity<DossierMedical> getDossierByPatient(@PathVariable String patientId) {
+    public ResponseEntity<DossierMedical> getDossierByPatient(@PathVariable String patientId,
+                                                              @RequestParam(required = false) String code,
+                                                              Authentication auth) {
         try {
             DossierMedical dossier = dossierMedicalService.getDossierByPatientId(patientId);
-            return ResponseEntity.ok(dossier);
+            return verifierAcces(dossier, code, auth);
         } catch (com.meditrack.exceptions.DossierMedicalNotFoundException e) {
             return ResponseEntity.noContent().build();
         }
+    }
+
+    private ResponseEntity<DossierMedical> verifierAcces(DossierMedical dossier, String code, Authentication auth) {
+        boolean isMedecin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_MEDECIN"));
+        boolean isPatient = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_PATIENT"));
+
+        if (!isMedecin && !isPatient) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        if (isMedecin && (code == null || !code.equals(dossier.getCodeAccess()))) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        return ResponseEntity.ok(dossier);
     }
 
     /**

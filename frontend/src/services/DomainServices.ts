@@ -5,7 +5,7 @@ export interface Hopital { id: string; nom: string; adresse?: string; email?: st
 export interface Medecin { id: string; nom: string; prenom: string; email: string; telephone: string; specialite: string; disponible: boolean; hopital?: { id: string; nom: string }; }
 export interface Patient { id: string; nom: string; prenom: string; email: string; telephone: string; adresse?: string; dateDeNaissance?: string; groupeSanguin?: string; nineaOuCin?: string; personneDeConfiance?: string; hopital?: { id: string; nom: string }; }
 export interface RendezVous { id: string; date: string; heure: string; motif: string; statut: "EN_ATTENTE" | "CONFIRME" | "ANNULE" | "TERMINE"; diagnostic?: string; patient: Patient; medecin: Medecin; }
-export interface DossierMedical { id: string; allergies?: string; poids?: string; taille?: string; tension?: string; temperature?: string; antecedents?: string; terrain?: string; suiviPrenatal?: string; suiviInfantile?: string; preventionPaludisme?: string; analysesBiologiques?: string; imagerie?: string; rapportsSpecialistes?: string; patient: Patient; ordonnances?: Ordonnance[]; }
+export interface DossierMedical { id: string; codeAccess?: string; allergies?: string; poids?: string; taille?: string; tension?: string; temperature?: string; antecedents?: string; terrain?: string; suiviPrenatal?: string; suiviInfantile?: string; preventionPaludisme?: string; analysesBiologiques?: string; imagerie?: string; rapportsSpecialistes?: string; patient: Patient; ordonnances?: Ordonnance[]; }
 export interface Ordonnance { id: string; date: string; dateCreation?: string; medicaments: Record<string, string>; medecin?: { id: string; nom: string; prenom: string }; rendezVous?: RendezVous; dossierMedical?: { id: string }; }
 export interface Secretaire { id: string; nom: string; prenom: string; email: string; telephone: string; hopital?: { id: string; nom: string }; }
 export interface Disponibilite { id: string; date: string; heureDebut: string; heureFin: string; estReserve: boolean; nombreMaxPatients: number; placesRestantes: number; medecin?: { id: string; nom: string; prenom: string }; }
@@ -67,8 +67,8 @@ export const rendezVousService = {
 };
 
 export const dossierService = {
-    getById: (id: string) => api.get<DossierMedical>(`/dossiers-medicaux/${id}`).then(r => r.data),
-    getByPatient: (pid: string) => api.get<DossierMedical>(`/dossiers-medicaux/patient/${pid}`).then(r => {
+    getById: (id: string, code?: string) => api.get<DossierMedical>(code ? `/dossiers-medicaux/${id}?code=${encodeURIComponent(code)}` : `/dossiers-medicaux/${id}`).then(r => r.data),
+    getByPatient: (pid: string, code?: string) => api.get<DossierMedical>(code ? `/dossiers-medicaux/patient/${pid}?code=${encodeURIComponent(code)}` : `/dossiers-medicaux/patient/${pid}`).then(r => {
         // 204 No Content → pas de dossier
         if (r.status === 204 || !r.data) return null;
         return r.data;

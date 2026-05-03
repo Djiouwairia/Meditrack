@@ -28,6 +28,11 @@ export default function MedecinDossier() {
     const [loading, setLoading]           = useState(true);
     const [dossierLoading, setDossierLoading] = useState(false);
 
+    // Code d'accès
+    const [showCodePrompt, setShowCodePrompt] = useState(false);
+    const [accessCodeInput, setAccessCodeInput] = useState("");
+    const [codeError, setCodeError]       = useState("");
+
     // Édition dossier
     const [editMode, setEditMode]         = useState(false);
     const [editForm, setEditForm]         = useState({ 
@@ -53,15 +58,17 @@ export default function MedecinDossier() {
         }
     }, [patientId]);
 
-    const loadDossierAndHistory = async (id: string) => {
+    const loadDossierAndHistory = async (id: string, code?: string) => {
         setDossierLoading(true);
         try {
             const rdvs = await rendezVousService.getByPatient(id, 0, 50);
             setHistoriqueRdv(rdvs.content.filter(r => r.statut === "TERMINE"));
 
-            const dos = await dossierService.getByPatient(id);
+            const dos = await dossierService.getByPatient(id, code);
             if (dos && dos.id) {
                 setDossier(dos);
+                setShowCodePrompt(false);
+                setCodeError("");
                 setEditForm({ 
                     allergies: dos.allergies || "", poids: dos.poids || "", taille: dos.taille || "",
                     tension: dos.tension || "", temperature: dos.temperature || "", antecedents: dos.antecedents || "", terrain: dos.terrain || "",
@@ -72,8 +79,15 @@ export default function MedecinDossier() {
                 setDossier(null);
             }
         } catch (e: any) {
-            console.warn("Erreur récupération dossier:", e);
-            setDossier(null);
+            if (e?.response?.status === 403 || e?.response?.status === 401) {
+                setShowCodePrompt(true);
+                if (code) {
+                    setCodeError("Code d'accès incorrect.");
+                }
+            } else {
+                console.warn("Erreur récupération dossier:", e);
+                setDossier(null);
+            }
         } finally {
             setDossierLoading(false);
         }
@@ -170,6 +184,30 @@ export default function MedecinDossier() {
                     {dossierLoading ? (
                         <div style={{ display: "flex", justifyContent: "center", padding: 60 }}>
                             <div className="spinner-border" style={{ color: ACCENT }}></div>
+                        </div>
+                    ) : showCodePrompt ? (
+                        <div style={{ textAlign: "center", padding: "60px 0", maxWidth: 400, margin: "0 auto" }}>
+                            <div style={{ width: 80, height: 80, borderRadius: "50%", background: "#FEE2E2", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", color: "#EF4444" }}>
+                                <i className="bi bi-shield-lock-fill" style={{ fontSize: 36 }}></i>
+                            </div>
+                            <div style={{ color: "#0F0F0F", fontWeight: 700, fontSize: 18 }}>Accès Protégé</div>
+                            <div style={{ color: "#6B6B6B", fontSize: 14, marginTop: 8, marginBottom: 24 }}>Ce dossier médical est sécurisé. Veuillez saisir le code d'accès fourni par le patient pour le consulter.</div>
+                            
+                            <input 
+                                type="text" 
+                                value={accessCodeInput} 
+                                onChange={e => setAccessCodeInput(e.target.value.toUpperCase())} 
+                                placeholder="Code d'accès (ex: X7B9K)" 
+                                style={{ width: "100%", textAlign: "center", textTransform: "uppercase", letterSpacing: 2, fontSize: 18, fontWeight: 700, padding: "12px", borderRadius: 10, border: `2px solid ${codeError ? '#EF4444' : '#EBEBEB'}`, outline: "none", marginBottom: 16 }}
+                                onKeyDown={e => { if(e.key === "Enter") loadDossierAndHistory(patient.id, accessCodeInput) }}
+                            />
+                            
+                            {codeError && <div style={{ color: "#EF4444", fontSize: 13, marginBottom: 16, fontWeight: 600 }}>{codeError}</div>}
+                            
+                            <button onClick={() => loadDossierAndHistory(patient.id, accessCodeInput)}
+                                    style={{ background: ACCENT, color: "#fff", border: "none", borderRadius: 10, padding: "12px 0", width: "100%", fontWeight: 700, cursor: "pointer", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                                <i className="bi bi-unlock-fill"></i> Déverrouiller le dossier
+                            </button>
                         </div>
                     ) : !dossier ? (
                         <div style={{ textAlign: "center", padding: "60px 0" }}>
