@@ -1,6 +1,6 @@
 package com.meditrack.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -32,11 +32,11 @@ public class Ordonnance {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "rendez_vous_id", nullable = false)
-    @JsonBackReference
+    @JsonIgnoreProperties({"ordonnances", "dossierMedical", "patient", "medecin"})
     private RendezVous rendezVous;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dossier_medical_id", nullable = false)
-    @JsonBackReference("dossier-ordonnances")
+    @JsonIgnoreProperties({"ordonnances", "rendezVous", "patient"})
     private DossierMedical dossierMedical;
 }

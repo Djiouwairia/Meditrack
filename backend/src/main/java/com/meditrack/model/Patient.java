@@ -1,6 +1,7 @@
 package com.meditrack.model;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,12 +20,14 @@ public class Patient extends Utilisateur {
     private String adresse;
     private LocalDate dateDeNaissance;
     private String groupeSanguin;
+    private String nineaOuCin;
+    private String personneDeConfiance;
 
     @OneToOne(mappedBy = "patient", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference("patient-dossier")
+    @JsonIgnoreProperties({"patient", "rendezVous", "ordonnances"})
     private DossierMedical dossierMedical;
 
     @OneToMany(mappedBy = "patient", fetch = FetchType.LAZY)
-    @JsonManagedReference("patient-rdv")
+    @JsonIgnore
     private List<RendezVous> rendezVous;
 }

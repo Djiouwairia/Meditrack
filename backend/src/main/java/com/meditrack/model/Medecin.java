@@ -1,6 +1,6 @@
 package com.meditrack.model;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,6 +19,6 @@ public class Medecin extends Utilisateur {
     private boolean disponible;
 
     @OneToMany(mappedBy = "medecin", fetch = FetchType.LAZY)
-    @JsonManagedReference("medecin-rdv")
+    @JsonIgnore
     private List<RendezVous> rendezVous;
 }

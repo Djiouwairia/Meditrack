@@ -1,5 +1,6 @@
 package com.meditrack.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,12 +27,19 @@ public class Disponibilite {
     @Column(nullable = false)
     private LocalTime heureFin;
 
-    /** false = libre, true = déjà réservé par un RDV */
+    /** false = libre, true = déjà réservé par un RDV (plus de places) */
     @Column(nullable = false)
     private boolean estReserve = false;
 
+    @Column(nullable = false)
+    private int nombreMaxPatients = 1;
+
+    @Column(nullable = false)
+    private int placesRestantes = 1;
+
     /** Médecin propriétaire du créneau */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "medecin_id", nullable = false)
+    @JsonIgnoreProperties({"rendezVous", "disponibilites", "motDePasse"})
     private Medecin medecin;
 }

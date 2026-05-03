@@ -18,6 +18,9 @@ public interface RendezVousRepository extends JpaRepository<RendezVous, String> 
     Page<RendezVous> findByPatientId(String patientId, Pageable pageable);
     Page<RendezVous> findByStatut(StatutRendezVous statut, Pageable pageable);
 
+    // Tous les RDV triés par date (pour admin/secrétaire)
+    Page<RendezVous> findAll(Pageable pageable);
+
     List<RendezVous> findByMedecinIdAndDate(String medecinId, LocalDate date);
 
     // Vérifier si un médecin a déjà un rendez-vous à cette date/heure

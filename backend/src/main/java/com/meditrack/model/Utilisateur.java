@@ -1,6 +1,6 @@
 package com.meditrack.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.meditrack.enums.Role;
 import com.meditrack.enums.Sexe;
 import com.meditrack.enums.StatutUtilisateur;
@@ -36,7 +36,7 @@ public class Utilisateur {
     private Sexe sexe;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hopital_id")
-    @JsonBackReference
+    @JsonIgnoreProperties({"utilisateurs"})
     private Hopital hopital;
 
 

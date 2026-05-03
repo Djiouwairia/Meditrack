@@ -33,13 +33,42 @@ public class DossierMedicalService {
     }
 
     @Transactional
+    public DossierMedical creerDossier(String patientId) {
+        // Si le dossier existe déjà, on le retourne
+        var existing = dossierMedicalRepository.findByPatientId(patientId);
+        if (existing.isPresent()) {
+            return existing.get();
+        }
+        
+        Patient patient = patientRepository.findById(patientId)
+                .orElseThrow(() -> new PatientNotFoundException("Patient introuvable : " + patientId));
+        
+        DossierMedical dossier = new DossierMedical();
+        dossier.setId(generateId());
+        dossier.setNumero("DM-" + System.currentTimeMillis());
+        dossier.setDateDeCreation(LocalDate.now());
+        dossier.setPatient(patient);
+        return dossierMedicalRepository.save(dossier);
+    }
+
+    @Transactional
     public DossierMedical updateDossier(String id, DossierMedicalRequestDTO dto) {
         DossierMedical dossier = dossierMedicalRepository.findById(id)
                 .orElseThrow(() -> new DossierMedicalNotFoundException("Dossier médical introuvable : " + id));
 
-        dossier.setAllergies(dto.getAllergies());
-        dossier.setPoids(dto.getPoids());
-        dossier.setTaille(dto.getTaille());
+        if (dto.getAllergies() != null) dossier.setAllergies(dto.getAllergies());
+        if (dto.getPoids() != null) dossier.setPoids(dto.getPoids());
+        if (dto.getTaille() != null) dossier.setTaille(dto.getTaille());
+        if (dto.getTension() != null) dossier.setTension(dto.getTension());
+        if (dto.getTemperature() != null) dossier.setTemperature(dto.getTemperature());
+        if (dto.getAntecedents() != null) dossier.setAntecedents(dto.getAntecedents());
+        if (dto.getTerrain() != null) dossier.setTerrain(dto.getTerrain());
+        if (dto.getSuiviPrenatal() != null) dossier.setSuiviPrenatal(dto.getSuiviPrenatal());
+        if (dto.getSuiviInfantile() != null) dossier.setSuiviInfantile(dto.getSuiviInfantile());
+        if (dto.getPreventionPaludisme() != null) dossier.setPreventionPaludisme(dto.getPreventionPaludisme());
+        if (dto.getAnalysesBiologiques() != null) dossier.setAnalysesBiologiques(dto.getAnalysesBiologiques());
+        if (dto.getImagerie() != null) dossier.setImagerie(dto.getImagerie());
+        if (dto.getRapportsSpecialistes() != null) dossier.setRapportsSpecialistes(dto.getRapportsSpecialistes());
 
         return dossierMedicalRepository.save(dossier);
     }

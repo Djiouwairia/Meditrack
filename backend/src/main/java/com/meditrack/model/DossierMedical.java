@@ -1,7 +1,7 @@
 package com.meditrack.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -28,17 +28,44 @@ public class DossierMedical {
     private String allergies;
     private String poids;
     private String taille;
+    
+    // Constantes cliniques supplémentaires
+    private String tension;
+    private String temperature;
+
+    // Antécédents
+    @Column(columnDefinition = "TEXT")
+    private String antecedents;
+    
+    // Terrain (Maladies passées/non traitées)
+    @Column(columnDefinition = "TEXT")
+    private String terrain;
+
+    // Carnet de Santé
+    @Column(columnDefinition = "TEXT")
+    private String suiviPrenatal;
+    @Column(columnDefinition = "TEXT")
+    private String suiviInfantile;
+    private String preventionPaludisme;
+
+    // Résultats Paracliniques
+    @Column(columnDefinition = "TEXT")
+    private String analysesBiologiques;
+    @Column(columnDefinition = "TEXT")
+    private String imagerie;
+    @Column(columnDefinition = "TEXT")
+    private String rapportsSpecialistes;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id", nullable = false)
-    @JsonBackReference("patient-dossier")
+    @JsonIgnoreProperties({"dossierMedical", "rendezVous", "motDePasse"})
     private Patient patient;
 
     @OneToMany(mappedBy = "dossierMedical", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference("dossier-ordonnances")
+    @JsonIgnoreProperties({"dossierMedical", "rendezVous"})
     private List<Ordonnance> ordonnances;
 
     @OneToMany(mappedBy = "dossierMedical", fetch = FetchType.LAZY)
-    @JsonManagedReference("dossier-rdv")
+    @JsonIgnore
     private List<RendezVous> rendezVous;
 }

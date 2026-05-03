@@ -37,8 +37,8 @@ export default function DashboardLayout({
             style={{
                 display: "flex",
                 height: "100vh",
-                fontFamily: "'DM Sans', sans-serif",
-                background: "#FAFAFA"
+                fontFamily: "var(--font-family)",
+                background: "var(--bg-color)"
             }}
         >
             {/* SIDEBAR */}
@@ -149,9 +149,9 @@ export default function DashboardLayout({
                                     padding: "9px 10px",
                                     borderRadius: 9,
                                     textDecoration: "none",
-                                    background: active ? "#F0F0F0" : "transparent",
-                                    borderLeft: active ? `3px solid ${accentColor}` : "3px solid transparent",
-                                    color: active ? "#0F0F0F" : "#6B6B6B",
+                                    background: active ? "var(--primary-light)" : "transparent",
+                                    borderLeft: active ? `3px solid var(--primary)` : "3px solid transparent",
+                                    color: active ? "var(--primary-dark)" : "var(--text-muted)",
                                     fontWeight: active ? 500 : 400,
                                     fontSize: 13.5,
                                     transition: "all 0.15s"
@@ -162,7 +162,7 @@ export default function DashboardLayout({
                                     style={{
                                         fontSize: 16,
                                         minWidth: 16,
-                                        color: active ? accentColor : "#BDBDBD"
+                                        color: active ? "var(--primary)" : "#BDBDBD"
                                     }}
                                 />
                                 {sidebarOpen && <span>{item.label}</span>}
@@ -226,9 +226,8 @@ export default function DashboardLayout({
                 </div>
             </aside>
 
-            {/* MAIN */}
             <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-                <header className="navbar bg-white border-bottom px-4 d-flex justify-content-between align-items-center">
+                <header className="navbar glass-panel px-4 d-flex justify-content-between align-items-center" style={{ position: "sticky", top: 0, zIndex: 50, padding: "12px 24px" }}>
 
     {/* TITLE */}
     <h1 className="h6 m-0 fw-semibold">

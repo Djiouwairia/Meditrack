@@ -38,8 +38,23 @@ export const hopitalService = {
 export const utilisateurService = {
     getAll: (page = 0, size = 10, sortBy = "nom") =>
         api.get<PageResponse<Utilisateur>>(`/utilisateurs?page=${page}&size=${size}&sortBy=${sortBy}`).then(r => r.data),
-    create: (dto: Partial<Utilisateur>) =>
-        api.post<Utilisateur>("/utilisateurs", dto).then(r => r.data),
+    create: (dto: Partial<Utilisateur> & { hopitalId?: string }) => {
+        if (dto.role === "MEDECIN") {
+            return api.post<Utilisateur>("/medecins", dto).then(r => r.data);
+        }
+        if (dto.role === "SECRETAIRE") {
+            return api.post<Utilisateur>("/secretaires", dto).then(r => r.data);
+        }
+        if (dto.role === "PATIENT") {
+            return api.post<Utilisateur>("/patients", dto).then(r => r.data);
+        }
+
+        if (dto.hopitalId && dto.hopitalId !== "") {
+            const { hopitalId, ...rest } = dto;
+            return api.post<Utilisateur>(`/utilisateurs/hopital/${hopitalId}`, rest).then(r => r.data);
+        }
+        return api.post<Utilisateur>("/utilisateurs", dto).then(r => r.data);
+    },
     update: (id: string, dto: Partial<Utilisateur>) =>
         api.put<Utilisateur>(`/utilisateurs/${id}`, dto).then(r => r.data),
     delete: (id: string) =>

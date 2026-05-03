@@ -229,8 +229,7 @@ export default function AdminUtilisateurs() {
                 </div>
                 <button
                     onClick={() => setCreateModal(true)}
-                    className="btn fw-bold text-white rounded-3 px-4"
-                    style={{ background: "#27A869" }}
+                    className="btn btn-primary"
                 >
                     <i className="bi bi-person-plus me-2"></i>Nouveau utilisateur
                 </button>
@@ -411,7 +410,7 @@ export default function AdminUtilisateurs() {
                             </div>
                             <div className="modal-footer border-0 pt-0">
                                 <button className="btn btn-danger rounded-3 px-4" onClick={() => { setCreateModal(false); setCreateError(""); }}>Annuler</button>
-                                <button className="btn text-white rounded-3 px-4 fw-semibold" style={{ background: "#27A869" }} onClick={handleCreate} disabled={createLoading}>
+                                <button className="btn btn-primary" onClick={handleCreate} disabled={createLoading}>
                                     {createLoading ? <span className="spinner-border spinner-border-sm"></span> : "Créer"}
                                 </button>
                             </div>
@@ -447,6 +446,16 @@ export default function AdminUtilisateurs() {
                                     <div className="col-12">
                                         <label className="form-label fw-semibold small"><i className="bi bi-gender-ambiguous me-1"></i>Sexe</label>
                                         <select className="form-select" value={editForm.sexe} onChange={e => setEditForm(f => ({ ...f, sexe: e.target.value }))}>
+                                            <option value="">Sélectionner</option>
+                                            <option value="HOMME">Homme</option>
+                                            <option value="FEMME">Femme</option>
+                                        </select>
+                                    </div>
+                                    <div className="col-12">
+                                        <label className="form-label fw-semibold small"><i className="bi bi-shield-lock me-1"></i>Rôle</label>
+                                        <select className="form-select" value={editForm.role} onChange={e => setEditForm(f => ({ ...f, role: e.target.value }))}>
+                                            <option value="">Sélectionner</option>
+                                            <option value="ADMIN">Admin</option>
                                             <option value="SECRETAIRE">Secrétaire</option>
                                             <option value="MEDECIN">Médecin</option>
                                             <option value="PATIENT">Patient</option>
@@ -456,7 +465,7 @@ export default function AdminUtilisateurs() {
                             </div>
                             <div className="modal-footer border-0 pt-0">
                                 <button className="btn btn-danger rounded-3 px-4" onClick={() => { setEditModal(false); setEditError(""); }}>Annuler</button>
-                                <button className="btn text-white rounded-3 px-4 fw-semibold" style={{ background: "#27A869" }} onClick={handleEdit} disabled={editLoading}>
+                                <button className="btn btn-primary" onClick={handleEdit} disabled={editLoading}>
                                     {editLoading ? <span className="spinner-border spinner-border-sm"></span> : "Enregistrer"}
                                 </button>
                             </div>

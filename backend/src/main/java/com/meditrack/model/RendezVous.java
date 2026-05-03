@@ -1,6 +1,6 @@
 package com.meditrack.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.meditrack.enums.StatutRendezVous;
 import jakarta.persistence.*;
 import lombok.*;
@@ -34,21 +34,27 @@ public class RendezVous {
     @Enumerated(EnumType.STRING)
     private StatutRendezVous statut = StatutRendezVous.EN_ATTENTE;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "patient_id", nullable = false)
-    @JsonBackReference("patient-rdv")
+    @JsonIgnoreProperties({"rendezVous", "dossierMedical", "motDePasse"})
     private Patient patient;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "medecin_id", nullable = false)
-    @JsonBackReference("medecin-rdv")
+    @JsonIgnoreProperties({"rendezVous", "motDePasse", "disponibilites"})
     private Medecin medecin;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dossier_medical_id")
-    @JsonBackReference("dossier-rdv")
+    @JsonIgnoreProperties({"rendezVous", "patient", "ordonnances"})
     private DossierMedical dossierMedical;
 
     @OneToMany(mappedBy = "rendezVous", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties({"rendezVous", "dossierMedical"})
     private List<Ordonnance> ordonnances;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "disponibilite_id")
+    @JsonIgnoreProperties({"medecin"})
+    private Disponibilite disponibilite;
 }
