@@ -47,6 +47,7 @@ public class SecurityConfig {
 
 
                         // ── Disponibilités (NOUVEAU) ──
+                        .requestMatchers(HttpMethod.GET,    "/disponibilites/medecin/*/libres").permitAll()
                         .requestMatchers(HttpMethod.POST,   "/disponibilites").hasRole("MEDECIN")
                         .requestMatchers(HttpMethod.DELETE, "/disponibilites/**").hasRole("MEDECIN")
                         .requestMatchers(HttpMethod.PATCH,  "/disponibilites/**").hasRole("ADMIN")

@@ -16,46 +16,7 @@ interface Medecin {
     hopital?: Hopital;
 }
 
-interface Creneau {
-    date: string;
-    heure: string;
-    isoDate: string;
-}
-
-const SLOTS_POOL: Creneau[][] = [
-    [
-        { date: "Sam 09 Mai",  heure: "09:00", isoDate: "2026-05-09" },
-        { date: "Sam 09 Mai",  heure: "10:30", isoDate: "2026-05-09" },
-        { date: "Lun 11 Mai",  heure: "08:00", isoDate: "2026-05-11" },
-        { date: "Lun 11 Mai",  heure: "14:00", isoDate: "2026-05-11" },
-        { date: "Mer 13 Mai",  heure: "11:00", isoDate: "2026-05-13" },
-        { date: "Jeu 14 Mai",  heure: "15:30", isoDate: "2026-05-14" },
-    ],
-    [
-        { date: "Sam 09 Mai",  heure: "08:30", isoDate: "2026-05-09" },
-        { date: "Lun 11 Mai",  heure: "09:00", isoDate: "2026-05-11" },
-        { date: "Lun 11 Mai",  heure: "16:00", isoDate: "2026-05-11" },
-        { date: "Mar 12 Mai",  heure: "10:00", isoDate: "2026-05-12" },
-        { date: "Jeu 14 Mai",  heure: "08:00", isoDate: "2026-05-14" },
-        { date: "Ven 15 Mai",  heure: "13:00", isoDate: "2026-05-15" },
-    ],
-    [
-        { date: "Dim 10 Mai",  heure: "10:00", isoDate: "2026-05-10" },
-        { date: "Lun 11 Mai",  heure: "11:30", isoDate: "2026-05-11" },
-        { date: "Mar 12 Mai",  heure: "08:00", isoDate: "2026-05-12" },
-        { date: "Mer 13 Mai",  heure: "09:30", isoDate: "2026-05-13" },
-        { date: "Ven 15 Mai",  heure: "14:00", isoDate: "2026-05-15" },
-        { date: "Sam 16 Mai",  heure: "09:00", isoDate: "2026-05-16" },
-    ],
-    [
-        { date: "Sam 09 Mai",  heure: "11:00", isoDate: "2026-05-09" },
-        { date: "Lun 11 Mai",  heure: "08:30", isoDate: "2026-05-11" },
-        { date: "Mar 12 Mai",  heure: "15:00", isoDate: "2026-05-12" },
-        { date: "Mer 13 Mai",  heure: "10:00", isoDate: "2026-05-13" },
-        { date: "Jeu 14 Mai",  heure: "09:00", isoDate: "2026-05-14" },
-        { date: "Ven 15 Mai",  heure: "16:30", isoDate: "2026-05-15" },
-    ],
-];
+// Suppression des faux créneaux (SLOTS_POOL)
 
 const SPEC_ICONS: Record<string, string> = {
     "Cardiologie":       "❤️",
@@ -348,6 +309,110 @@ const customStyles = `
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8080";
 
+interface Creneau {
+    id: string;
+    date: string;
+    heure: string;
+    isoDate: string;
+}
+
+function MedecinCard({ medecin, onReserver }: { medecin: Medecin, onReserver: (m: Medecin, c: Creneau) => void }) {
+    const [slots, setSlots] = useState<Creneau[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [choix, setChoix] = useState<Creneau | null>(null);
+
+    useEffect(() => {
+        fetch(`${API_BASE}/disponibilites/medecin/${medecin.id}/libres`)
+            .then(res => res.json())
+            .then(data => {
+                const mapped = data.map((d: any) => {
+                    const dateObj = new Date(d.date);
+                    const days = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+                    const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+                    const strDate = `${days[dateObj.getDay()]} ${dateObj.getDate().toString().padStart(2, '0')} ${months[dateObj.getMonth()]}`;
+                    
+                    return {
+                        id: d.id,
+                        date: strDate,
+                        heure: d.heureDebut.substring(0, 5),
+                        isoDate: d.date
+                    };
+                });
+                setSlots(mapped);
+            })
+            .catch(console.error)
+            .finally(() => setLoading(false));
+    }, [medecin.id]);
+
+    const toggleSlot = (c: Creneau) => {
+        setChoix(prev => (prev?.id === c.id ? null : c));
+    };
+
+    const initiales = `${medecin.prenom?.[0] ?? ""}${medecin.nom?.[0] ?? ""}`;
+
+    return (
+        <div className="col-12 col-md-6 col-lg-4">
+            <div className="rdv-card">
+                <div className="rdv-card-header">
+                    <div className="d-flex gap-3">
+                        <div className="rdv-avatar">{initiales}</div>
+                        <div>
+                            <h5 className="rdv-card-name">
+                                Dr. {medecin.prenom} {medecin.nom}
+                            </h5>
+                            <p className="rdv-card-spec">
+                                {SPEC_ICONS[medecin.specialite] ?? "🩺"} {medecin.specialite}
+                            </p>
+                            {medecin.hopital?.nom && (
+                                <p className="rdv-card-hopital">
+                                    🏥 {medecin.hopital.nom}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="rdv-slots">
+                    <p className="rdv-slots-title">📆 Prochains créneaux</p>
+                    
+                    {loading ? (
+                        <div className="text-center py-3"><span className="spinner-border spinner-border-sm text-success"></span></div>
+                    ) : slots.length === 0 ? (
+                        <div className="text-center text-muted small py-3">Aucun créneau disponible.</div>
+                    ) : (
+                        <div className="row g-2">
+                            {slots.map((c) => {
+                                const isSelected = choix?.id === c.id;
+                                return (
+                                    <div key={c.id} className="col-4">
+                                        <div
+                                            className={`rdv-slot ${isSelected ? "selected" : ""}`}
+                                            onClick={() => toggleSlot(c)}
+                                        >
+                                            <span className="rdv-slot-date">{c.date}</span>
+                                            <span className="rdv-slot-heure">{c.heure}</span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+
+                    <button
+                        className="rdv-btn-reserver"
+                        disabled={!choix}
+                        onClick={() => onReserver(medecin, choix!)}
+                    >
+                        {choix
+                            ? `📅 Réserver — ${choix.date} ${choix.heure}`
+                            : "🗓️ Choisissez un créneau"}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 function RDV() {
     const navigate = useNavigate();
 
@@ -387,20 +452,7 @@ function RDV() {
         ? medecins
         : medecins.filter(m => m.specialite === filtre);
 
-    const getSlotsForMedecin = (idx: number): Creneau[] =>
-        SLOTS_POOL[idx % SLOTS_POOL.length];
-
-    const toggleSlot = (medecinId: string, creneau: Creneau) => {
-        setSelected(prev => {
-            const current = prev[medecinId];
-            const isSame = current?.date === creneau.date && current?.heure === creneau.heure;
-            return { ...prev, [medecinId]: isSame ? null : creneau };
-        });
-    };
-
-    const handleReserver = (medecin: Medecin) => {
-        const creneau = selected[medecin.id];
-        if (!creneau) return;
+    const handleReserver = (medecin: Medecin, creneau: Creneau) => {
         
         sessionStorage.setItem("pendingRdv", JSON.stringify({
             medecinId: medecin.id,
@@ -470,67 +522,9 @@ function RDV() {
 
                     {!loading && !error && (
                         <div className="row g-4">
-                            {medecinsFiltres.map((medecin, idx) => {
-                                const slots = getSlotsForMedecin(idx);
-                                const choix = selected[medecin.id] ?? null;
-                                const initiales = `${medecin.prenom?.[0] ?? ""}${medecin.nom?.[0] ?? ""}`;
-
-                                return (
-                                    <div key={medecin.id} className="col-12 col-md-6 col-lg-4">
-                                        <div className="rdv-card">
-                                            <div className="rdv-card-header">
-                                                <div className="d-flex gap-3">
-                                                    <div className="rdv-avatar">{initiales}</div>
-                                                    <div>
-                                                        <h5 className="rdv-card-name">
-                                                            Dr. {medecin.prenom} {medecin.nom}
-                                                        </h5>
-                                                        <p className="rdv-card-spec">
-                                                            {SPEC_ICONS[medecin.specialite] ?? "🩺"} {medecin.specialite}
-                                                        </p>
-                                                        {medecin.hopital?.nom && (
-                                                            <p className="rdv-card-hopital">
-                                                                🏥 {medecin.hopital.nom}
-                                                            </p>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div className="rdv-slots">
-                                                <p className="rdv-slots-title">📆 Prochains créneaux</p>
-                                                <div className="row g-2">
-                                                    {slots.map((c, i) => {
-                                                        const isSelected =
-                                                            choix?.date === c.date && choix?.heure === c.heure;
-                                                        return (
-                                                            <div key={i} className="col-4">
-                                                                <div
-                                                                    className={`rdv-slot ${isSelected ? "selected" : ""}`}
-                                                                    onClick={() => toggleSlot(medecin.id, c)}
-                                                                >
-                                                                    <span className="rdv-slot-date">{c.date}</span>
-                                                                    <span className="rdv-slot-heure">{c.heure}</span>
-                                                                </div>
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </div>
-
-                                                <button
-                                                    className="rdv-btn-reserver"
-                                                    disabled={!choix}
-                                                    onClick={() => handleReserver(medecin)}
-                                                >
-                                                    {choix
-                                                        ? `📅 Réserver — ${choix.date} ${choix.heure}`
-                                                        : "🗓️ Choisissez un créneau"}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
+                            {medecinsFiltres.map((medecin) => (
+                                <MedecinCard key={medecin.id} medecin={medecin} onReserver={handleReserver} />
+                            ))}
                         </div>
                     )}
                 </div>

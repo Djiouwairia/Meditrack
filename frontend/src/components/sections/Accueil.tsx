@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 import heroImage from "../../assets/hero.png";
 import img1 from "../../assets/1.jpg";
@@ -94,8 +95,8 @@ function Hero() {
                         Voir les spécialités
                     </a>
 
-                    <a
-                        href="#connexion"
+                    <Link
+                        to="/login"
                         style={{
                             padding: "14px 28px",
                             border: "2px solid #fff",
@@ -106,7 +107,7 @@ function Hero() {
                         }}
                     >
                         Se connecter
-                    </a>
+                    </Link>
                 </div>
 
                 {/* INDICATORS */}
