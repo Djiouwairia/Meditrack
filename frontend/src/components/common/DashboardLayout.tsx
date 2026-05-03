@@ -1,6 +1,9 @@
-import { useState, type ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../../context/AuthContext";
+import { usePreferences } from "../../context/PreferenceContext";
+import { notificationService, type Notification } from "../../services/DomainServices";
 import Logo from "../../assets/logo.png";
 
 interface NavItem {
@@ -24,11 +27,22 @@ export default function DashboardLayout({
 }: Props) {
     // @ts-ignore
     const [sidebarOpen, setSidebarOpen] = useState(true);
-
+    const { t } = useTranslation();
     const { user, logout } = useAuth();
+    const { theme, toggleTheme, language, changeLanguage } = usePreferences();
     const location = useLocation();
     // @ts-ignore
     const navigate = useNavigate();
+
+    const [unreadCount, setUnreadCount] = useState(0);
+    const [recentNotifs, setRecentNotifs] = useState<Notification[]>([]);
+
+    useEffect(() => {
+        if (user) {
+            notificationService.getUnreadCount().then(r => setUnreadCount(r.count)).catch(() => {});
+            notificationService.getAll(0, 3).then(r => setRecentNotifs(r.content)).catch(() => {});
+        }
+    }, [user]);
 
     const initials =
   `${user?.prenom?.[0] ?? "?"}${user?.nom?.[0] ?? "?"}`.toUpperCase();
@@ -254,6 +268,30 @@ export default function DashboardLayout({
     })}
 </div>
 
+        {/* THEME TOGGLE */}
+        <button
+            className="btn btn-light"
+            onClick={toggleTheme}
+            title={theme === "dark" ? "Mode clair" : "Mode sombre"}
+        >
+            <i className={`bi ${theme === "dark" ? "bi-sun" : "bi-moon"}`}></i>
+        </button>
+
+        {/* LANGUAGE SELECTOR */}
+        <div className="dropdown">
+            <button
+                className="btn btn-light dropdown-toggle text-uppercase"
+                data-bs-toggle="dropdown"
+            >
+                {language}
+            </button>
+            <ul className="dropdown-menu dropdown-menu-end shadow-sm" style={{ minWidth: "120px" }}>
+                <li><button className="dropdown-item" onClick={() => changeLanguage("fr")}>🇫🇷 FR</button></li>
+                <li><button className="dropdown-item" onClick={() => changeLanguage("en")}>🇬🇧 EN</button></li>
+                <li><button className="dropdown-item" onClick={() => changeLanguage("ar")}>🇸🇦 AR</button></li>
+            </ul>
+        </div>
+
         {/* 🔔 NOTIFICATIONS DROPDOWN */}
         <div className="dropdown">
 
@@ -264,38 +302,42 @@ export default function DashboardLayout({
                 <i className="bi bi-bell"></i>
 
                 {/* BADGE */}
-                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                    3
-                </span>
+                {unreadCount > 0 && (
+                    <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        {unreadCount}
+                    </span>
+                )}
             </button>
 
             {/* NOTIFICATION MENU */}
             <ul className="dropdown-menu dropdown-menu-end shadow-sm" style={{ width: "280px" }}>
 
                 <li className="dropdown-header fw-semibold">
-                    Notifications
+                    {t('dashboardLayout.notifications')}
                 </li>
 
                 <li><hr className="dropdown-divider" /></li>
 
-                <li>
-                    <button className="dropdown-item small">
-                         Nouveau rendez-vous confirmé
-                    </button>
-                </li>
-
-
-                <li>
-                    <button className="dropdown-item small">
-                         Rappel : consultation demain 10h
-                    </button>
-                </li>
+                {recentNotifs.length === 0 ? (
+                    <li><span className="dropdown-item small text-muted text-center">{t('dashboardLayout.noNotif')}</span></li>
+                ) : (
+                    recentNotifs.map(n => (
+                        <li key={n.id}>
+                            <button className="dropdown-item small d-flex flex-column" onClick={() => navigate(`/dashboard/${user?.role?.toLowerCase()}/notifications`)}>
+                                <span className={n.lue ? "text-muted" : "fw-bold"}>{n.titre}</span>
+                                <span className="text-muted" style={{ fontSize: 11 }}>
+                                    {new Date(n.dateCreation).toLocaleDateString("fr-FR")}
+                                </span>
+                            </button>
+                        </li>
+                    ))
+                )}
 
                 <li><hr className="dropdown-divider" /></li>
 
                 <li>
-                    <button className="dropdown-item text-center text-primary small">
-                        Voir toutes les notifications
+                    <button className="dropdown-item text-center text-primary small" onClick={() => navigate(`/dashboard/${user?.role?.toLowerCase()}/notifications`)}>
+                        {t('dashboardLayout.allNotifs')}
                     </button>
                 </li>
 
@@ -328,16 +370,16 @@ export default function DashboardLayout({
             <ul className="dropdown-menu dropdown-menu-end shadow-sm">
 
                 <li>
-                    <button className="dropdown-item small">
+                    <button className="dropdown-item small" onClick={() => navigate(`/dashboard/${user?.role?.toLowerCase()}/profil`)}>
                         <i className="bi bi-person me-2"></i>
-                        Mon profil
+                        {t('dashboardLayout.profile')}
                     </button>
                 </li>
 
                 <li>
-                    <button className="dropdown-item small">
+                    <button className="dropdown-item small" onClick={() => navigate(`/dashboard/${user?.role?.toLowerCase()}/parametres`)}>
                         <i className="bi bi-gear me-2"></i>
-                        Paramètres
+                        {t('dashboardLayout.settings')}
                     </button>
                 </li>
 
@@ -349,7 +391,7 @@ export default function DashboardLayout({
                         onClick={logout}
                     >
                         <i className="bi bi-box-arrow-right me-2"></i>
-                        Déconnexion
+                        {t('dashboardLayout.logout')}
                     </button>
                 </li>
 

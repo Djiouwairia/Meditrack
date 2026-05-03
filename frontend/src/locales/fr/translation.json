@@ -1,0 +1,52 @@
+{
+  "dashboardLayout": {
+    "profile": "Mon profil",
+    "settings": "Paramètres",
+    "logout": "Déconnexion",
+    "notifications": "Notifications",
+    "noNotif": "Aucune notification",
+    "allNotifs": "Voir toutes les notifications",
+    "lightMode": "Mode clair",
+    "darkMode": "Mode sombre"
+  },
+  "medecinDashboard": {
+    "nav_dashboard": "Tableau de bord",
+    "nav_agenda": "Mon agenda",
+    "nav_patients": "Mes patients",
+    "nav_ordonnances": "Ordonnances",
+    "nav_profile": "Mon profil",
+    "bonjour": "BONJOUR \ud83d\udc4b",
+    "rdvToday": "RDV aujourd'hui",
+    "confirmed": "Confirmés",
+    "finished": "Terminés",
+    "agendaToday": "Agenda du jour",
+    "noRdv": "Aucun rendez-vous aujourd'hui.",
+    "btnAddMeds": "+ Ajouter un médicament",
+    "cancel": "Annuler",
+    "createOrdo": "Créer l'ordonnance",
+    "diagnose": "Diagnostic (obligatoire)",
+    "finishBtn": "Terminer le RDV",
+    "prescription": "Ordonnance",
+    "finishedBadge": "Terminé",
+    "pendingBadge": "En attente"
+  },
+  "navBar": {
+    "home": "Accueil",
+    "features": "Fonctionnalités",
+    "specialties": "Spécialités",
+    "about": "À propos",
+    "contact": "Contact",
+    "bookAppt": "Prendre RDV",
+    "login": "Connexion",
+    "register": "Inscription"
+  },
+  "patientDashboard": {
+    "nav_dashboard": "Tableau de bord",
+    "nav_rdv": "Mes rendez-vous",
+    "nav_dossier": "Mon dossier",
+    "nav_ordonnances": "Ordonnances",
+    "nav_profile": "Mon profil",
+    "espacePatient": "Espace Patient",
+    "bonjour": "Bonjour, {{name}} 👋"
+  }
+}

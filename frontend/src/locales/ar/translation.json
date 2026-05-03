@@ -1,0 +1,52 @@
+{
+  "dashboardLayout": {
+    "profile": "ملفي الشخصي",
+    "settings": "الإعدادات",
+    "logout": "تسجيل خروج",
+    "notifications": "إشعارات",
+    "noNotif": "لا توجد إشعارات",
+    "allNotifs": "عرض كل الإشعارات",
+    "lightMode": "الوضع الفاتح",
+    "darkMode": "الوضع الداكن"
+  },
+  "medecinDashboard": {
+    "nav_dashboard": "لوحة القيادة",
+    "nav_agenda": "جدول المواعيد",
+    "nav_patients": "مرضاي",
+    "nav_ordonnances": "الوصفات الطبية",
+    "nav_profile": "ملفي الشخصي",
+    "bonjour": "مرحباً \ud83d\udc4b",
+    "rdvToday": "مواعيد اليوم",
+    "confirmed": "مؤكد",
+    "finished": "مكتمل",
+    "agendaToday": "جدول اليوم",
+    "noRdv": "لا توجد مواعيد اليوم.",
+    "btnAddMeds": "+ إضافة دواء",
+    "cancel": "إلغاء",
+    "createOrdo": "إنشاء وصفة طبية",
+    "diagnose": "التشخيص (مطلوب)",
+    "finishBtn": "إنهاء الموعد",
+    "prescription": "وصفة طبية",
+    "finishedBadge": "مكتمل",
+    "pendingBadge": "قيد الانتظار"
+  },
+  "navBar": {
+    "home": "الرئيسية",
+    "features": "المميزات",
+    "specialties": "التخصصات",
+    "about": "حول",
+    "contact": "اتصل بنا",
+    "bookAppt": "حجز موعد",
+    "login": "تسجيل الدخول",
+    "register": "إنشاء حساب"
+  },
+  "patientDashboard": {
+    "nav_dashboard": "لوحة القيادة",
+    "nav_rdv": "مواعيدي",
+    "nav_dossier": "ملفي الطبي",
+    "nav_ordonnances": "الوصفات الطبية",
+    "nav_profile": "ملفي الشخصي",
+    "espacePatient": "بوابة المريض",
+    "bonjour": "مرحباً، {{name}} 👋"
+  }
+}

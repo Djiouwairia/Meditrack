@@ -32,6 +32,7 @@ public class RendezVousService {
     private final MedecinRepository medecinRepository;
     private final DossierMedicalRepository dossierMedicalRepository;
     private final com.meditrack.repository.DisponibiliteRepository disponibiliteRepository;
+    private final NotificationService notificationService;
 
     /**
      * Prise de rendez-vous par un patient ou une secrétaire
@@ -81,7 +82,15 @@ public class RendezVousService {
         dossierMedicalRepository.findByPatientId(patient.getId())
                 .ifPresent(rdv::setDossierMedical);
 
-        return rendezVousRepository.save(rdv);
+        RendezVous savedRdv = rendezVousRepository.save(rdv);
+        
+        notificationService.createNotification(
+            medecin.getId(),
+            "Nouveau Rendez-vous",
+            "Le patient " + patient.getPrenom() + " " + patient.getNom() + " a réservé un rendez-vous le " + dto.getDate() + " à " + dto.getHeure()
+        );
+
+        return savedRdv;
     }
 
     public Page<RendezVous> getRendezVousByMedecin(String medecinId, int page, int size) {
@@ -132,7 +141,15 @@ public class RendezVousService {
     public RendezVous confirmerRendezVous(String id) {
         RendezVous rdv = getRendezVousById(id);
         rdv.setStatut(StatutRendezVous.CONFIRME);
-        return rendezVousRepository.save(rdv);
+        RendezVous saved = rendezVousRepository.save(rdv);
+        
+        notificationService.createNotification(
+            rdv.getPatient().getId(),
+            "Rendez-vous Confirmé",
+            "Votre rendez-vous du " + rdv.getDate() + " avec le Dr. " + rdv.getMedecin().getNom() + " a été confirmé."
+        );
+        
+        return saved;
     }
 
     @Transactional
@@ -146,6 +163,18 @@ public class RendezVousService {
                 dispo.setEstReserve(false);
                 disponibiliteRepository.save(dispo);
             }
+            
+            notificationService.createNotification(
+                rdv.getPatient().getId(),
+                "Rendez-vous Annulé",
+                "Votre rendez-vous du " + rdv.getDate() + " avec le Dr. " + rdv.getMedecin().getNom() + " a été annulé."
+            );
+            
+            notificationService.createNotification(
+                rdv.getMedecin().getId(),
+                "Rendez-vous Annulé",
+                "Le rendez-vous du " + rdv.getDate() + " avec le patient " + rdv.getPatient().getPrenom() + " " + rdv.getPatient().getNom() + " a été annulé."
+            );
         }
         return rendezVousRepository.save(rdv);
     }

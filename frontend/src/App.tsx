@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+import { useEffect } from "react";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { authService } from "./services/Authservice";
 
@@ -45,6 +46,17 @@ import AdminUtilisateurs from "./pages/admin/AdminUtilisateurs";
 import AdminHopitaux from "./pages/admin/AdminHopital";
 import AdminMedecins from "./pages/admin/AdminMedecins";
 import AdminProfil from "./pages/admin/AdminProfil";
+import AdminParametres from "./pages/admin/AdminParametres";
+import AdminNotifications from "./pages/admin/AdminNotifications";
+
+import MedecinParametres from "./pages/medecin/MedecinParametres";
+import MedecinNotifications from "./pages/medecin/MedecinNotifications";
+
+import PatientParametres from "./pages/patient/PatientParametres";
+import PatientNotifications from "./pages/patient/PatientNotifications";
+
+import SecretaireParametres from "./pages/secretaire/SecretaireParametres";
+import SecretaireNotifications from "./pages/secretaire/SecretaireNotifications";
 
 /* ───────────── REDIRECTION SELON RÔLE ───────────── */
 function RoleRedirect() {
@@ -150,6 +162,24 @@ function AppRoutes() {
                 }
             />
 
+            <Route
+                path="/dashboard/admin/parametres"
+                element={
+                    <Protected roles={["ADMIN", "ADMIN_HOPITAL"]}>
+                        <AdminParametres />
+                    </Protected>
+                }
+            />
+
+            <Route
+                path="/dashboard/admin/notifications"
+                element={
+                    <Protected roles={["ADMIN", "ADMIN_HOPITAL"]}>
+                        <AdminNotifications />
+                    </Protected>
+                }
+            />
+
             {/* ───────── MÉDECIN ───────── */}
             <Route
                 path="/dashboard/medecin"
@@ -205,6 +235,24 @@ function AppRoutes() {
                 }
             />
 
+            <Route
+                path="/dashboard/medecin/parametres"
+                element={
+                    <Protected roles={["MEDECIN"]}>
+                        <MedecinParametres />
+                    </Protected>
+                }
+            />
+
+            <Route
+                path="/dashboard/medecin/notifications"
+                element={
+                    <Protected roles={["MEDECIN"]}>
+                        <MedecinNotifications />
+                    </Protected>
+                }
+            />
+
             {/* ───────── PATIENT ───────── */}
             <Route
                 path="/dashboard/patient"
@@ -250,6 +298,24 @@ function AppRoutes() {
                     </Protected>
                 }
             />
+
+            <Route
+                path="/dashboard/patient/parametres"
+                element={
+                    <Protected roles={["PATIENT"]}>
+                        <PatientParametres />
+                    </Protected>
+                }
+            />
+
+            <Route
+                path="/dashboard/patient/notifications"
+                element={
+                    <Protected roles={["PATIENT"]}>
+                        <PatientNotifications />
+                    </Protected>
+                }
+            />
             
 
             {/* ───────── SECRÉTAIRE ───────── */}
@@ -289,6 +355,24 @@ function AppRoutes() {
                 }
             />
 
+            <Route
+                path="/dashboard/secretaire/parametres"
+                element={
+                    <Protected roles={["SECRETAIRE"]}>
+                        <SecretaireParametres />
+                    </Protected>
+                }
+            />
+
+            <Route
+                path="/dashboard/secretaire/notifications"
+                element={
+                    <Protected roles={["SECRETAIRE"]}>
+                        <SecretaireNotifications />
+                    </Protected>
+                }
+            />
+
             {/* ───────── FALLBACK ───────── */}
             <Route path="*" element={<Navigate to="/" replace />} />
 
@@ -298,6 +382,12 @@ function AppRoutes() {
 
 /* ───────────── APP ROOT ───────────── */
 export default function App() {
+    // Initialisation du thème global
+    useEffect(() => {
+        const savedTheme = localStorage.getItem("meditrack_theme") || "light";
+        document.documentElement.setAttribute("data-theme", savedTheme);
+    }, []);
+
     return (
         <AuthProvider>
             <AppRoutes />

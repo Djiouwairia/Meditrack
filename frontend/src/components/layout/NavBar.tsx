@@ -1,6 +1,7 @@
-import type { JSX } from "react";
 import React from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { usePreferences } from "../../context/PreferenceContext";
 
 interface NavBarProps {
     brandName: string;
@@ -330,6 +331,8 @@ const icons: Record<string, JSX.Element> = {
 
 function NavBar({ brandName, imageSrcPath }: NavBarProps) {
     const [isOpen, setIsOpen] = React.useState(false);
+    const { t } = useTranslation();
+    const { theme, toggleTheme, language, changeLanguage } = usePreferences();
 
     const toggleMenu = () => setIsOpen(!isOpen);
     const closeMenu = () => setIsOpen(false);
@@ -357,22 +360,46 @@ function NavBar({ brandName, imageSrcPath }: NavBarProps) {
 
                     <div className={`collapse navbar-collapse ${isOpen ? "show" : ""}`}>
                         <ul className="navbar-nav">
-                            <li><a className="nav-link" href="#accueil" onClick={closeMenu}>{icons.house}Accueil</a></li>
-                            <li><a className="nav-link" href="#fonctionnalites" onClick={closeMenu}>{icons.sparkles}Fonctionnalités</a></li>
-                            <li><a className="nav-link" href="#specialites" onClick={closeMenu}>{icons.doctor}Spécialités</a></li>
-                            <li><a className="nav-link" href="#apropos" onClick={closeMenu}>{icons.info}À propos</a></li>
-                            <li><a className="nav-link" href="#contact" onClick={closeMenu}>{icons.envelope}Contact</a></li>
+                            <li><a className="nav-link" href="#accueil" onClick={closeMenu}>{icons.house}{t('navBar.home')}</a></li>
+                            <li><a className="nav-link" href="#fonctionnalites" onClick={closeMenu}>{icons.sparkles}{t('navBar.features')}</a></li>
+                            <li><a className="nav-link" href="#specialites" onClick={closeMenu}>{icons.doctor}{t('navBar.specialties')}</a></li>
+                            <li><a className="nav-link" href="#apropos" onClick={closeMenu}>{icons.info}{t('navBar.about')}</a></li>
+                            <li><a className="nav-link" href="#contact" onClick={closeMenu}>{icons.envelope}{t('navBar.contact')}</a></li>
                         </ul>
 
-                        <div className="btn-connect-wrapper d-flex gap-2">
+                        <div className="btn-connect-wrapper d-flex gap-2 align-items-center">
+                            <button
+                                className="btn btn-light rounded-circle"
+                                style={{ width: 38, height: 38, padding: 0, display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid #EBEBEB" }}
+                                onClick={toggleTheme}
+                                title={theme === "dark" ? "Mode clair" : "Mode sombre"}
+                            >
+                                <i className={`bi ${theme === "dark" ? "bi-sun text-warning" : "bi-moon"}`}></i>
+                            </button>
+
+                            <div className="dropdown">
+                                <button
+                                    className="btn btn-light dropdown-toggle text-uppercase"
+                                    data-bs-toggle="dropdown"
+                                    style={{ borderRadius: 20, border: "1px solid #EBEBEB", padding: "0.3rem 0.8rem", fontSize: "0.85rem", display: "flex", alignItems: "center", gap: "4px" }}
+                                >
+                                    {language}
+                                </button>
+                                <ul className="dropdown-menu dropdown-menu-end shadow-sm" style={{ minWidth: "120px" }}>
+                                    <li><button className="dropdown-item" onClick={() => changeLanguage("fr")}>🇫🇷 FR</button></li>
+                                    <li><button className="dropdown-item" onClick={() => changeLanguage("en")}>🇬🇧 EN</button></li>
+                                    <li><button className="dropdown-item" onClick={() => changeLanguage("ar")}>🇸🇦 AR</button></li>
+                                </ul>
+                            </div>
+
                             <a className="btn btn-connect btn-rdv" href="#rdv" onClick={closeMenu}>
-                                {icons.rdv} Prendre RDV
+                                {icons.rdv} {t('navBar.bookAppt')}
                             </a>
                             <Link className="btn btn-connect" to="/login" onClick={closeMenu}>
-                                {icons.login} Connexion
+                                {icons.login} {t('navBar.login')}
                             </Link>
                             <Link className="btn btn-connect" to="/register" onClick={closeMenu}>
-                                {icons.signup} Inscription
+                                {icons.signup} {t('navBar.register')}
                             </Link>
                         </div>
                     </div>

@@ -1,0 +1,52 @@
+{
+  "dashboardLayout": {
+    "profile": "My profile",
+    "settings": "Settings",
+    "logout": "Logout",
+    "notifications": "Notifications",
+    "noNotif": "No notifications",
+    "allNotifs": "See all notifications",
+    "lightMode": "Light mode",
+    "darkMode": "Dark mode"
+  },
+  "medecinDashboard": {
+    "nav_dashboard": "Dashboard",
+    "nav_agenda": "My schedule",
+    "nav_patients": "My patients",
+    "nav_ordonnances": "Prescriptions",
+    "nav_profile": "My profile",
+    "bonjour": "HELLO \ud83d\udc4b",
+    "rdvToday": "Appointments today",
+    "confirmed": "Confirmed",
+    "finished": "Completed",
+    "agendaToday": "Today's schedule",
+    "noRdv": "No appointments today.",
+    "btnAddMeds": "+ Add a medication",
+    "cancel": "Cancel",
+    "createOrdo": "Create prescription",
+    "diagnose": "Diagnosis (required)",
+    "finishBtn": "Finish appointment",
+    "prescription": "Prescription",
+    "finishedBadge": "Completed",
+    "pendingBadge": "Pending"
+  },
+  "navBar": {
+    "home": "Home",
+    "features": "Features",
+    "specialties": "Specialties",
+    "about": "About",
+    "contact": "Contact",
+    "bookAppt": "Book Appt",
+    "login": "Login",
+    "register": "Sign up"
+  },
+  "patientDashboard": {
+    "nav_dashboard": "Dashboard",
+    "nav_rdv": "My appointments",
+    "nav_dossier": "My record",
+    "nav_ordonnances": "Prescriptions",
+    "nav_profile": "My profile",
+    "espacePatient": "Patient Portal",
+    "bonjour": "Hello, {{name}} 👋"
+  }
+}

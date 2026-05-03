@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import DashboardLayout from "../../components/common/DashboardLayout";
 import StatCard from "../../components/common/Statcard";
 import StatusBadge from "../../components/common/StatusBadge";
@@ -10,15 +11,8 @@ import {
     patientService, rendezVousService, dossierService, medecinService,
     type Patient, type RendezVous, type DossierMedical, type Medecin} from "../../services/DomainServices";
 
-const NAV = [
-    { icon: "bi-speedometer2", label: "Tableau de bord", path: "/dashboard/patient" },
-    { icon: "bi-calendar-check", label: "Mes rendez-vous", path: "/dashboard/patient/rendez-vous" },
-    { icon: "bi-folder2-open", label: "Mon dossier", path: "/dashboard/patient/dossier" },
-    { icon: "bi-file-earmark-medical", label: "Ordonnances", path: "/dashboard/patient/ordonnances" },
-    { icon: "bi-person-gear", label: "Mon profil", path: "/dashboard/patient/profil" },
-];
-
 export default function PatientDashboard() {
+    const { t } = useTranslation();
     const { user } = useAuth();
     const [patient, setPatient] = useState<Patient | null>(null);
     const [rdvs, setRdvs] = useState<RendezVous[]>([]);
@@ -116,8 +110,16 @@ export default function PatientDashboard() {
         }, 2000);
     };
 
+    const NAV = [
+        { icon: "bi-speedometer2", label: t('patientDashboard.nav_dashboard'), path: "/dashboard/patient" },
+        { icon: "bi-calendar-check", label: t('patientDashboard.nav_rdv'), path: "/dashboard/patient/rendez-vous" },
+        { icon: "bi-folder2-open", label: t('patientDashboard.nav_dossier'), path: "/dashboard/patient/dossier" },
+        { icon: "bi-file-earmark-medical", label: t('patientDashboard.nav_ordonnances'), path: "/dashboard/patient/ordonnances" },
+        { icon: "bi-person-gear", label: t('patientDashboard.nav_profile'), path: "/dashboard/patient/profil" },
+    ];
+
     return (
-        <DashboardLayout navItems={NAV} title="Tableau de bord" >
+        <DashboardLayout navItems={NAV} title={t('patientDashboard.nav_dashboard')} >
             {loading ? (
                 <div className="d-flex justify-content-center align-items-center" style={{ height: 300 }}>
                     <div className="spinner-border" style={{ color: "#27A869" }}></div>
@@ -125,11 +127,11 @@ export default function PatientDashboard() {
             ) : (
                 <>
                     {/* Welcome Section */}
-                    <div style={{ background: "linear-gradient(135deg, #1A7A52, #27A869)", borderRadius: 24, padding: "32px", color: "#fff", marginBottom: 28, display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 10px 30px rgba(39, 168, 105, 0.2)" }}>
-                        <div>
-                            <div style={{ fontSize: 14, opacity: 0.9, marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>Espace Patient</div>
-                            <div style={{ fontSize: 28, fontWeight: 800, marginBottom: 4 }}>Bonjour, {patient?.prenom} 👋</div>
-                            <div style={{ opacity: 0.85, fontSize: 15, display: "flex", gap: 12, alignItems: "center" }}>
+                      <div style={{ background: "linear-gradient(135deg, #1A7A52, #27A869)", borderRadius: 24, padding: "32px", color: "#fff", marginBottom: 28, display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 10px 30px rgba(39, 168, 105, 0.2)" }}>
+                          <div>
+                              <div style={{ fontSize: 14, opacity: 0.9, marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>{t('patientDashboard.espacePatient')}</div>
+                              <div style={{ fontSize: 28, fontWeight: 800, marginBottom: 4 }}>{t('patientDashboard.bonjour', { name: patient?.prenom })}</div>
+                              <div style={{ opacity: 0.85, fontSize: 15, display: "flex", gap: 12, alignItems: "center" }}>
                                 <span><i className="bi bi-hospital me-2"></i>{patient?.hopital?.nom || "Centre principal"}</span>
                                 {patient?.groupeSanguin && <span>• Groupe {patient.groupeSanguin}</span>}
                             </div>

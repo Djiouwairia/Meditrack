@@ -2,13 +2,14 @@ import api from "./api";
 
 export interface PageResponse<T> { content: T[]; totalElements: number; totalPages: number; number: number; size: number; }
 export interface Hopital { id: string; nom: string; adresse?: string; email?: string; contact?: string; }
-export interface Medecin { id: string; nom: string; prenom: string; email: string; telephone: string; specialite: string; disponible: boolean; hopital?: { id: string; nom: string }; }
-export interface Patient { id: string; nom: string; prenom: string; email: string; telephone: string; adresse?: string; dateDeNaissance?: string; groupeSanguin?: string; nineaOuCin?: string; personneDeConfiance?: string; hopital?: { id: string; nom: string }; }
+export interface Medecin { id: string; nom: string; prenom: string; email: string; telephone: string; specialite: string; disponible: boolean; hopital?: { id: string; nom: string }; notificationsEmail?: boolean; notificationsSms?: boolean; }
+export interface Patient { id: string; nom: string; prenom: string; email: string; telephone: string; adresse?: string; dateDeNaissance?: string; groupeSanguin?: string; nineaOuCin?: string; personneDeConfiance?: string; hopital?: { id: string; nom: string }; notificationsEmail?: boolean; notificationsSms?: boolean; }
 export interface RendezVous { id: string; date: string; heure: string; motif: string; statut: "EN_ATTENTE" | "CONFIRME" | "ANNULE" | "TERMINE"; diagnostic?: string; patient: Patient; medecin: Medecin; }
 export interface DossierMedical { id: string; codeAccess?: string; allergies?: string; poids?: string; taille?: string; tension?: string; temperature?: string; antecedents?: string; terrain?: string; suiviPrenatal?: string; suiviInfantile?: string; preventionPaludisme?: string; analysesBiologiques?: string; imagerie?: string; rapportsSpecialistes?: string; patient: Patient; ordonnances?: Ordonnance[]; }
 export interface Ordonnance { id: string; date: string; dateCreation?: string; medicaments: Record<string, string>; medecin?: { id: string; nom: string; prenom: string }; rendezVous?: RendezVous; dossierMedical?: { id: string }; }
-export interface Secretaire { id: string; nom: string; prenom: string; email: string; telephone: string; hopital?: { id: string; nom: string }; }
+export interface Secretaire { id: string; nom: string; prenom: string; email: string; telephone: string; hopital?: { id: string; nom: string }; notificationsEmail?: boolean; notificationsSms?: boolean; }
 export interface Disponibilite { id: string; date: string; heureDebut: string; heureFin: string; estReserve: boolean; nombreMaxPatients: number; placesRestantes: number; medecin?: { id: string; nom: string; prenom: string }; }
+export interface Notification { id: string; titre: string; message: string; lue: boolean; dateCreation: string; }
 
 export const medecinService = {
     getMe: () => api.get<Medecin>("/medecins/me").then(r => r.data),
@@ -92,4 +93,14 @@ export const disponibiliteService = {
     getLibres: (medecinId: string) => api.get<Disponibilite[]>(`/disponibilites/medecin/${medecinId}/libres`).then(r => r.data),
     ajouter: (dto: { date: string; heureDebut: string; heureFin: string; nombreMaxPatients?: number }) => api.post<Disponibilite>("/disponibilites", dto).then(r => r.data),
     supprimer: (id: string) => api.delete(`/disponibilites/${id}`),
+};
+
+export const notificationService = {
+    getAll: (page = 0, size = 10) => api.get<PageResponse<Notification>>(`/notifications?page=${page}&size=${size}`).then(r => r.data),
+    getUnreadCount: () => api.get<{ count: number }>("/notifications/unread-count").then(r => r.data),
+    markAsRead: (id: string) => api.put<void>(`/notifications/${id}/read`),
+};
+
+export const userService = {
+    updatePreferences: (prefs: { email?: boolean; sms?: boolean }) => api.patch<void>("/utilisateurs/me/preferences", prefs),
 };

@@ -4,16 +4,9 @@ import StatCard from "../../components/common/Statcard";
 import StatusBadge from "../../components/common/StatusBadge";
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { rendezVousService, ordonnanceService, dossierService, type RendezVous, type Medecin, type Patient, type DossierMedical, type Ordonnance } from "../../services/DomainServices";
 import api from "../../services/api";
-
-const NAV = [
-    { icon: "bi-speedometer2",         label: "Tableau de bord",   path: "/dashboard/medecin" },
-    { icon: "bi-calendar-check",       label: "Mon agenda",         path: "/dashboard/medecin/agenda" },
-    { icon: "bi-people",               label: "Mes patients",       path: "/dashboard/medecin/patients" },
-    { icon: "bi-file-earmark-medical", label: "Ordonnances",        path: "/dashboard/medecin/ordonnances" },
-    { icon: "bi-person-gear",          label: "Mon profil",         path: "/dashboard/medecin/profil" },
-];
 
 const ACCENT       = "#1A7A52";
 const ACCENT_LIGHT = "#E8F5EE";
@@ -34,6 +27,7 @@ function fmtTime(t: string) {
 }
 
 export default function MedecinDashboard() {
+    const { t } = useTranslation();
     const { user } = useAuth();
     const [medecin, setMedecin]               = useState<Medecin | null>(null);
     const [rdvAujourdhui, setRdvAujourdhui]   = useState<RendezVous[]>([]);
@@ -138,8 +132,16 @@ export default function MedecinDashboard() {
         termines:  rdvAujourdhui.filter(r => r.statut === "TERMINE").length,
     };
 
+    const NAV = [
+        { icon: "bi-speedometer2",         label: t('medecinDashboard.nav_dashboard'),   path: "/dashboard/medecin" },
+        { icon: "bi-calendar-check",       label: t('medecinDashboard.nav_agenda'),         path: "/dashboard/medecin/agenda" },
+        { icon: "bi-people",               label: t('medecinDashboard.nav_patients'),       path: "/dashboard/medecin/patients" },
+        { icon: "bi-file-earmark-medical", label: t('medecinDashboard.nav_ordonnances'),        path: "/dashboard/medecin/ordonnances" },
+        { icon: "bi-person-gear",          label: t('medecinDashboard.nav_profile'),         path: "/dashboard/medecin/profil" },
+    ];
+
     return (
-        <DashboardLayout navItems={NAV} title="Tableau de bord" >
+        <DashboardLayout navItems={NAV} title={t('medecinDashboard.nav_dashboard')} >
             {loading ? (
                 <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: 300 }}>
                     <div className="spinner-border" style={{ color: ACCENT }}></div>
@@ -177,7 +179,7 @@ export default function MedecinDashboard() {
                                 <div style={{ width: 28, height: 28, borderRadius: 8, background: ACCENT_LIGHT, display: "flex", alignItems: "center", justifyContent: "center" }}>
                                     <i className="bi bi-calendar-check" style={{ color: ACCENT, fontSize: 13 }}></i>
                                 </div>
-                                <span style={{ fontSize: 14, fontWeight: 600, color: "#0F0F0F" }}>Agenda du jour</span>
+                                <span style={{ fontSize: 14, fontWeight: 600, color: "#0F0F0F" }}>{t('medecinDashboard.agendaToday')}</span>
                             </div>
                             <span style={{ fontSize: 12, color: "#BDBDBD", fontFamily: "'DM Mono', monospace" }}>
                                 {new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
@@ -187,7 +189,7 @@ export default function MedecinDashboard() {
                         {rdvAujourdhui.length === 0 ? (
                             <div style={{ textAlign: "center", padding: "48px 0", color: "#BDBDBD" }}>
                                 <i className="bi bi-calendar2-x" style={{ fontSize: 36 }}></i>
-                                <div style={{ marginTop: 10, fontSize: 14 }}>Aucun rendez-vous aujourd'hui</div>
+                                <div style={{ marginTop: 10, fontSize: 14 }}>{t('medecinDashboard.noRdv')}</div>
                             </div>
                         ) : (
                             <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
@@ -227,13 +229,13 @@ export default function MedecinDashboard() {
                                                 {rdv.statut === "CONFIRME" && (
                                                     <button onClick={() => openTerminerModal(rdv)} disabled={!!actionLoading}
                                                             style={{ background: "#E0E7FF", color: "#3730A3", border: "none", borderRadius: 7, padding: "5px 11px", fontSize: 11.5, fontWeight: 600, cursor: "pointer" }}>
-                                                            Terminer
+                                                            {t('medecinDashboard.finishBtn')}
                                                     </button>
                                                 )}
                                                 {rdv.statut === "TERMINE" && (
                                                     <button onClick={() => { setSelectedRdv(rdv); setOrdoModal(true); }}
                                                         style={{ background: ACCENT_LIGHT, color: ACCENT, border: `0.5px solid #A7D7BE`, borderRadius: 7, padding: "5px 11px", fontSize: 11.5, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
-                                                        <i className="bi bi-file-earmark-plus"></i> Ordonnance
+                                                        <i className="bi bi-file-earmark-plus"></i> {t('medecinDashboard.prescription')}
                                                     </button>
                                                 )}
                                             </div>
@@ -299,7 +301,7 @@ export default function MedecinDashboard() {
                         <div style={{ display: "flex", gap: 10, marginTop: 24, justifyContent: "flex-end" }}>
                             <button onClick={() => setTerminerModal(false)}
                                 style={{ background: "#F5F5F5", border: "none", borderRadius: 8, padding: "9px 18px", cursor: "pointer", fontSize: 13.5, color: "#6B6B6B", fontWeight: 600 }}>
-                                Annuler
+                                {t('medecinDashboard.cancel')}
                             </button>
                             <button onClick={handleTerminer} disabled={!terminerDiag.trim() || !!actionLoading}
                                 style={{ background: ACCENT, color: "#fff", border: "none", borderRadius: 8, padding: "9px 22px", cursor: "pointer", fontSize: 13.5, fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}>
@@ -354,17 +356,17 @@ export default function MedecinDashboard() {
 
                                 <button onClick={() => setMedicaments([...medicaments, { nom: "", posologie: "" }])}
                                     style={{ background: "none", border: `0.5px dashed ${ACCENT}`, color: ACCENT, borderRadius: 8, padding: "6px 14px", fontSize: 12.5, cursor: "pointer", marginBottom: 20 }}>
-                                    + Ajouter un médicament
+                                    {t('medecinDashboard.btnAddMeds')}
                                 </button>
 
                                 <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
                                     <button onClick={() => setOrdoModal(false)}
                                         style={{ background: "#F5F5F5", border: "none", borderRadius: 8, padding: "9px 18px", cursor: "pointer", fontSize: 13.5, color: "#6B6B6B" }}>
-                                        Annuler
+                                        {t('medecinDashboard.cancel')}
                                     </button>
                                     <button onClick={handleOrdonnance} disabled={ordoLoading || medicaments.every(m => !m.nom.trim())}
                                         style={{ background: ACCENT, color: "#fff", border: "none", borderRadius: 8, padding: "9px 22px", cursor: "pointer", fontSize: 13.5, fontWeight: 500 }}>
-                                        {ordoLoading ? <span className="spinner-border spinner-border-sm"></span> : "Créer l'ordonnance"}
+                                        {ordoLoading ? <span className="spinner-border spinner-border-sm"></span> : t('medecinDashboard.createOrdo')}
                                     </button>
                                 </div>
                             </>

@@ -39,5 +39,6 @@ public class Utilisateur {
     @JsonIgnoreProperties({"utilisateurs"})
     private Hopital hopital;
 
-
+    private boolean notificationsEmail = true;
+    private boolean notificationsSms = false;
 }
