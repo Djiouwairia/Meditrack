@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
 import DashboardLayout from "../../components/common/DashboardLayout";
-import { useAuth } from "../../context/AuthContext";
 import { secretaireService, patientService, type Secretaire, type Patient } from "../../services/DomainServices";
 
 const NAV = [
@@ -41,7 +40,7 @@ function Modal({ title, icon, onClose, children }: {
     title: string; icon?: string; onClose: () => void; children: React.ReactNode;
 }) {
     return (
-        <div className="modal fade show d-block" tabIndex={-1} style={{ background: "rgba(0,0,0,0.5)" }}>
+        <div className="modal fade show d-block" tabIndex={-1} style={{ background: "rgba(0,0,0,0.5)", zIndex: 1050 }}>
             <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable" style={{ width: "30rem", maxWidth: "90vw" }}>
                 <div className="modal-content rounded-4 border-0 shadow">
                     <div className="modal-header border-0 text-white" style={{ background: "#27A869" }}>
@@ -68,13 +67,14 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 export default function SecretairePatients() {
-    const { user } = useAuth();
+    // ✅ FIX : secretaire résolu via getMe() — fiable, pas de recherche par email
     const [secretaire, setSecretaire] = useState<Secretaire | null>(null);
     const [patients, setPatients]     = useState<Patient[]>([]);
     const [loading, setLoading]       = useState(true);
     const [page, setPage]             = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [search, setSearch]         = useState("");
+    const [initError, setInitError]   = useState("");
 
     // Modal créer
     const [createModal, setCreateModal]     = useState(false);
@@ -104,14 +104,6 @@ export default function SecretairePatients() {
 
     const removeToast = (id: number) => setToasts(prev => prev.filter(t => t.id !== id));
 
-    const resolveSecretaire = useCallback(async () => {
-        if (!user?.email) return null;
-        const s = await secretaireService.getAll(0, 100);
-        const sec = s.content.find(x => x.email === user.email) ?? null;
-        setSecretaire(sec);
-        return sec;
-    }, [user]);
-
     const loadPatients = useCallback(async (pg: number) => {
         setLoading(true);
         try {
@@ -119,19 +111,38 @@ export default function SecretairePatients() {
             setPatients(data.content);
             setTotalPages(data.totalPages);
             setPage(pg);
+        } catch (e) {
+            console.error("Erreur chargement patients:", e);
         } finally { setLoading(false); }
     }, []);
 
+    // ✅ FIX : getMe() au lieu de getAll(0,100).find(email)
     useEffect(() => {
-        resolveSecretaire();
-        loadPatients(0);
-    }, []);
+        (async () => {
+            try {
+                const sec = await secretaireService.getMe();
+                setSecretaire(sec);
+            } catch (e: any) {
+                console.error("Erreur résolution secrétaire:", e);
+                setInitError("Impossible de charger le profil secrétaire.");
+            }
+            await loadPatients(0);
+        })();
+    }, [loadPatients]);
 
+    // ── Créer patient ─────────────────────────────────────────────────────────
     const handleCreate = async () => {
-        if (!secretaire) return;
+        // ✅ FIX : si secretaire toujours null, alerte visible au lieu de silence
+        if (!secretaire) {
+            setCreateError("Profil secrétaire non chargé. Rechargez la page.");
+            return;
+        }
         setCreateLoading(true); setCreateError("");
         try {
-            await secretaireService.creerPatient(secretaire.id, { ...createForm, hopitalId: secretaire.hopital?.id });
+            await secretaireService.creerPatient(secretaire.id, {
+                ...createForm,
+                hopitalId: secretaire.hopital?.id,
+            });
             await loadPatients(0);
             setCreateModal(false);
             setCreateForm({ nom: "", prenom: "", email: "", telephone: "", motDePasse: "", adresse: "", dateDeNaissance: "", groupeSanguin: "" });
@@ -180,6 +191,12 @@ export default function SecretairePatients() {
             {/* ── Toasts ── */}
             <ToastContainer toasts={toasts} onRemove={removeToast} />
 
+            {initError && (
+                <div className="alert alert-warning mb-3" style={{ borderRadius: 12 }}>
+                    <i className="bi bi-exclamation-triangle me-2"></i>{initError}
+                </div>
+            )}
+
             {/* Toolbar */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, gap: 12, flexWrap: "wrap" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, background: "#fff", borderRadius: 12, padding: "10px 16px", flex: 1, maxWidth: 360, boxShadow: "0 2px 8px rgba(0,0,0,0.05)", border: "1px solid #F0F2F7" }}>
@@ -187,7 +204,7 @@ export default function SecretairePatients() {
                     <input placeholder="Rechercher un patient..." value={search} onChange={e => setSearch(e.target.value)}
                            style={{ border: "none", outline: "none", fontSize: 14, flex: 1 }} />
                 </div>
-                <button onClick={() => setCreateModal(true)}
+                <button onClick={() => { setCreateError(""); setCreateModal(true); }}
                         style={{ background: "#27A869", color: "#fff", border: "none", borderRadius: 12, padding: "11px 24px", fontWeight: 700, cursor: "pointer", fontSize: 14 }}>
                     <i className="bi bi-person-plus me-2"></i>Nouveau patient
                 </button>
@@ -201,52 +218,59 @@ export default function SecretairePatients() {
                     </div>
                 ) : (
                     <>
-                        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 600 }}>
+                        <div className="table-responsive"><table style={{ width: "100%", borderCollapse: "collapse", minWidth: 600 }}>
                             <thead>
-                                <tr style={{ borderBottom: "2px solid #F0F2F7" }}>
-                                    {["Patient", "Email", "Téléphone", "Groupe", "Adresse", "Actions"].map(h => (
-                                        <th key={h} style={{ textAlign: "left", padding: "10px 14px", fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: 0.5 }}>{h}</th>
-                                    ))}
-                                </tr>
+                            <tr style={{ borderBottom: "2px solid #F0F2F7" }}>
+                                {["Patient", "Email", "Téléphone", "Groupe", "Adresse", "Actions"].map(h => (
+                                    <th key={h} style={{ textAlign: "left", padding: "10px 14px", fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: 0.5 }}>{h}</th>
+                                ))}
+                            </tr>
                             </thead>
                             <tbody>
-                                {filtered.map(p => (
-                                    <tr key={p.id} style={{ borderBottom: "1px solid #F0F2F7", transition: "background 0.12s" }}
-                                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#FAFAFA"}
-                                        onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}>
-                                        <td style={{ padding: "13px 14px" }}>
-                                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                                                <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#DCFCE7", display: "flex", alignItems: "center", justifyContent: "center", color: "#27A869", fontWeight: 700, fontSize: 13, flexShrink: 0 }}>
-                                                    {p.prenom?.[0]}{p.nom?.[0]}
-                                                </div>
-                                                <div>
-                                                    <div style={{ fontWeight: 600, fontSize: 14 }}>{p.prenom} {p.nom}</div>
-                                                    {p.dateDeNaissance && <div style={{ fontSize: 11, color: "#9CA3AF" }}>{new Date(p.dateDeNaissance).toLocaleDateString("fr-FR")}</div>}
-                                                </div>
+                            {filtered.length === 0 ? (
+                                <tr>
+                                    <td colSpan={6} style={{ textAlign: "center", padding: "48px 0", color: "#BDBDBD" }}>
+                                        <i className="bi bi-people" style={{ fontSize: 40 }}></i>
+                                        <div style={{ marginTop: 12 }}>Aucun patient trouvé</div>
+                                    </td>
+                                </tr>
+                            ) : filtered.map(p => (
+                                <tr key={p.id} style={{ borderBottom: "1px solid #F0F2F7", transition: "background 0.12s" }}
+                                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#FAFAFA"}
+                                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}>
+                                    <td style={{ padding: "13px 14px" }}>
+                                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                            <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#DCFCE7", display: "flex", alignItems: "center", justifyContent: "center", color: "#27A869", fontWeight: 700, fontSize: 13, flexShrink: 0 }}>
+                                                {p.prenom?.[0]}{p.nom?.[0]}
                                             </div>
-                                        </td>
-                                        <td style={{ padding: "13px 14px", fontSize: 13, color: "#374151" }}>{p.email}</td>
-                                        <td style={{ padding: "13px 14px", fontSize: 13, color: "#374151" }}>{p.telephone}</td>
-                                        <td style={{ padding: "13px 14px" }}>
-                                            {p.groupeSanguin
-                                                ? <span style={{ background: "#FEE2E2", color: "#991B1B", fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20 }}>{p.groupeSanguin}</span>
-                                                : <span style={{ color: "#D1D5DB" }}>—</span>}
-                                        </td>
-                                        <td style={{ padding: "13px 14px", fontSize: 13, color: "#6B7280", maxWidth: 140, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.adresse || "—"}</td>
-                                        <td style={{ padding: "13px 14px" }}>
-                                            <div style={{ display: "flex", gap: 8 }}>
-                                                <button onClick={() => openEdit(p)} className="btn text-primary btn-sm" title="Modifier">
-                                                    <i className="bi bi-pencil"></i>
-                                                </button>
-                                                <button onClick={() => setDeleteId(p.id)} className="btn text-danger btn-sm" title="Supprimer">
-                                                    <i className="bi bi-trash"></i>
-                                                </button>
+                                            <div>
+                                                <div style={{ fontWeight: 600, fontSize: 14 }}>{p.prenom} {p.nom}</div>
+                                                {p.dateDeNaissance && <div style={{ fontSize: 11, color: "#9CA3AF" }}>{new Date(p.dateDeNaissance).toLocaleDateString("fr-FR")}</div>}
                                             </div>
-                                        </td>
-                                    </tr>
-                                ))}
+                                        </div>
+                                    </td>
+                                    <td style={{ padding: "13px 14px", fontSize: 13, color: "#374151" }}>{p.email}</td>
+                                    <td style={{ padding: "13px 14px", fontSize: 13, color: "#374151" }}>{p.telephone}</td>
+                                    <td style={{ padding: "13px 14px" }}>
+                                        {p.groupeSanguin
+                                            ? <span style={{ background: "#FEE2E2", color: "#991B1B", fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20 }}>{p.groupeSanguin}</span>
+                                            : <span style={{ color: "#D1D5DB" }}>—</span>}
+                                    </td>
+                                    <td style={{ padding: "13px 14px", fontSize: 13, color: "#6B7280", maxWidth: 140, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.adresse || "—"}</td>
+                                    <td style={{ padding: "13px 14px" }}>
+                                        <div style={{ display: "flex", gap: 8 }}>
+                                            <button onClick={() => openEdit(p)} className="btn text-primary btn-sm" title="Modifier">
+                                                <i className="bi bi-pencil"></i>
+                                            </button>
+                                            <button onClick={() => setDeleteId(p.id)} className="btn text-danger btn-sm" title="Supprimer">
+                                                <i className="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
                             </tbody>
-                        </table>
+                        </table></div>
 
                         {totalPages > 1 && (
                             <div style={{ display: "flex", justifyContent: "center", gap: 8, marginTop: 20 }}>
@@ -323,7 +347,7 @@ export default function SecretairePatients() {
 
             {/* ── Confirm Suppression ── */}
             {deleteId && (
-                <div className="modal fade show d-block" tabIndex={-1} style={{ background: "rgba(0,0,0,0.5)" }}>
+                <div className="modal fade show d-block" tabIndex={-1} style={{ background: "rgba(0,0,0,0.5)", zIndex: 1050 }}>
                     <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: 380 }}>
                         <div className="modal-content rounded-4 border-0 shadow text-center p-4">
                             <i className="bi bi-exclamation-triangle-fill text-danger" style={{ fontSize: 44 }}></i>

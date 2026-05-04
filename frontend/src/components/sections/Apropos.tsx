@@ -176,9 +176,19 @@ const style = `
 @media (max-width: 768px) {
   .apropos { padding: 60px 20px; }
   .apropos h2 { font-size: 2rem; }
-  .apropos-text { padding: 25px; }
+  .apropos-text { padding: 25px; border-radius: 20px; }
   .apropos-features { grid-template-columns: 1fr; gap: 20px; }
-  .apropos-card { padding: 20px; }
+  .apropos-card { padding: 20px; border-radius: 16px; }
+}
+
+@media (max-width: 480px) {
+  .apropos { padding: 50px 16px; }
+  .apropos h2 { font-size: 1.75rem; }
+  .apropos-subtitle { font-size: 0.95rem; }
+  .apropos-text { padding: 20px; }
+  .apropos-text p { font-size: 0.95rem; }
+  .apropos-card { padding: 16px; }
+  .apropos-header { margin-bottom: 40px; }
 }
 `;
 

@@ -135,11 +135,23 @@ const style = `
 @media (max-width: 768px) {
   .fonctionnalites { padding: 60px 20px; }
   .fonctionnalites h2 { font-size: 2rem; }
+  .fonctionnalites-grid { margin-top: 40px; gap: 20px; }
   .card { padding: 25px 20px; }
   .icon { width: 42px; height: 42px; }
   .title { font-size: 1.1rem; }
 }
+
+@media (max-width: 480px) {
+  .fonctionnalites { padding: 50px 16px; }
+  .fonctionnalites h2 { font-size: 1.75rem; }
+  .fonctionnalites p.sub { font-size: 0.95rem; }
+  .fonctionnalites-grid { grid-template-columns: 1fr; margin-top: 30px; }
+  .card { padding: 22px 18px; border-radius: 18px; }
+  .cta { width: 100%; justify-content: center; }
+}
 `;
+
+import { Link } from "react-router-dom";
 
 function Fonctionnalites() {
     return (
@@ -201,13 +213,13 @@ function Fonctionnalites() {
                         <div className="desc">
                             Évitez les déplacements inutiles et les longues attentes. Consultez en ligne.
                         </div>
-                        <a href="#connexion" className="cta btn-outline">
+                        <Link to="/login" className="cta btn-outline">
                             Se connecter
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <line x1="5" y1="12" x2="19" y2="12"/>
                                 <polyline points="12 5 19 12 12 19"/>
                             </svg>
-                        </a>
+                        </Link>
                     </div>
 
                     {/* Carte 4 - Suivi simplifié */}
@@ -219,13 +231,13 @@ function Fonctionnalites() {
                         <div className="desc">
                             Consultez vos rendez-vous et votre historique facilement. Recevez des rappels.
                         </div>
-                        <a href="#connexion" className="cta btn-light">
+                        <Link to="/login" className="cta btn-light">
                             Se connecter
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <line x1="5" y1="12" x2="19" y2="12"/>
                                 <polyline points="12 5 19 12 12 19"/>
                             </svg>
-                        </a>
+                        </Link>
                     </div>
 
                 </div>

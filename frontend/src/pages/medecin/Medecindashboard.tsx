@@ -3,7 +3,8 @@ import DashboardLayout from "../../components/common/DashboardLayout";
 import StatCard from "../../components/common/Statcard";
 import StatusBadge from "../../components/common/StatusBadge";
 import { useAuth } from '../../context/AuthContext';
-import { rendezVousService, ordonnanceService, type RendezVous, type Medecin } from "../../services/DomainServices";
+import { useNavigate } from 'react-router-dom';
+import { rendezVousService, ordonnanceService, dossierService, type RendezVous, type Medecin, type Patient, type DossierMedical, type Ordonnance } from "../../services/DomainServices";
 import api from "../../services/api";
 
 const NAV = [
@@ -48,6 +49,10 @@ export default function MedecinDashboard() {
     const [terminerModal, setTerminerModal] = useState(false);
     const [terminerRdv, setTerminerRdv]     = useState<RendezVous | null>(null);
     const [terminerDiag, setTerminerDiag]   = useState("");
+    const [terminerConstantes, setTerminerConstantes] = useState({ tension: "", temperature: "", poids: "" });
+    const [terminerDossierId, setTerminerDossierId] = useState<string | null>(null);
+
+    const navigate = useNavigate();
 
     const loadData = useCallback(async () => {
         if (!user?.email) return;
@@ -56,7 +61,7 @@ export default function MedecinDashboard() {
             const med: Medecin = await api.get("/medecins/me").then(r => r.data);
             setMedecin(med);
             const rdvs = await rendezVousService.getAujourdhui(med.id);
-            setRdvAujourdhui(rdvs);
+            setRdvAujourdhui(rdvs.filter(r => r.statut === "CONFIRME" || r.statut === "TERMINE"));
         } catch (e) {
             console.error("Erreur chargement dashboard médecin:", e);
         } finally {
@@ -66,26 +71,52 @@ export default function MedecinDashboard() {
 
     useEffect(() => { loadData(); }, [loadData]);
 
-    const handleConfirmer = async (rdvId: string) => {
-        setActionLoading(rdvId + "_confirmer");
-        try { await rendezVousService.confirmer(rdvId); await loadData(); }
-        finally { setActionLoading(null); }
-    };
-
     const handleAnnuler = async (rdvId: string) => {
         setActionLoading(rdvId + "_annuler");
         try { await rendezVousService.annuler(rdvId); await loadData(); }
         finally { setActionLoading(null); }
     };
 
+    const openDossier = (pat: Patient) => {
+        navigate("/dashboard/medecin/patients/" + pat.id);
+    };
+
+    const openTerminerModal = async (rdv: RendezVous) => {
+        setTerminerRdv(rdv);
+        setTerminerDiag("");
+        setTerminerConstantes({ tension: "", temperature: "", poids: "" });
+        setTerminerDossierId(null);
+        setTerminerModal(true);
+        try {
+            const dos = await dossierService.getByPatient(rdv.patient.id);
+            if (dos && dos.id) {
+                setTerminerDossierId(dos.id);
+                setTerminerConstantes({ tension: dos.tension || "", temperature: dos.temperature || "", poids: dos.poids || "" });
+            }
+        } catch(e) { console.error(e); }
+    };
+
     const handleTerminer = async () => {
         if (!terminerRdv) return;
         setActionLoading(terminerRdv.id + "_terminer");
         try {
+            let did = terminerDossierId;
+            if (!did) {
+                const newDos = await dossierService.create(terminerRdv.patient.id);
+                did = newDos.id;
+            }
+            if (did && (terminerConstantes.tension || terminerConstantes.temperature || terminerConstantes.poids)) {
+                await dossierService.update(did, { 
+                    tension: terminerConstantes.tension, 
+                    temperature: terminerConstantes.temperature, 
+                    poids: terminerConstantes.poids 
+                });
+            }
             await rendezVousService.terminer(terminerRdv.id, terminerDiag);
             setTerminerModal(false);
-            setTerminerDiag("");
             await loadData();
+        } catch(e) {
+            console.error(e);
         } finally { setActionLoading(null); }
     };
 
@@ -104,7 +135,6 @@ export default function MedecinDashboard() {
     const stats = {
         total:     rdvAujourdhui.length,
         confirmes: rdvAujourdhui.filter(r => r.statut === "CONFIRME").length,
-        enAttente: rdvAujourdhui.filter(r => r.statut === "EN_ATTENTE").length,
         termines:  rdvAujourdhui.filter(r => r.statut === "TERMINE").length,
     };
 
@@ -137,7 +167,6 @@ export default function MedecinDashboard() {
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px,1fr))", gap: 12, marginBottom: 20 }}>
                         <StatCard icon="bi-calendar-day"    label="RDV aujourd'hui" value={stats.total}     color={ACCENT}    bg={ACCENT_LIGHT} />
                         <StatCard icon="bi-check-circle"    label="Confirmés"       value={stats.confirmes} color="#0EA5E9"   bg="#E0F2FE" />
-                        <StatCard icon="bi-hourglass-split" label="En attente"      value={stats.enAttente} color="#F59E0B"   bg="#FEF3C7" />
                         <StatCard icon="bi-check2-all"      label="Terminés"        value={stats.termines}  color="#8B5CF6"   bg="#EDE9FE" />
                     </div>
 
@@ -183,9 +212,10 @@ export default function MedecinDashboard() {
                                             </div>
 
                                             {/* Infos */}
-                                            <div style={{ flex: 1 }}>
-                                                <div style={{ fontWeight: 500, fontSize: 13.5, color: "#0F0F0F" }}>
+                                            <div style={{ flex: 1, cursor: "pointer" }} onClick={() => openDossier(rdv.patient)}>
+                                                <div style={{ fontWeight: 500, fontSize: 13.5, color: "#0F0F0F", display: "flex", alignItems: "center", gap: 6 }}>
                                                     {rdv.patient?.prenom} {rdv.patient?.nom}
+                                                    <i className="bi bi-folder2-open" style={{ color: ACCENT, fontSize: 13 }} title="Voir le dossier médical"></i>
                                                 </div>
                                                 <div style={{ fontSize: 12, color: "#9E9E9E", marginTop: 2 }}>{rdv.motif}</div>
                                             </div>
@@ -194,27 +224,11 @@ export default function MedecinDashboard() {
 
                                             {/* Actions */}
                                             <div style={{ display: "flex", gap: 6 }}>
-                                                {rdv.statut === "EN_ATTENTE" && (
-                                                    <button onClick={() => handleConfirmer(rdv.id)} disabled={!!actionLoading}
-                                                        style={{ background: "#D1FAE5", color: "#065F46", border: "none", borderRadius: 7, padding: "5px 11px", fontSize: 11.5, fontWeight: 600, cursor: "pointer" }}>
-                                                        {actionLoading === rdv.id + "_confirmer"
-                                                            ? <span className="spinner-border spinner-border-sm"></span>
-                                                            : "✓ Confirmer"}
-                                                    </button>
-                                                )}
-                                                {(rdv.statut === "EN_ATTENTE" || rdv.statut === "CONFIRME") && (
-                                                    <>
-                                                        <button onClick={() => { setTerminerRdv(rdv); setTerminerModal(true); }} disabled={!!actionLoading}
+                                                {rdv.statut === "CONFIRME" && (
+                                                    <button onClick={() => openTerminerModal(rdv)} disabled={!!actionLoading}
                                                             style={{ background: "#E0E7FF", color: "#3730A3", border: "none", borderRadius: 7, padding: "5px 11px", fontSize: 11.5, fontWeight: 600, cursor: "pointer" }}>
                                                             Terminer
-                                                        </button>
-                                                        <button onClick={() => handleAnnuler(rdv.id)} disabled={!!actionLoading}
-                                                            style={{ background: "#FEE2E2", color: "#991B1B", border: "none", borderRadius: 7, padding: "5px 11px", fontSize: 11.5, fontWeight: 600, cursor: "pointer" }}>
-                                                            {actionLoading === rdv.id + "_annuler"
-                                                                ? <span className="spinner-border spinner-border-sm"></span>
-                                                                : "Annuler"}
-                                                        </button>
-                                                    </>
+                                                    </button>
                                                 )}
                                                 {rdv.statut === "TERMINE" && (
                                                     <button onClick={() => { setSelectedRdv(rdv); setOrdoModal(true); }}
@@ -231,34 +245,65 @@ export default function MedecinDashboard() {
                 </>
             )}
 
-            {/* ── Modal Terminer ── */}
+            {/* ── Modal Terminer / Consultation ── */}
             {terminerModal && terminerRdv && (
-                <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.35)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <div style={{ background: "#fff", borderRadius: 16, padding: 28, width: 460, maxWidth: "90vw", border: "0.5px solid #EBEBEB" }}>
+                <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <div style={{ background: "#fff", borderRadius: 16, padding: 28, width: 540, maxWidth: "90vw", border: "0.5px solid #EBEBEB", maxHeight: "90vh", overflowY: "auto" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-                            <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600, color: "#0F0F0F" }}>Terminer le rendez-vous</h3>
+                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                <div style={{ width: 36, height: 36, borderRadius: "50%", background: ACCENT_LIGHT, color: ACCENT, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>
+                                    <i className="bi bi-clipboard2-pulse"></i>
+                                </div>
+                                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#0F0F0F" }}>Clôturer la consultation</h3>
+                            </div>
                             <button onClick={() => setTerminerModal(false)}
                                 style={{ background: "#F5F5F5", border: "none", width: 28, height: 28, borderRadius: 8, cursor: "pointer", color: "#6B6B6B", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
                         </div>
-                        <p style={{ color: "#9E9E9E", fontSize: 13, marginBottom: 16 }}>
-                            Patient : {terminerRdv.patient?.prenom} {terminerRdv.patient?.nom}
-                        </p>
-                        <label style={{ fontSize: 12.5, fontWeight: 500, color: "#6B6B6B", display: "block", marginBottom: 6 }}>Diagnostic</label>
+
+                        <div style={{ background: "#FAFAFA", borderRadius: 10, padding: 12, marginBottom: 20, border: "0.5px solid #EBEBEB" }}>
+                            <div style={{ fontSize: 12, color: "#9E9E9E", marginBottom: 4 }}>Patient</div>
+                            <div style={{ fontWeight: 600, fontSize: 14, color: "#0F0F0F" }}>{terminerRdv.patient?.prenom} {terminerRdv.patient?.nom}</div>
+                            <div style={{ fontSize: 12.5, color: "#6B6B6B", marginTop: 4 }}>Motif : {terminerRdv.motif}</div>
+                        </div>
+
+                        <div style={{ fontSize: 13, fontWeight: 700, color: ACCENT, marginBottom: 10, borderBottom: "1px solid #EBEBEB", paddingBottom: 6 }}>
+                            <i className="bi bi-activity me-2"></i>Constantes du jour
+                        </div>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 20 }}>
+                            <div>
+                                <label style={{ fontSize: 12, fontWeight: 600, color: "#6B6B6B", display: "block", marginBottom: 4 }}>Tension</label>
+                                <input value={terminerConstantes.tension} onChange={e => setTerminerConstantes(c => ({...c, tension: e.target.value}))} placeholder="Ex: 12/8" style={inp} />
+                            </div>
+                            <div>
+                                <label style={{ fontSize: 12, fontWeight: 600, color: "#6B6B6B", display: "block", marginBottom: 4 }}>Temp. (°C)</label>
+                                <input value={terminerConstantes.temperature} onChange={e => setTerminerConstantes(c => ({...c, temperature: e.target.value}))} placeholder="Ex: 38.5" style={inp} />
+                            </div>
+                            <div>
+                                <label style={{ fontSize: 12, fontWeight: 600, color: "#6B6B6B", display: "block", marginBottom: 4 }}>Poids (kg)</label>
+                                <input value={terminerConstantes.poids} onChange={e => setTerminerConstantes(c => ({...c, poids: e.target.value}))} placeholder="Ex: 70" style={inp} />
+                            </div>
+                        </div>
+
+                        <div style={{ fontSize: 13, fontWeight: 700, color: ACCENT, marginBottom: 10, borderBottom: "1px solid #EBEBEB", paddingBottom: 6 }}>
+                            <i className="bi bi-file-medical me-2"></i>Conclusion
+                        </div>
+                        <label style={{ fontSize: 12.5, fontWeight: 600, color: "#6B6B6B", display: "block", marginBottom: 6 }}>Diagnostic</label>
                         <textarea
                             value={terminerDiag}
                             onChange={e => setTerminerDiag(e.target.value)}
-                            rows={4}
-                            placeholder="Entrez le diagnostic..."
+                            rows={3}
+                            placeholder="Saisissez le diagnostic final..."
                             style={{ ...inp, resize: "vertical" }}
                         />
-                        <div style={{ display: "flex", gap: 10, marginTop: 18, justifyContent: "flex-end" }}>
+
+                        <div style={{ display: "flex", gap: 10, marginTop: 24, justifyContent: "flex-end" }}>
                             <button onClick={() => setTerminerModal(false)}
-                                style={{ background: "#F5F5F5", border: "none", borderRadius: 8, padding: "9px 18px", cursor: "pointer", fontSize: 13.5, color: "#6B6B6B" }}>
+                                style={{ background: "#F5F5F5", border: "none", borderRadius: 8, padding: "9px 18px", cursor: "pointer", fontSize: 13.5, color: "#6B6B6B", fontWeight: 600 }}>
                                 Annuler
                             </button>
                             <button onClick={handleTerminer} disabled={!terminerDiag.trim() || !!actionLoading}
-                                style={{ background: ACCENT, color: "#fff", border: "none", borderRadius: 8, padding: "9px 22px", cursor: "pointer", fontSize: 13.5, fontWeight: 500 }}>
-                                {actionLoading ? <span className="spinner-border spinner-border-sm"></span> : "Confirmer"}
+                                style={{ background: ACCENT, color: "#fff", border: "none", borderRadius: 8, padding: "9px 22px", cursor: "pointer", fontSize: 13.5, fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}>
+                                {actionLoading ? <span className="spinner-border spinner-border-sm"></span> : <><i className="bi bi-check2-circle"></i> Enregistrer et Terminer</>}
                             </button>
                         </div>
                     </div>
@@ -327,6 +372,8 @@ export default function MedecinDashboard() {
                     </div>
                 </div>
             )}
+
+
         </DashboardLayout>
     );
 }

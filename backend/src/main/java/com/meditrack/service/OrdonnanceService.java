@@ -1,7 +1,6 @@
 package com.meditrack.service;
 
 import com.meditrack.dto.OrdonnanceRequestDTO;
-import com.meditrack.exceptions.DossierMedicalNotFoundException;
 import com.meditrack.exceptions.OrdonnanceNotFoundException;
 import com.meditrack.exceptions.RendezVousNotFoundException;
 import com.meditrack.model.DossierMedical;
@@ -32,9 +31,16 @@ public class OrdonnanceService {
                 .orElseThrow(() -> new RendezVousNotFoundException(
                         "Rendez-vous introuvable : " + dto.getRendezVousId()));
 
+        // On récupère ou on crée le dossier médical s'il n'existe pas encore
         DossierMedical dossier = dossierMedicalRepository.findByPatientId(rdv.getPatient().getId())
-                .orElseThrow(() -> new DossierMedicalNotFoundException(
-                        "Dossier médical introuvable pour le patient du rendez-vous"));
+                .orElseGet(() -> {
+                    DossierMedical newDossier = new DossierMedical();
+                    newDossier.setId(generateId());
+                    newDossier.setNumero("DM-" + System.currentTimeMillis());
+                    newDossier.setDateDeCreation(java.time.LocalDate.now());
+                    newDossier.setPatient(rdv.getPatient());
+                    return dossierMedicalRepository.save(newDossier);
+                });
 
         Ordonnance ordonnance = new Ordonnance();
         ordonnance.setId(generateId());
@@ -54,6 +60,11 @@ public class OrdonnanceService {
     public Page<Ordonnance> getOrdonnancesByRendezVous(String rendezVousId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return ordonnanceRepository.findByRendezVousId(rendezVousId, pageable);
+    }
+
+    public Page<Ordonnance> getOrdonnancesByMedecin(String medecinId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("date").descending());
+        return ordonnanceRepository.findByRendezVousMedecinId(medecinId, pageable);
     }
 
     public Ordonnance getOrdonnanceById(String id) {

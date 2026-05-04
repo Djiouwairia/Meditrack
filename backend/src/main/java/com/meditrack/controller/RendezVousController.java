@@ -29,6 +29,17 @@ public class RendezVousController {
         return new ResponseEntity<>(rendezVousService.prendreRendezVous(dto), HttpStatus.CREATED);
     }
 
+    /**
+     * Tous les rendez-vous (secrétaire/admin) — filtrés optionnellement par statut
+     */
+    @GetMapping
+    public ResponseEntity<Page<RendezVous>> getAllRendezVous(
+            @RequestParam(required = false) String statut,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "50") int size) {
+        return ResponseEntity.ok(rendezVousService.getAllRendezVous(statut, page, size));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<RendezVous> getRendezVousById(@PathVariable String id) {
         return ResponseEntity.ok(rendezVousService.getRendezVousById(id));

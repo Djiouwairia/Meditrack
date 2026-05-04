@@ -15,4 +15,5 @@ public class DisponibiliteRequestDTO {
     private LocalDate date;
     private LocalTime heureDebut;
     private LocalTime heureFin;
+    private int       nombreMaxPatients = 1;
 }

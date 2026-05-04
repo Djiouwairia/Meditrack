@@ -31,6 +31,7 @@ public class RendezVousService {
     private final PatientRepository patientRepository;
     private final MedecinRepository medecinRepository;
     private final DossierMedicalRepository dossierMedicalRepository;
+    private final com.meditrack.repository.DisponibiliteRepository disponibiliteRepository;
 
     /**
      * Prise de rendez-vous par un patient ou une secrétaire
@@ -43,8 +44,22 @@ public class RendezVousService {
         Medecin medecin = medecinRepository.findById(dto.getMedecinId())
                 .orElseThrow(() -> new MedecinNotFoundException("Médecin introuvable : " + dto.getMedecinId()));
 
-        // Vérifier conflit de créneau
-        if (rendezVousRepository.existsByMedecinIdAndDateAndHeure(
+        com.meditrack.model.Disponibilite dispoToSave = null;
+        if (dto.getDisponibiliteId() != null && !dto.getDisponibiliteId().isBlank()) {
+            com.meditrack.model.Disponibilite dispo = disponibiliteRepository.findById(dto.getDisponibiliteId())
+                    .orElseThrow(() -> new IllegalArgumentException("Créneau introuvable"));
+            if (dispo.isEstReserve() || dispo.getPlacesRestantes() <= 0) {
+                throw new ConflitRendezVousException("Ce créneau est complet.");
+            }
+            dispo.setPlacesRestantes(dispo.getPlacesRestantes() - 1);
+            if (dispo.getPlacesRestantes() <= 0) {
+                dispo.setEstReserve(true);
+            }
+            dispoToSave = disponibiliteRepository.save(dispo);
+        }
+
+        // Vérifier conflit de créneau (uniquement si aucune disponibilité pré-définie n'est utilisée)
+        if (dispoToSave == null && rendezVousRepository.existsByMedecinIdAndDateAndHeure(
                 dto.getMedecinId(), dto.getDate(), dto.getHeure())) {
             throw new ConflitRendezVousException(
                     "Le médecin a déjà un rendez-vous le " + dto.getDate() + " à " + dto.getHeure());
@@ -58,6 +73,9 @@ public class RendezVousService {
         rdv.setStatut(StatutRendezVous.EN_ATTENTE);
         rdv.setPatient(patient);
         rdv.setMedecin(medecin);
+        if (dispoToSave != null) {
+            rdv.setDisponibilite(dispoToSave);
+        }
 
         // Lier au dossier médical du patient
         dossierMedicalRepository.findByPatientId(patient.getId())
@@ -74,6 +92,18 @@ public class RendezVousService {
     public Page<RendezVous> getRendezVousByPatient(String patientId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("date").descending());
         return rendezVousRepository.findByPatientId(patientId, pageable);
+    }
+
+    /**
+     * Tous les rendez-vous (pour secrétaire/admin), filtrés optionnellement par statut
+     */
+    public Page<RendezVous> getAllRendezVous(String statut, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("date").descending());
+        if (statut != null && !statut.isBlank()) {
+            StatutRendezVous s = StatutRendezVous.valueOf(statut);
+            return rendezVousRepository.findByStatut(s, pageable);
+        }
+        return rendezVousRepository.findAll(pageable);
     }
 
     /**
@@ -108,7 +138,15 @@ public class RendezVousService {
     @Transactional
     public RendezVous annulerRendezVous(String id) {
         RendezVous rdv = getRendezVousById(id);
-        rdv.setStatut(StatutRendezVous.ANNULE);
+        if (rdv.getStatut() != StatutRendezVous.ANNULE) {
+            rdv.setStatut(StatutRendezVous.ANNULE);
+            if (rdv.getDisponibilite() != null) {
+                com.meditrack.model.Disponibilite dispo = rdv.getDisponibilite();
+                dispo.setPlacesRestantes(dispo.getPlacesRestantes() + 1);
+                dispo.setEstReserve(false);
+                disponibiliteRepository.save(dispo);
+            }
+        }
         return rendezVousRepository.save(rdv);
     }
 
@@ -120,9 +158,18 @@ public class RendezVousService {
         return rendezVousRepository.save(rdv);
     }
 
+    @Transactional
     public void deleteRendezVous(String id) {
-        if (!rendezVousRepository.existsById(id))
-            throw new RendezVousNotFoundException("Rendez-vous introuvable : " + id);
+        RendezVous rdv = rendezVousRepository.findById(id).orElse(null);
+        if (rdv == null) return;
+        
+        if (rdv.getStatut() != StatutRendezVous.ANNULE && rdv.getStatut() != StatutRendezVous.TERMINE && rdv.getDisponibilite() != null) {
+            com.meditrack.model.Disponibilite dispo = rdv.getDisponibilite();
+            dispo.setPlacesRestantes(dispo.getPlacesRestantes() + 1);
+            dispo.setEstReserve(false);
+            disponibiliteRepository.save(dispo);
+        }
+        
         rendezVousRepository.deleteById(id);
     }
 

@@ -42,11 +42,14 @@ public class DisponibiliteService {
         if (disponibiliteRepository.existsConflict(dto.getMedecinId(), dto.getDate(), dto.getHeureDebut(), dto.getHeureFin()))
             throw new IllegalArgumentException("Ce créneau chevauche une disponibilité existante.");
 
+        int max = dto.getNombreMaxPatients() > 0 ? dto.getNombreMaxPatients() : 1;
         Disponibilite d = Disponibilite.builder()
                 .id(generateId())
                 .date(dto.getDate())
                 .heureDebut(dto.getHeureDebut())
                 .heureFin(dto.getHeureFin())
+                .nombreMaxPatients(max)
+                .placesRestantes(max)
                 .estReserve(false)
                 .medecin(medecin)
                 .build();
@@ -54,9 +57,9 @@ public class DisponibiliteService {
         return disponibiliteRepository.save(d);
     }
 
-    /** Toutes les disponibilités d'un médecin (à partir d'aujourd'hui) */
+    /** Toutes les disponibilités d'un médecin (passées + futures) */
     public List<Disponibilite> getDisponibilitesMedecin(String medecinId) {
-        return disponibiliteRepository.findByMedecinIdFromDate(medecinId, LocalDate.now());
+        return disponibiliteRepository.findByMedecinIdFromDate(medecinId, LocalDate.now().minusDays(30));
     }
 
     /** Créneaux libres uniquement — utilisé par la secrétaire pour planifier */
@@ -65,7 +68,6 @@ public class DisponibiliteService {
     }
 
     /**
-     * Marque un créneau comme réservé.
      * Appelé automatiquement lors de la création d'un RendezVous.
      */
     @Transactional

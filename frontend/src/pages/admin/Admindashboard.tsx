@@ -29,13 +29,22 @@ ChartJS.register(
     LineElement, PointElement, Tooltip, Legend, Filler, Title
 );
 
-const NAV = [
-    { icon: "bi-speedometer2", label: "Tableau de bord", path: "/dashboard/admin" },
-    { icon: "bi-hospital",     label: "Hôpitaux",        path: "/dashboard/admin/hopitaux" },
-    { icon: "bi-people",       label: "Utilisateurs",    path: "/dashboard/admin/utilisateurs" },
-    { icon: "bi-person-badge", label: "Médecins",        path: "/dashboard/admin/medecins" },
-    { icon: "bi-person-gear",  label: "Mon profil",      path: "/dashboard/admin/profil" },
-];
+const getNavItems = (role?: string) => {
+    if (role === "ADMIN_HOPITAL") {
+        return [
+            { icon: "bi-speedometer2", label: "Tableau de bord", path: "/dashboard/admin" },
+            { icon: "bi-people",       label: "Utilisateurs",    path: "/dashboard/admin/utilisateurs" },
+            { icon: "bi-person-badge", label: "Médecins",        path: "/dashboard/admin/medecins" },
+            { icon: "bi-person-gear",  label: "Mon profil",      path: "/dashboard/admin/profil" },
+        ];
+    }
+    return [
+        { icon: "bi-speedometer2", label: "Tableau de bord", path: "/dashboard/admin" },
+        { icon: "bi-hospital",     label: "Hôpitaux",        path: "/dashboard/admin/hopitaux" },
+        { icon: "bi-people",       label: "Utilisateurs",    path: "/dashboard/admin/utilisateurs" },
+        { icon: "bi-person-gear",  label: "Mon profil",      path: "/dashboard/admin/profil" },
+    ];
+};
 
 // ── Carte graphique ──
 function ChartCard({ title, icon, children }: { title: string; icon: string; children: React.ReactNode }) {
@@ -180,7 +189,7 @@ export default function AdminDashboard() {
     const greeting = now.getHours() < 12 ? "Bonjour" : now.getHours() < 18 ? "Bon après-midi" : "Bonsoir";
 
     return (
-        <DashboardLayout navItems={NAV} title="Administration">
+        <DashboardLayout navItems={getNavItems(user?.role)} title="Administration">
 
             {/* ── Banner ── */}
             <div style={{

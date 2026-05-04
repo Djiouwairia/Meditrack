@@ -3,8 +3,8 @@ import DashboardLayout from "../../components/common/DashboardLayout.tsx";
 import StatCard from "../../components/common/Statcard.tsx";
 import { useAuth } from "../../context/AuthContext.tsx";
 import {
-    secretaireService, patientService, medecinService,
-    type Secretaire, type Patient, type Medecin
+    secretaireService, patientService, medecinService, disponibiliteService,
+    type Secretaire, type Patient, type Medecin, type Disponibilite
 } from "../../services/DomainServices.ts";
 
 const NAV = [
@@ -87,9 +87,34 @@ export default function SecretaireDashboard() {
 
     // Modal RDV
     const [rdvModal, setRdvModal]     = useState(false);
-    const [rdvForm, setRdvForm]       = useState({ patientId: "", medecinId: "", date: "", heure: "", motif: "" });
+    const [rdvForm, setRdvForm]       = useState({ patientId: "", medecinId: "", disponibiliteId: "", date: "", heure: "", motif: "" });
+    const [medecinDispos, setMedecinDispos] = useState<Disponibilite[]>([]);
     const [rdvLoading, setRdvLoading] = useState(false);
     const [rdvError, setRdvError]     = useState("");
+
+    useEffect(() => {
+        if (rdvForm.medecinId) {
+            disponibiliteService.getLibres(rdvForm.medecinId)
+                .then(dispos => {
+                    const sorted = dispos.sort((a,b) => new Date(a.date+"T"+a.heureDebut).getTime() - new Date(b.date+"T"+b.heureDebut).getTime());
+                    setMedecinDispos(sorted);
+                })
+                .catch(() => setMedecinDispos([]));
+        } else {
+            setMedecinDispos([]);
+            setRdvForm(f => ({ ...f, disponibiliteId: "", date: "", heure: "" }));
+        }
+    }, [rdvForm.medecinId]);
+
+    const handleDispoChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const id = e.target.value;
+        const dispo = medecinDispos.find(d => d.id === id);
+        if (dispo) {
+            setRdvForm(f => ({ ...f, disponibiliteId: id, date: dispo.date, heure: dispo.heureDebut }));
+        } else {
+            setRdvForm(f => ({ ...f, disponibiliteId: "", date: "", heure: "" }));
+        }
+    };
 
     // Pagination patients
     const [patPage, setPatPage]   = useState(0);
@@ -110,12 +135,11 @@ export default function SecretaireDashboard() {
         if (!user?.email) return;
         setLoading(true);
         try {
-            const [secPage, medData] = await Promise.all([
-                secretaireService.getAll(0, 100),
+            const [sec, medData] = await Promise.all([
+                secretaireService.getMe(),
                 medecinService.getAll(0, 100),
             ]);
-            const sec = secPage.content.find(s => s.email === user.email);
-            setSecretaire(sec || null);
+            setSecretaire(sec);
             setMedecins(medData.content);
             await loadPatients(0);
         } finally { setLoading(false); }
@@ -155,7 +179,7 @@ export default function SecretaireDashboard() {
         try {
             await secretaireService.prendreRendezVous(secretaire.id, rdvForm);
             setRdvModal(false);
-            setRdvForm({ patientId: "", medecinId: "", date: "", heure: "", motif: "" });
+            setRdvForm({ patientId: "", medecinId: "", disponibiliteId: "", date: "", heure: "", motif: "" });
             showToast("Rendez-vous créé avec succès !");
         } catch (e: any) {
             setRdvError(e?.response?.data?.message || "Erreur lors de la prise de RDV");
@@ -220,7 +244,7 @@ export default function SecretaireDashboard() {
                         </div>
 
                         <div style={{ overflowX: "auto" }}>
-                            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                            <div className="table-responsive"><table style={{ width: "100%", borderCollapse: "collapse" }}>
                                 <thead>
                                     <tr style={{ borderBottom: "2px solid #F0F2F7" }}>
                                         {["Patient", "Email", "Téléphone", "Groupe sanguin", "Actions"].map(h => (
@@ -264,7 +288,7 @@ export default function SecretaireDashboard() {
                                         </tr>
                                     ))}
                                 </tbody>
-                            </table>
+                            </table></div>
                         </div>
 
                         {patTotal > 1 && (
@@ -324,10 +348,16 @@ export default function SecretaireDashboard() {
                             {medecins.filter(m => m.disponible).map(m => <option key={m.id} value={m.id}>Dr. {m.prenom} {m.nom} — {m.specialite}</option>)}
                         </select>
                     </Field>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
-                        <Field label="Date"><input type="date" value={rdvForm.date} onChange={e => setRdvForm(f => ({ ...f, date: e.target.value }))} min={new Date().toISOString().slice(0, 10)} style={inputStyle} /></Field>
-                        <Field label="Heure"><input type="time" value={rdvForm.heure} onChange={e => setRdvForm(f => ({ ...f, heure: e.target.value }))} style={inputStyle} /></Field>
-                    </div>
+                    <Field label="Créneau disponible">
+                        <select value={rdvForm.disponibiliteId} onChange={handleDispoChange} style={inputStyle} disabled={!rdvForm.medecinId}>
+                            <option value="">Sélectionner un créneau</option>
+                            {medecinDispos.map(d => (
+                                <option key={d.id} value={d.id}>
+                                    {new Date(d.date).toLocaleDateString("fr-FR", { weekday: 'short', day: 'numeric', month: 'short'})} à {d.heureDebut.slice(0,5)} ({d.placesRestantes} places)
+                                </option>
+                            ))}
+                        </select>
+                    </Field>
                     <Field label="Motif">
                         <textarea value={rdvForm.motif} onChange={e => setRdvForm(f => ({ ...f, motif: e.target.value }))} rows={3} placeholder="Motif de la consultation..." style={{ ...inputStyle, resize: "vertical" }} />
                     </Field>

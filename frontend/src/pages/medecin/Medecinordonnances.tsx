@@ -31,7 +31,7 @@ function fmtDate(d?: string) {
 export default function MedecinOrdonnances() {
     // @ts-ignore
     const [medecin, setMedecin]             = useState<Medecin | null>(null);
-    const [rdvsTermines, setRdvsTermines]   = useState<RendezVous[]>([]);
+    const [rdvsDisponibles, setRdvsDisponibles] = useState<RendezVous[]>([]);
     const [ordonnances, setOrdonnances]     = useState<Ordonnance[]>([]);
     const [loading, setLoading]             = useState(true);
     const [selected, setSelected]           = useState<Ordonnance | null>(null);
@@ -51,32 +51,24 @@ export default function MedecinOrdonnances() {
     const load = useCallback(async () => {
         setLoading(true);
         try {
-            // 1. Médecin connecté via /medecins/me
             const med = await medecinService.getMe();
             setMedecin(med);
 
-            // 2. Tous ses RDV terminés (pour filtrer + créer)
             const rdvPage = await rendezVousService.getByMedecin(med.id, 0, 200);
-            const termines = rdvPage.content.filter(r => r.statut === "TERMINE");
-            setRdvsTermines(termines);
+            const validRdvs = rdvPage.content.filter(r => r.statut === "CONFIRME" || r.statut === "TERMINE");
+            setRdvsDisponibles(validRdvs);
 
-            // 3. Ordonnances : filtrées par RDV ou toutes (5 derniers RDV terminés)
-            const cible = filterRdv
-                ? [termines.find(r => r.id === filterRdv)].filter(Boolean) as RendezVous[]
-                : termines.slice(0, 20); // on limite à 20 RDV pour les perfs
+            let ordoList: Ordonnance[] = [];
+            if (filterRdv) {
+                const p = await ordonnanceService.getByRendezVous(filterRdv, 0, 50);
+                ordoList = p.content;
+            } else {
+                const p = await ordonnanceService.getByMedecin(med.id, 0, 50);
+                ordoList = p.content;
+            }
 
-            const all: Ordonnance[] = [];
-            await Promise.all(
-                cible.map(rdv =>
-                    ordonnanceService.getByRendezVous(rdv.id, 0, 50)
-                        .then(p => all.push(...p.content))
-                        .catch(() => {})
-                )
-            );
-
-            // Trier par date décroissante
-            all.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
-            setOrdonnances(all);
+            ordoList.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+            setOrdonnances(ordoList);
         } catch (e) {
             console.error("Erreur chargement ordonnances:", e);
         } finally {
@@ -88,7 +80,7 @@ export default function MedecinOrdonnances() {
 
     // ── Création ordonnance ──────────────────────────────────────────────────
     const handleCreate = async () => {
-        if (!selRdv) return;
+        if (!selRdv || meds.every(m => !m.nom.trim())) return;
         setCreateLoading(true);
         setCreateError("");
         try {
@@ -104,6 +96,7 @@ export default function MedecinOrdonnances() {
                 setSelRdv(null);
             }, 1500);
         } catch (e: any) {
+            console.error("Erreur creation ordonnance:", e);
             setCreateError(e?.response?.data?.message || "Erreur lors de la création");
         } finally {
             setCreateLoading(false);
@@ -111,6 +104,8 @@ export default function MedecinOrdonnances() {
     };
 
     const openModal = () => { setModal(true); setCreateSuccess(false); setCreateError(""); setMeds([{ nom: "", posologie: "" }]); setSelRdv(null); };
+
+    const isBtnDisabled = createLoading || !selRdv || meds.every(m => !m.nom.trim());
 
     return (
         <DashboardLayout navItems={NAV} title="Ordonnances" accentColor={ACCENT}>
@@ -120,9 +115,9 @@ export default function MedecinOrdonnances() {
                 <select value={filterRdv} onChange={e => setFilterRdv(e.target.value)}
                         style={{ borderRadius: 10, border: "0.5px solid #EBEBEB", padding: "9px 14px", fontSize: 13, background: "#fff", flex: 1, maxWidth: 420, outline: "none" }}>
                     <option value="">Toutes les ordonnances</option>
-                    {rdvsTermines.map(r => (
+                    {rdvsDisponibles.map(r => (
                         <option key={r.id} value={r.id}>
-                            {r.patient?.prenom} {r.patient?.nom} — {r.date} à {r.heure?.slice(0, 5)}
+                            {r.patient?.prenom} {r.patient?.nom} — {r.date} à {r.heure?.slice(0, 5)} ({r.statut})
                         </option>
                     ))}
                 </select>
@@ -142,7 +137,7 @@ export default function MedecinOrdonnances() {
                 <div style={{ textAlign: "center", padding: "80px 0", background: "#fff", borderRadius: 14, color: "#BDBDBD", border: "0.5px solid #EBEBEB" }}>
                     <i className="bi bi-file-earmark-x" style={{ fontSize: 52 }}></i>
                     <div style={{ marginTop: 16, fontSize: 16 }}>Aucune ordonnance</div>
-                    <div style={{ fontSize: 13, marginTop: 8 }}>Créez des ordonnances après chaque consultation terminée</div>
+                    <div style={{ fontSize: 13, marginTop: 8 }}>{filterRdv ? "Aucune ordonnance pour ce rendez-vous" : "Créez des ordonnances pendant ou après chaque consultation"}</div>
                 </div>
             ) : (
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(290px, 1fr))", gap: 14 }}>
@@ -152,7 +147,6 @@ export default function MedecinOrdonnances() {
                              onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = ACCENT; el.style.transform = "translateY(-2px)"; }}
                              onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = "#EBEBEB"; el.style.transform = ""; }}>
 
-                            {/* En-tête patient */}
                             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
                                 <div style={{ width: 40, height: 40, borderRadius: 10, background: `${ACCENT}18`, display: "flex", alignItems: "center", justifyContent: "center", color: ACCENT, fontWeight: 700, fontSize: 14, flexShrink: 0 }}>
                                     {o.rendezVous?.patient?.prenom?.[0]}{o.rendezVous?.patient?.nom?.[0]}
@@ -170,7 +164,6 @@ export default function MedecinOrdonnances() {
                                 </span>
                             </div>
 
-                            {/* Médicaments preview */}
                             <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
                                 {Object.entries(o.medicaments || {}).slice(0, 3).map(([med, pos]) => (
                                     <div key={med} style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "7px 10px", borderRadius: 8, background: "#F0FDF4" }}>
@@ -213,14 +206,14 @@ export default function MedecinOrdonnances() {
                                 {/* Sélection RDV */}
                                 <div style={{ marginBottom: 16 }}>
                                     <label style={{ fontSize: 12.5, fontWeight: 600, color: "#6B6B6B", display: "block", marginBottom: 6 }}>
-                                        Rendez-vous terminé
+                                        Rendez-vous
                                     </label>
-                                    <select value={selRdv?.id || ""} onChange={e => setSelRdv(rdvsTermines.find(r => r.id === e.target.value) || null)}
+                                    <select value={selRdv?.id || ""} onChange={e => setSelRdv(rdvsDisponibles.find(r => r.id === e.target.value) || null)}
                                             style={{ ...inp }}>
                                         <option value="">Sélectionner un rendez-vous</option>
-                                        {rdvsTermines.map(r => (
+                                        {rdvsDisponibles.map(r => (
                                             <option key={r.id} value={r.id}>
-                                                {r.patient?.prenom} {r.patient?.nom} — {r.date} {r.heure?.slice(0, 5)}
+                                                {r.patient?.prenom} {r.patient?.nom} — {r.date} {r.heure?.slice(0, 5)} ({r.statut})
                                             </option>
                                         ))}
                                     </select>
@@ -230,10 +223,10 @@ export default function MedecinOrdonnances() {
                                 <label style={{ fontSize: 12.5, fontWeight: 600, color: "#6B6B6B", display: "block", marginBottom: 8 }}>Médicaments</label>
                                 {meds.map((m, i) => (
                                     <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-                                        <input placeholder="Médicament" value={m.nom}
+                                        <input placeholder="Ex: Paracétamol" value={m.nom}
                                                onChange={e => { const c = [...meds]; c[i].nom = e.target.value; setMeds(c); }}
                                                style={{ flex: 1, borderRadius: 8, border: "0.5px solid #EBEBEB", padding: "8px 12px", fontSize: 13, outline: "none", background: "#FAFAFA" }} />
-                                        <input placeholder="Posologie" value={m.posologie}
+                                        <input placeholder="Ex: 1 mat, 1 soir" value={m.posologie}
                                                onChange={e => { const c = [...meds]; c[i].posologie = e.target.value; setMeds(c); }}
                                                style={{ flex: 1, borderRadius: 8, border: "0.5px solid #EBEBEB", padding: "8px 12px", fontSize: 13, outline: "none", background: "#FAFAFA" }} />
                                         {meds.length > 1 && (
@@ -252,11 +245,26 @@ export default function MedecinOrdonnances() {
                                             style={{ background: "#F5F5F5", border: "none", borderRadius: 9, padding: "9px 18px", cursor: "pointer", fontSize: 13.5, color: "#6B6B6B" }}>
                                         Annuler
                                     </button>
-                                    <button onClick={handleCreate} disabled={createLoading || !selRdv || meds.every(m => !m.nom.trim())}
-                                            style={{ background: ACCENT, color: "#fff", border: "none", borderRadius: 9, padding: "9px 22px", cursor: "pointer", fontWeight: 600, fontSize: 13.5 }}>
+                                    <button onClick={handleCreate} disabled={isBtnDisabled}
+                                            style={{ 
+                                                background: isBtnDisabled ? "#A7D7BE" : ACCENT, 
+                                                color: "#fff", 
+                                                border: "none", 
+                                                borderRadius: 9, 
+                                                padding: "9px 22px", 
+                                                cursor: isBtnDisabled ? "not-allowed" : "pointer", 
+                                                fontWeight: 600, 
+                                                fontSize: 13.5,
+                                                opacity: isBtnDisabled ? 0.7 : 1
+                                            }}>
                                         {createLoading ? <span className="spinner-border spinner-border-sm"></span> : "Créer"}
                                     </button>
                                 </div>
+                                {isBtnDisabled && !createLoading && (
+                                    <div style={{ fontSize: 11, color: "#9E9E9E", textAlign: "right", marginTop: 8 }}>
+                                        Veuillez sélectionner un rendez-vous et saisir au moins un médicament.
+                                    </div>
+                                )}
                             </>
                         )}
                     </div>
@@ -275,7 +283,7 @@ export default function MedecinOrdonnances() {
                         <div style={{ background: "#F8FAFC", borderRadius: 10, padding: "12px 14px", marginBottom: 18, fontSize: 13, color: "#6B6B6B", lineHeight: 1.8 }}>
                             <div><strong>Patient :</strong> {selected.rendezVous?.patient?.prenom} {selected.rendezVous?.patient?.nom}</div>
                             <div><strong>Date :</strong> {fmtDate(selected.date)}</div>
-                            {selected.rendezVous?.motif && <div><strong>Motif :</strong> {selected.rendezVous.motif}</div>}
+                            {selected.rendezVous?.motif && <div><strong>Motif RDV :</strong> {selected.rendezVous.motif}</div>}
                         </div>
 
                         <label style={{ fontSize: 12.5, fontWeight: 600, color: "#6B6B6B", display: "block", marginBottom: 10 }}>Médicaments prescrits</label>

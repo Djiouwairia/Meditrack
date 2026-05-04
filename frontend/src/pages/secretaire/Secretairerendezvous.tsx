@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import DashboardLayout from "../../components/common/DashboardLayout";
 import StatusBadge from "../../components/common/StatusBadge";
-import { useAuth } from "../../context/AuthContext";
-import { secretaireService, patientService, medecinService, rendezVousService, type Secretaire, type Patient, type Medecin, type RendezVous } from "../../services/DomainServices";
+import { secretaireService, patientService, medecinService, rendezVousService, disponibiliteService, type Secretaire, type Patient, type Medecin, type RendezVous, type Disponibilite } from "../../services/DomainServices";
 
 const NAV = [
     { icon: "bi-speedometer2",   label: "Tableau de bord",  path: "/dashboard/secretaire" },
@@ -14,7 +13,6 @@ const NAV = [
 const inp = { width:"100%", borderRadius:8, border:"1px solid #E5E7EB", padding:"9px 12px", fontSize:14, boxSizing:"border-box" as const };
 
 export default function SecretaireRendezVous() {
-    const { user } = useAuth();
     const [secretaire, setSecretaire] = useState<Secretaire | null>(null);
     const [patients, setPatients]     = useState<Patient[]>([]);
     const [medecins, setMedecins]     = useState<Medecin[]>([]);
@@ -23,52 +21,78 @@ export default function SecretaireRendezVous() {
     const [filterStatut, setFilterStatut] = useState("TOUS");
     const [search, setSearch]         = useState("");
     const [actionLoading, setActionLoading] = useState<string | null>(null);
+    const [confirmSuccess, setConfirmSuccess] = useState(false);
 
     /* modal nouveau RDV */
     const [modal, setModal]     = useState(false);
-    const [form, setForm]       = useState({ patientId:"", medecinId:"", date:"", heure:"", motif:"" });
+    const [form, setForm]       = useState({ patientId:"", medecinId:"", disponibiliteId: "", date:"", heure:"", motif:"" });
+    const [medecinDispos, setMedecinDispos] = useState<Disponibilite[]>([]);
     const [formLoading, setFormLoading] = useState(false);
     const [formSuccess, setFormSuccess] = useState(false);
     const [formError, setFormError]     = useState("");
 
-    /* modal terminer (diagnostic) */
-    const [terminerRdv, setTerminerRdv] = useState<RendezVous | null>(null);
-    const [diag, setDiag]               = useState("");
-    const [diagLoading, setDiagLoading] = useState(false);
+
 
     const loadAll = useCallback(async () => {
-        if (!user?.email) return;
         setLoading(true);
         try {
-            const [secPage, patPage, medPage] = await Promise.all([
-                secretaireService.getAll(0, 100),
+            const [sec, patPage, medPage] = await Promise.all([
+                secretaireService.getMe(),
                 patientService.getAll(0, 200),
                 medecinService.getAll(0, 100),
             ]);
-            const sec = secPage.content.find(s => s.email === user.email) ?? null;
             setSecretaire(sec);
             setPatients(patPage.content);
             setMedecins(medPage.content);
 
-            // Charger les RDV de tous les patients
-            const allRdvs: RendezVous[] = [];
-            for (const p of patPage.content.slice(0, 30)) {
-                const data = await rendezVousService.getByPatient(p.id, 0, 50).catch(() => ({ content: [] }));
-                allRdvs.push(...data.content);
-            }
-            // Déduplique par ID
+            // Charger tous les RDV via le nouveau endpoint générique
+            const data = await rendezVousService.getAll(0, 200);
+            const allRdvs = data.content;
+
+            // Déduplique par ID au cas où
             const seen = new Set<string>();
             const unique = allRdvs.filter(r => { if (seen.has(r.id)) return false; seen.add(r.id); return true; });
             setRdvs(unique.sort((a, b) => b.date.localeCompare(a.date) || b.heure.localeCompare(a.heure)));
+        } catch (e) {
+            console.error("Erreur chargement données secrétaire:", e);
         } finally { setLoading(false); }
-    }, [user]);
+    }, []);
 
     useEffect(() => { loadAll(); }, [loadAll]);
+
+    useEffect(() => {
+        if (form.medecinId) {
+            disponibiliteService.getLibres(form.medecinId)
+                .then(dispos => {
+                    const sorted = dispos.sort((a,b) => new Date(a.date+"T"+a.heureDebut).getTime() - new Date(b.date+"T"+b.heureDebut).getTime());
+                    setMedecinDispos(sorted);
+                })
+                .catch(() => setMedecinDispos([]));
+        } else {
+            setMedecinDispos([]);
+            setForm(f => ({ ...f, disponibiliteId: "", date: "", heure: "" }));
+        }
+    }, [form.medecinId]);
+
+    const handleDispoChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const id = e.target.value;
+        const dispo = medecinDispos.find(d => d.id === id);
+        if (dispo) {
+            setForm(f => ({ ...f, disponibiliteId: id, date: dispo.date, heure: dispo.heureDebut }));
+        } else {
+            setForm(f => ({ ...f, disponibiliteId: "", date: "", heure: "" }));
+        }
+    };
 
     const handleConfirmer = async (rdv: RendezVous) => {
         if (!secretaire) return;
         setActionLoading(rdv.id + "_conf");
-        try { await secretaireService.confirmerRdv(secretaire.id, rdv.id); await loadAll(); }
+        try { 
+            await secretaireService.confirmerRdv(secretaire.id, rdv.id); 
+            setConfirmSuccess(true);
+            setTimeout(() => setConfirmSuccess(false), 3000);
+            await loadAll(); 
+        }
         finally { setActionLoading(null); }
     };
 
@@ -79,12 +103,7 @@ export default function SecretaireRendezVous() {
         finally { setActionLoading(null); }
     };
 
-    const handleTerminer = async () => {
-        if (!terminerRdv) return;
-        setDiagLoading(true);
-        try { await rendezVousService.terminer(terminerRdv.id, diag); setTerminerRdv(null); setDiag(""); await loadAll(); }
-        finally { setDiagLoading(false); }
-    };
+
 
     const handleCreate = async () => {
         if (!secretaire) return;
@@ -93,7 +112,7 @@ export default function SecretaireRendezVous() {
             await secretaireService.prendreRendezVous(secretaire.id, form);
             setFormSuccess(true);
             await loadAll();
-            setTimeout(() => { setModal(false); setFormSuccess(false); setForm({ patientId:"", medecinId:"", date:"", heure:"", motif:"" }); }, 1500);
+            setTimeout(() => { setModal(false); setFormSuccess(false); setForm({ patientId:"", medecinId:"", disponibiliteId: "", date:"", heure:"", motif:"" }); }, 1500);
         } catch (e: any) { setFormError(e?.response?.data?.message || "Erreur création RDV"); }
         finally { setFormLoading(false); }
     };
@@ -145,6 +164,12 @@ export default function SecretaireRendezVous() {
 
             {/* Liste */}
             <div style={{ background:"#fff", borderRadius:20, padding:24, boxShadow:"0 2px 12px rgba(0,0,0,0.05)", border:"1px solid #F0F2F7" }}>
+                {confirmSuccess && (
+                    <div style={{ background: "#D1FAE5", color: "#065F46", padding: "12px 16px", borderRadius: 12, marginBottom: 20, display: "flex", alignItems: "center", gap: 8, fontWeight: 600, animation: "fadeIn 0.3s ease" }}>
+                        <i className="bi bi-check-circle-fill" style={{ fontSize: 18 }}></i>
+                        Rendez-vous confirmé. Le ticket électronique a été transmis au patient.
+                    </div>
+                )}
                 {loading ? (
                     <div className="d-flex justify-content-center" style={{ padding:60 }}><div className="spinner-border" style={{ color:"#27A869" }}></div></div>
                 ) : filtered.length === 0 ? (
@@ -189,20 +214,14 @@ export default function SecretaireRendezVous() {
                                     {rdv.statut === "EN_ATTENTE" && (
                                         <button onClick={()=>handleConfirmer(rdv)} disabled={!!actionLoading}
                                                 style={{ background:"#D1FAE5", color:"#065F46", border:"none", borderRadius:8, padding:"6px 12px", fontSize:12, fontWeight:600, cursor:"pointer" }}>
-                                            {actionLoading===rdv.id+"_conf"?<span className="spinner-border spinner-border-sm"></span>:"✓ Confirmer"}
+                                            {actionLoading===rdv.id+"_conf"?<span className="spinner-border spinner-border-sm"></span>:"✓ Valider"}
                                         </button>
                                     )}
                                     {(rdv.statut==="EN_ATTENTE"||rdv.statut==="CONFIRME") && (
-                                        <>
-                                            <button onClick={()=>{setTerminerRdv(rdv);setDiag("");}}
-                                                    style={{ background:"#E0E7FF", color:"#3730A3", border:"none", borderRadius:8, padding:"6px 12px", fontSize:12, fontWeight:600, cursor:"pointer" }}>
-                                                Terminer
-                                            </button>
                                             <button onClick={()=>handleAnnuler(rdv)} disabled={!!actionLoading}
                                                     style={{ background:"#FEE2E2", color:"#991B1B", border:"none", borderRadius:8, padding:"6px 12px", fontSize:12, fontWeight:600, cursor:"pointer" }}>
                                                 {actionLoading===rdv.id+"_ann"?<span className="spinner-border spinner-border-sm"></span>:"Annuler"}
-                                            </button>
-                                        </>
+                                        </button>
                                     )}
                                 </div>
                             </div>
@@ -239,15 +258,16 @@ export default function SecretaireRendezVous() {
                                             {medecins.filter(m=>m.disponible).map(m=><option key={m.id} value={m.id}>Dr. {m.prenom} {m.nom} — {m.specialite}</option>)}
                                         </select>
                                     </div>
-                                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
-                                        <div>
-                                            <label style={{ fontSize:13, fontWeight:600, color:"#374151", display:"block", marginBottom:6 }}>Date</label>
-                                            <input type="date" value={form.date} min={new Date().toISOString().slice(0,10)} onChange={e=>setForm(f=>({...f,date:e.target.value}))} style={inp}/>
-                                        </div>
-                                        <div>
-                                            <label style={{ fontSize:13, fontWeight:600, color:"#374151", display:"block", marginBottom:6 }}>Heure</label>
-                                            <input type="time" value={form.heure} onChange={e=>setForm(f=>({...f,heure:e.target.value}))} style={inp}/>
-                                        </div>
+                                    <div>
+                                        <label style={{ fontSize:13, fontWeight:600, color:"#374151", display:"block", marginBottom:6 }}>Créneau disponible</label>
+                                        <select value={form.disponibiliteId} onChange={handleDispoChange} style={inp} disabled={!form.medecinId}>
+                                            <option value="">Sélectionner un créneau</option>
+                                            {medecinDispos.map(d => (
+                                                <option key={d.id} value={d.id}>
+                                                    {new Date(d.date).toLocaleDateString("fr-FR", { weekday: 'short', day: 'numeric', month: 'short'})} à {d.heureDebut.slice(0,5)} ({d.placesRestantes} places)
+                                                </option>
+                                            ))}
+                                        </select>
                                     </div>
                                     <div>
                                         <label style={{ fontSize:13, fontWeight:600, color:"#374151", display:"block", marginBottom:6 }}>Motif</label>
@@ -267,26 +287,10 @@ export default function SecretaireRendezVous() {
                 </div>
             )}
 
-            {/* Modal terminer */}
-            {terminerRdv && (
-                <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.5)", zIndex:1000, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                    <div style={{ background:"#fff", borderRadius:20, padding:32, width:460, maxWidth:"90vw" }}>
-                        <h3 style={{ margin:"0 0 8px", fontSize:18, fontWeight:700 }}>Terminer le rendez-vous</h3>
-                        <p style={{ color:"#8A94A6", fontSize:14, marginBottom:20 }}>
-                            {terminerRdv.patient?.prenom} {terminerRdv.patient?.nom} · Dr. {terminerRdv.medecin?.prenom} {terminerRdv.medecin?.nom}
-                        </p>
-                        <label style={{ fontSize:13, fontWeight:600, color:"#374151", display:"block", marginBottom:6 }}>Diagnostic</label>
-                        <textarea value={diag} onChange={e=>setDiag(e.target.value)} rows={4} placeholder="Entrez le diagnostic..." style={{...inp,resize:"vertical"}}/>
-                        <div style={{ display:"flex", gap:12, justifyContent:"flex-end", marginTop:20 }}>
-                            <button onClick={()=>setTerminerRdv(null)} style={{ background:"#F3F4F6", border:"none", borderRadius:10, padding:"10px 20px", cursor:"pointer" }}>Annuler</button>
-                            <button onClick={handleTerminer} disabled={diagLoading||!diag.trim()}
-                                    style={{ background:"linear-gradient(135deg,#27A869,#27A869)", color:"#fff", border:"none", borderRadius:10, padding:"10px 24px", cursor:"pointer", fontWeight:600, fontSize:14 }}>
-                                {diagLoading?<span className="spinner-border spinner-border-sm"></span>:"Confirmer"}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+
+            <style>{`
+                @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+            `}</style>
         </DashboardLayout>
     );
 }

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import DashboardLayout from "../../components/common/DashboardLayout";
 import StatusBadge from "../../components/common/StatusBadge";
 import {
-    medecinService, rendezVousService, disponibiliteService,
+    medecinService, rendezVousService, disponibiliteService, dossierService,
     type RendezVous, type Medecin, type Disponibilite
 } from "../../services/DomainServices";
 
@@ -30,14 +30,60 @@ function TabRdv({ medecin }: { medecin: Medecin | null }) {
     const [action, setAction]   = useState<string | null>(null);
     const [filtre, setFiltre]   = useState("TOUS");
     const today = new Date().toISOString().slice(0, 10);
-    const next7 = (() => { const d = new Date(); d.setDate(d.getDate() + 6); return d.toISOString().slice(0, 10); })();
-    const [debut, setDebut] = useState(today);
+    const prev7 = (() => { const d = new Date(); d.setDate(d.getDate() - 7); return d.toISOString().slice(0, 10); })();
+    const next7 = (() => { const d = new Date(); d.setDate(d.getDate() + 7); return d.toISOString().slice(0, 10); })();
+    const [debut, setDebut] = useState(prev7);
     const [fin, setFin]     = useState(next7);
+
+    const [terminerModal, setTerminerModal] = useState(false);
+    const [terminerRdv, setTerminerRdv]     = useState<RendezVous | null>(null);
+    const [terminerDiag, setTerminerDiag]   = useState("");
+    const [terminerConstantes, setTerminerConstantes] = useState({ tension: "", temperature: "", poids: "" });
+    const [terminerDossierId, setTerminerDossierId] = useState<string | null>(null);
+
+    const inp = { width: "100%", borderRadius: 8, border: "0.5px solid #EBEBEB", padding: "9px 12px", fontSize: 14, boxSizing: "border-box" as const, outline: "none", background: "#FAFAFA", color: "#0F0F0F" };
+
+    const openTerminerModal = async (rdv: RendezVous) => {
+        setTerminerRdv(rdv);
+        setTerminerDiag("");
+        setTerminerConstantes({ tension: "", temperature: "", poids: "" });
+        setTerminerDossierId(null);
+        setTerminerModal(true);
+        try {
+            const dos = await dossierService.getByPatient(rdv.patient.id);
+            if (dos && dos.id) {
+                setTerminerDossierId(dos.id);
+                setTerminerConstantes({ tension: dos.tension || "", temperature: dos.temperature || "", poids: dos.poids || "" });
+            }
+        } catch(e) { console.error(e); }
+    };
+
+    const handleTerminer = async () => {
+        if (!terminerRdv) return;
+        setAction(terminerRdv.id + "_terminer");
+        try {
+            let did = terminerDossierId;
+            if (!did) {
+                const newDos = await dossierService.create(terminerRdv.patient.id);
+                did = newDos.id;
+            }
+            if (did && (terminerConstantes.tension || terminerConstantes.temperature || terminerConstantes.poids)) {
+                await dossierService.update(did, { tension: terminerConstantes.tension, temperature: terminerConstantes.temperature, poids: terminerConstantes.poids });
+            }
+            await rendezVousService.terminer(terminerRdv.id, terminerDiag);
+            setTerminerModal(false);
+            await load();
+        } catch(e) { console.error(e); } 
+        finally { setAction(null); }
+    };
 
     const load = useCallback(async (d = debut, f = fin) => {
         if (!medecin) return;
         setLoading(true);
-        try { setRdvs(await rendezVousService.getAgendaMedecin(medecin.id, d, f)); }
+        try { 
+            const data = await rendezVousService.getAgendaMedecin(medecin.id, d, f);
+            setRdvs(data.filter(r => r.statut === "CONFIRME" || r.statut === "TERMINE"));
+        }
         catch (e) { console.error(e); }
         finally { setLoading(false); }
     }, [medecin]);
@@ -67,7 +113,7 @@ function TabRdv({ medecin }: { medecin: Medecin | null }) {
                     </button>
                 </div>
                 <div style={{ display: "flex", gap: 6, marginLeft: "auto", flexWrap: "wrap" }}>
-                    {[{ k: "TOUS", l: "Tous" }, { k: "EN_ATTENTE", l: "En attente" }, { k: "CONFIRME", l: "Confirmés" }, { k: "TERMINE", l: "Terminés" }, { k: "ANNULE", l: "Annulés" }].map(s => (
+                    {[{ k: "TOUS", l: "Tous" }, { k: "CONFIRME", l: "Confirmés" }, { k: "TERMINE", l: "Terminés" }].map(s => (
                         <button key={s.k} onClick={() => setFiltre(s.k)} style={{ background: filtre === s.k ? ACCENT : "#F5F5F5", color: filtre === s.k ? "#fff" : "#6B6B6B", border: "none", borderRadius: 20, padding: "5px 14px", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>{s.l}</button>
                     ))}
                 </div>
@@ -102,13 +148,10 @@ function TabRdv({ medecin }: { medecin: Medecin | null }) {
                                         </div>
                                         <StatusBadge status={rdv.statut} />
                                         <div style={{ display: "flex", gap: 6 }}>
-                                            {rdv.statut === "EN_ATTENTE" && (
-                                                <button onClick={() => act(rdv.id, "_c", () => rendezVousService.confirmer(rdv.id))} disabled={!!action} style={{ background: "#D1FAE5", color: "#065F46", border: "none", borderRadius: 7, padding: "5px 12px", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
-                                                    {action === rdv.id + "_c" ? <span className="spinner-border spinner-border-sm"></span> : "✓ Confirmer"}
+                                            {rdv.statut === "CONFIRME" && (
+                                                <button onClick={() => openTerminerModal(rdv)} disabled={!!action} style={{ background: "#DBEAFE", color: "#1E40AF", border: "none", borderRadius: 7, padding: "5px 12px", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
+                                                    {action === rdv.id + "_terminer" ? <span className="spinner-border spinner-border-sm"></span> : "✓ Terminer"}
                                                 </button>
-                                            )}
-                                            {(rdv.statut === "EN_ATTENTE" || rdv.statut === "CONFIRME") && (
-                                                <button onClick={() => act(rdv.id, "_a", () => rendezVousService.annuler(rdv.id))} disabled={!!action} style={{ background: "#FEE2E2", color: "#991B1B", border: "none", borderRadius: 7, padding: "5px 12px", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>Annuler</button>
                                             )}
                                         </div>
                                     </div>
@@ -116,6 +159,70 @@ function TabRdv({ medecin }: { medecin: Medecin | null }) {
                             </div>
                         </div>
                     ))}
+                </div>
+            )}
+
+            {terminerModal && terminerRdv && (
+                <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <div style={{ background: "#fff", borderRadius: 16, padding: 28, width: 540, maxWidth: "90vw", border: "0.5px solid #EBEBEB", maxHeight: "90vh", overflowY: "auto" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#E8F5EE", color: ACCENT, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>
+                                    <i className="bi bi-clipboard2-pulse"></i>
+                                </div>
+                                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#0F0F0F" }}>Clôturer la consultation</h3>
+                            </div>
+                            <button onClick={() => setTerminerModal(false)}
+                                style={{ background: "#F5F5F5", border: "none", width: 28, height: 28, borderRadius: 8, cursor: "pointer", color: "#6B6B6B", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
+                        </div>
+
+                        <div style={{ background: "#FAFAFA", borderRadius: 10, padding: 12, marginBottom: 20, border: "0.5px solid #EBEBEB" }}>
+                            <div style={{ fontSize: 12, color: "#9E9E9E", marginBottom: 4 }}>Patient</div>
+                            <div style={{ fontWeight: 600, fontSize: 14, color: "#0F0F0F" }}>{terminerRdv.patient?.prenom} {terminerRdv.patient?.nom}</div>
+                            <div style={{ fontSize: 12.5, color: "#6B6B6B", marginTop: 4 }}>Motif : {terminerRdv.motif}</div>
+                        </div>
+
+                        <div style={{ fontSize: 13, fontWeight: 700, color: ACCENT, marginBottom: 10, borderBottom: "1px solid #EBEBEB", paddingBottom: 6 }}>
+                            <i className="bi bi-activity me-2"></i>Constantes du jour
+                        </div>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 20 }}>
+                            <div>
+                                <label style={{ fontSize: 12, fontWeight: 600, color: "#6B6B6B", display: "block", marginBottom: 4 }}>Tension</label>
+                                <input value={terminerConstantes.tension} onChange={e => setTerminerConstantes(c => ({...c, tension: e.target.value}))} placeholder="Ex: 12/8" style={inp} />
+                            </div>
+                            <div>
+                                <label style={{ fontSize: 12, fontWeight: 600, color: "#6B6B6B", display: "block", marginBottom: 4 }}>Temp. (°C)</label>
+                                <input value={terminerConstantes.temperature} onChange={e => setTerminerConstantes(c => ({...c, temperature: e.target.value}))} placeholder="Ex: 38.5" style={inp} />
+                            </div>
+                            <div>
+                                <label style={{ fontSize: 12, fontWeight: 600, color: "#6B6B6B", display: "block", marginBottom: 4 }}>Poids (kg)</label>
+                                <input value={terminerConstantes.poids} onChange={e => setTerminerConstantes(c => ({...c, poids: e.target.value}))} placeholder="Ex: 70" style={inp} />
+                            </div>
+                        </div>
+
+                        <div style={{ fontSize: 13, fontWeight: 700, color: ACCENT, marginBottom: 10, borderBottom: "1px solid #EBEBEB", paddingBottom: 6 }}>
+                            <i className="bi bi-file-medical me-2"></i>Conclusion
+                        </div>
+                        <label style={{ fontSize: 12.5, fontWeight: 600, color: "#6B6B6B", display: "block", marginBottom: 6 }}>Diagnostic</label>
+                        <textarea
+                            value={terminerDiag}
+                            onChange={e => setTerminerDiag(e.target.value)}
+                            rows={3}
+                            placeholder="Saisissez le diagnostic final..."
+                            style={{ ...inp, resize: "vertical" }}
+                        />
+
+                        <div style={{ display: "flex", gap: 10, marginTop: 24, justifyContent: "flex-end" }}>
+                            <button onClick={() => setTerminerModal(false)}
+                                style={{ background: "#F5F5F5", border: "none", borderRadius: 8, padding: "9px 18px", cursor: "pointer", fontSize: 13.5, color: "#6B6B6B", fontWeight: 600 }}>
+                                Annuler
+                            </button>
+                            <button onClick={handleTerminer} disabled={!terminerDiag.trim() || !!action}
+                                style={{ background: ACCENT, color: "#fff", border: "none", borderRadius: 8, padding: "9px 22px", cursor: "pointer", fontSize: 13.5, fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}>
+                                {action === terminerRdv.id + "_terminer" ? <span className="spinner-border spinner-border-sm"></span> : <><i className="bi bi-check2-circle"></i> Enregistrer et Terminer</>}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </>
@@ -127,7 +234,7 @@ function TabDisponibilites({ medecin }: { medecin: Medecin | null }) {
     const [dispos, setDispos]         = useState<Disponibilite[]>([]);
     const [loading, setLoading]       = useState(true);
     const [deleteId, setDeleteId]     = useState<string | null>(null);
-    const [form, setForm]             = useState({ date: "", heureDebut: "", heureFin: "" });
+    const [form, setForm]             = useState({ date: "", heureDebut: "", heureFin: "", nombreMaxPatients: "1" });
     const [addLoading, setAddLoading] = useState(false);
     const [addError, setAddError]     = useState("");
     const [addSuccess, setAddSuccess] = useState(false);
@@ -146,8 +253,8 @@ function TabDisponibilites({ medecin }: { medecin: Medecin | null }) {
         if (!form.date || !form.heureDebut || !form.heureFin) { setAddError("Tous les champs sont requis."); return; }
         setAddLoading(true); setAddError(""); setAddSuccess(false);
         try {
-            await disponibiliteService.ajouter({ date: form.date, heureDebut: form.heureDebut + ":00", heureFin: form.heureFin + ":00" });
-            setForm({ date: "", heureDebut: "", heureFin: "" });
+            await disponibiliteService.ajouter({ date: form.date, heureDebut: form.heureDebut + ":00", heureFin: form.heureFin + ":00", nombreMaxPatients: parseInt(form.nombreMaxPatients) || 1 });
+            setForm({ date: "", heureDebut: "", heureFin: "", nombreMaxPatients: "1" });
             setAddSuccess(true);
             await load();
             setTimeout(() => setAddSuccess(false), 2500);
@@ -205,6 +312,11 @@ function TabDisponibilites({ medecin }: { medecin: Medecin | null }) {
                         <input type="time" value={form.heureFin}
                                onChange={e => setForm(f => ({ ...f, heureFin: e.target.value }))} style={inp} />
                     </div>
+                    <div>
+                        <label style={{ fontSize: 12, fontWeight: 600, color: "#9E9E9E", display: "block", marginBottom: 5 }}>Nombre max de patients</label>
+                        <input type="number" min="1" max="50" value={form.nombreMaxPatients}
+                               onChange={e => setForm(f => ({ ...f, nombreMaxPatients: e.target.value }))} style={inp} />
+                    </div>
                     <button onClick={handleAdd} disabled={addLoading}
                             style={{ background: addLoading ? "#9E9E9E" : ACCENT, color: "#fff", border: "none", borderRadius: 10, padding: "11px 0", fontWeight: 700, cursor: addLoading ? "not-allowed" : "pointer", fontSize: 13.5, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
                         {addLoading ? <><span className="spinner-border spinner-border-sm"></span> Ajout...</> : <><i className="bi bi-calendar-plus"></i> Ajouter</>}
@@ -252,7 +364,9 @@ function TabDisponibilites({ medecin }: { medecin: Medecin | null }) {
                                             </div>
                                             <div style={{ flex: 1 }}>
                                                 <div style={{ fontWeight: 700, fontSize: 14, fontFamily: "monospace" }}>{fmt(d.heureDebut)} – {fmt(d.heureFin)}</div>
-                                                <div style={{ fontSize: 12, color: "#9E9E9E", marginTop: 2 }}>{diffMin(d.heureDebut, d.heureFin)} min</div>
+                                                <div style={{ fontSize: 12, color: "#9E9E9E", marginTop: 2 }}>
+                                                    {diffMin(d.heureDebut, d.heureFin)} min • {d.placesRestantes}/{d.nombreMaxPatients} places restantes
+                                                </div>
                                             </div>
                                             <span style={{ background: d.estReserve ? "#FEE2E2" : "#D1FAE5", color: d.estReserve ? "#991B1B" : "#065F46", fontSize: 11, fontWeight: 700, padding: "3px 12px", borderRadius: 20 }}>
                                                 {d.estReserve ? "Réservé" : "Libre"}

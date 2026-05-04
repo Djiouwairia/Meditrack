@@ -15,22 +15,20 @@ public class CorsConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // Origine du frontend React (Vite)
-        config.setAllowedOrigins(List.of(
-                "http://localhost:5173",   // Vite dev
-                "http://localhost:3000"    // CRA dev (au cas où)
-        ));
+        // Accepte toutes les origines (réseau local, téléphone, autre machine)
+        // Pour restreindre en production, remplacer par les domaines exacts.
+        config.setAllowedOriginPatterns(List.of("*"));
 
         // Méthodes HTTP autorisées
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 
-        // Headers autorisés (Authorization pour JWT + Content-Type)
+        // Tous les headers (Authorization JWT + Content-Type + custom)
         config.setAllowedHeaders(List.of("*"));
 
-        // Autoriser l'envoi des cookies / Authorization header
+        // Nécessaire pour envoyer le header Authorization
         config.setAllowCredentials(true);
 
-        // Durée de cache du preflight OPTIONS (en secondes)
+        // Cache preflight OPTIONS 1 heure
         config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

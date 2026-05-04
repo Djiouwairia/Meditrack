@@ -38,29 +38,37 @@ public class SecurityConfig {
                         .requestMatchers("/hopital/**").hasRole("ADMIN")
 
                         // ── Médecins ──
+                        .requestMatchers(HttpMethod.GET, "/medecins/disponibles").permitAll()
                         .requestMatchers(HttpMethod.POST,   "/medecins").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/medecins/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET,    "/medecins/**").authenticated()
                         .requestMatchers(HttpMethod.PATCH,  "/medecins/**").hasAnyRole("ADMIN", "MEDECIN")
 
+
+
                         // ── Disponibilités (NOUVEAU) ──
+                        .requestMatchers(HttpMethod.GET,    "/disponibilites/medecin/*/libres").permitAll()
                         .requestMatchers(HttpMethod.POST,   "/disponibilites").hasRole("MEDECIN")
                         .requestMatchers(HttpMethod.DELETE, "/disponibilites/**").hasRole("MEDECIN")
                         .requestMatchers(HttpMethod.PATCH,  "/disponibilites/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET,    "/disponibilites/**").hasAnyRole("MEDECIN", "SECRETAIRE", "ADMIN")
+                        .requestMatchers(HttpMethod.GET,    "/disponibilites/**").hasAnyRole("MEDECIN", "SECRETAIRE", "ADMIN", "PATIENT")
 
                         // ── Patients ──
-                        .requestMatchers(HttpMethod.GET,    "/patients/**").hasAnyRole("ADMIN", "SECRETAIRE", "MEDECIN")
+                        .requestMatchers(HttpMethod.GET,    "/patients/**").hasAnyRole("ADMIN", "SECRETAIRE", "MEDECIN", "PATIENT")
                         .requestMatchers(HttpMethod.PUT,    "/patients/**").hasAnyRole("ADMIN", "SECRETAIRE")
                         .requestMatchers(HttpMethod.DELETE, "/patients/**").hasRole("ADMIN")
 
                         // ── Rendez-vous ──
                         .requestMatchers(HttpMethod.POST, "/rendez-vous").hasAnyRole("PATIENT", "SECRETAIRE", "ADMIN")
                         .requestMatchers(HttpMethod.GET,  "/rendez-vous/**").hasAnyRole("ADMIN", "MEDECIN", "SECRETAIRE", "PATIENT")
-                        .requestMatchers("/rendez-vous/*/confirmer", "/rendez-vous/*/annuler").hasAnyRole("SECRETAIRE", "ADMIN")
+                        .requestMatchers("/rendez-vous/*/confirmer", "/rendez-vous/*/annuler").hasAnyRole("SECRETAIRE", "ADMIN", "MEDECIN")
                         .requestMatchers("/rendez-vous/*/terminer").hasRole("MEDECIN")
 
                         // ── Dossiers ──
+                        .requestMatchers(HttpMethod.POST,   "/dossiers-medicaux/**").hasAnyRole("MEDECIN", "ADMIN", "SECRETAIRE")
+                        .requestMatchers(HttpMethod.GET,    "/dossiers-medicaux/**").hasAnyRole("MEDECIN", "ADMIN", "SECRETAIRE", "PATIENT")
+                        .requestMatchers(HttpMethod.PUT,    "/dossiers-medicaux/**").hasAnyRole("MEDECIN", "ADMIN", "SECRETAIRE")
+                        .requestMatchers(HttpMethod.PATCH,  "/dossiers-medicaux/**").hasAnyRole("MEDECIN", "ADMIN", "SECRETAIRE")
                         .requestMatchers("/dossiers-medicaux/**").hasAnyRole("MEDECIN", "ADMIN", "SECRETAIRE", "PATIENT")
 
                         // ── Ordonnances ──
@@ -71,10 +79,15 @@ public class SecurityConfig {
                         // ── Secrétaires ──
                         .requestMatchers(HttpMethod.POST,   "/secretaires").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/secretaires/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET,    "/secretaires/**").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET,    "/secretaires/**").hasAnyRole("ADMIN", "SECRETAIRE")
+                        .requestMatchers(HttpMethod.PUT,    "/secretaires/**").hasAnyRole("ADMIN", "SECRETAIRE")
+                        .requestMatchers(HttpMethod.POST,   "/secretaires/*/rendez-vous").hasAnyRole("ADMIN", "SECRETAIRE")
+                        .requestMatchers(HttpMethod.PATCH,  "/secretaires/*/rendez-vous/**").hasAnyRole("ADMIN", "SECRETAIRE")
 
                         // ── Utilisateurs ──
                         .requestMatchers("/utilisateurs/**").hasRole("ADMIN")
+
+                        // Medecins
 
                         .anyRequest().authenticated()
                 )

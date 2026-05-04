@@ -51,6 +51,17 @@ public class OrdonnanceController {
         return ResponseEntity.ok(ordonnanceService.getOrdonnancesByRendezVous(rendezVousId, page, size));
     }
 
+    /**
+     * Toutes les ordonnances d'un médecin
+     */
+    @GetMapping("/medecin/{medecinId}")
+    public ResponseEntity<Page<Ordonnance>> getByMedecin(
+            @PathVariable String medecinId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "50") int size) {
+        return ResponseEntity.ok(ordonnanceService.getOrdonnancesByMedecin(medecinId, page, size));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteOrdonnance(@PathVariable String id) {
         ordonnanceService.deleteOrdonnance(id);

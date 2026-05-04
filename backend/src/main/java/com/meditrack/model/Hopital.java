@@ -1,6 +1,6 @@
 package com.meditrack.model;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -31,6 +31,6 @@ public class Hopital {
     private String contact;
 
     @OneToMany(mappedBy = "hopital")
-    @JsonManagedReference
+    @JsonIgnoreProperties({"hopital", "motDePasse", "rendezVous", "disponibilites"})
     private List<Utilisateur> utilisateurs;
 }

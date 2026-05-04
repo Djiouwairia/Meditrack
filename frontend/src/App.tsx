@@ -20,10 +20,16 @@ import AdminDashboard from "./pages/admin/Admindashboard";
 import MedecinDashboard from "./pages/medecin/Medecindashboard";
 import MedecinAgenda from "./pages/medecin/Medecinagenda";
 import PatientDashboard from "./pages/patient/Patientdashboard";
+import PatientRendezVous from "./pages/patient/Patientrendezvous";
+import PatientDossier from "./pages/patient/Patientdossier";
+import PatientOrdonnances from "./pages/patient/Patientordonnances";
+import PatientProfil from "./pages/patient/Patientprofil";
+
 import SecretaireDashboard from "./pages/secretaire/SecretaireDashboard";
 
 /* 🟩 MÉDECIN PAGES */
 import MedecinPatients from "./pages/medecin/Medecinpatients";
+import MedecinDossier from "./pages/medecin/Medecindossier";
 import MedecinOrdonnances from "./pages/medecin/Medecinordonnances";
 import MedecinProfil from "./pages/medecin/Medecinprofil";
 
@@ -37,9 +43,8 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import imagePath from "./assets/logo.png";
 import AdminUtilisateurs from "./pages/admin/AdminUtilisateurs";
 import AdminHopitaux from "./pages/admin/AdminHopital";
-import PatientRendezVous from "./pages/patient/Patientrendezvous";
-import PatientProfil from "./pages/patient/Patientprofil";
-import PatientDossier from "./pages/patient/Patientdossier";
+import AdminMedecins from "./pages/admin/AdminMedecins";
+import AdminProfil from "./pages/admin/AdminProfil";
 
 /* ───────────── REDIRECTION SELON RÔLE ───────────── */
 function RoleRedirect() {
@@ -67,10 +72,6 @@ function Protected({
     }
 
     return <>{children}</>;
-}
-
-function Patientordonnances() {
-    return null;
 }
 
 /* ───────────── ROUTES APP ───────────── */
@@ -107,7 +108,7 @@ function AppRoutes() {
             <Route
                 path="/dashboard/admin"
                 element={
-                    <Protected roles={["ADMIN"]}>
+                    <Protected roles={["ADMIN", "ADMIN_HOPITAL"]}>
                         <AdminDashboard />
                     </Protected>
                 }
@@ -116,7 +117,7 @@ function AppRoutes() {
              <Route
                 path="/dashboard/admin/utilisateurs"
                 element={
-                    <Protected roles={["ADMIN"]}>
+                    <Protected roles={["ADMIN", "ADMIN_HOPITAL"]}>
                         <AdminUtilisateurs />
                     </Protected>
                 }
@@ -127,6 +128,24 @@ function AppRoutes() {
                 element={
                     <Protected roles={["ADMIN"]}>
                         <AdminHopitaux />
+                    </Protected>
+                }
+            />
+
+            <Route
+                path="/dashboard/admin/medecins"
+                element={
+                    <Protected roles={["ADMIN", "ADMIN_HOPITAL"]}>
+                        <AdminMedecins />
+                    </Protected>
+                }
+            />
+
+            <Route
+                path="/dashboard/admin/profil"
+                element={
+                    <Protected roles={["ADMIN", "ADMIN_HOPITAL"]}>
+                        <AdminProfil />
                     </Protected>
                 }
             />
@@ -160,6 +179,15 @@ function AppRoutes() {
             />
 
             <Route
+                path="/dashboard/medecin/patients/:patientId"
+                element={
+                    <Protected roles={["MEDECIN"]}>
+                        <MedecinDossier />
+                    </Protected>
+                }
+            />
+
+            <Route
                 path="/dashboard/medecin/ordonnances"
                 element={
                     <Protected roles={["MEDECIN"]}>
@@ -179,7 +207,7 @@ function AppRoutes() {
 
             {/* ───────── PATIENT ───────── */}
             <Route
-                path="/dashboard/patient/"
+                path="/dashboard/patient"
                 element={
                     <Protected roles={["PATIENT"]}>
                         <PatientDashboard />
@@ -188,7 +216,7 @@ function AppRoutes() {
             />
 
             <Route
-                path="dashboard/patient/rendez-vous"
+                path="/dashboard/patient/rendez-vous"
                 element={
                     <Protected roles={["PATIENT"]}>
                         <PatientRendezVous />
@@ -196,31 +224,29 @@ function AppRoutes() {
                 }
             />
 
-        
-            <Route
-                path="/dashboard/patient/profil"
-                element={
-                    <Protected roles={["PATIENT"]}>
-                        <PatientProfil />
-                    </Protected>
-                }
-            />
-
-            <Route
-                path="/dashboard/patient/ordonance"
-                element={
-                    <Protected roles={["PATIENT"]}>
-                        <Patientordonnances />
-                    </Protected>
-                }
-            />
-
-            {/* ───────── PATIENT ───────── */}
             <Route
                 path="/dashboard/patient/dossier"
                 element={
                     <Protected roles={["PATIENT"]}>
                         <PatientDossier />
+                    </Protected>
+                }
+            />
+
+            <Route
+                path="/dashboard/patient/ordonnances"
+                element={
+                    <Protected roles={["PATIENT"]}>
+                        <PatientOrdonnances />
+                    </Protected>
+                }
+            />
+
+            <Route
+                path="/dashboard/patient/profil"
+                element={
+                    <Protected roles={["PATIENT"]}>
+                        <PatientProfil />
                     </Protected>
                 }
             />

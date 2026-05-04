@@ -20,4 +20,6 @@ public class PatientRequestDTO {
     private LocalDate dateDeNaissance;
     private String groupeSanguin;
     private String hopitalId;
+    private String nineaOuCin;
+    private String personneDeConfiance;
 }

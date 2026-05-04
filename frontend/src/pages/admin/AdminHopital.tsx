@@ -3,13 +3,24 @@ import DashboardLayout from "../../components/common/DashboardLayout";
 import EmptyImg from "../../assets/Empty.gif";
 import { hopitalService, type Hopital } from "../../services/Adminservice";
 
-const NAV = [
-    { icon: "bi-speedometer2", label: "Tableau de bord", path: "/dashboard/admin" },
-    { icon: "bi-hospital",     label: "Hôpitaux",        path: "/dashboard/admin/hopitaux" },
-    { icon: "bi-people",       label: "Utilisateurs",    path: "/dashboard/admin/utilisateurs" },
-    { icon: "bi-person-badge", label: "Médecins",        path: "/dashboard/admin/medecins" },
-    { icon: "bi-person-gear",  label: "Mon profil",      path: "/dashboard/admin/profil" },
-];
+import { useAuth } from "../../context/AuthContext";
+
+const getNavItems = (role?: string) => {
+    if (role === "ADMIN_HOPITAL") {
+        return [
+            { icon: "bi-speedometer2", label: "Tableau de bord", path: "/dashboard/admin" },
+            { icon: "bi-people",       label: "Utilisateurs",    path: "/dashboard/admin/utilisateurs" },
+            { icon: "bi-person-badge", label: "Médecins",        path: "/dashboard/admin/medecins" },
+            { icon: "bi-person-gear",  label: "Mon profil",      path: "/dashboard/admin/profil" },
+        ];
+    }
+    return [
+        { icon: "bi-speedometer2", label: "Tableau de bord", path: "/dashboard/admin" },
+        { icon: "bi-hospital",     label: "Hôpitaux",        path: "/dashboard/admin/hopitaux" },
+        { icon: "bi-people",       label: "Utilisateurs",    path: "/dashboard/admin/utilisateurs" },
+        { icon: "bi-person-gear",  label: "Mon profil",      path: "/dashboard/admin/profil" },
+    ];
+};
 
 // ── Toast ──
 type ToastType = "success" | "danger" | "warning";
@@ -36,6 +47,7 @@ function ToastContainer({ toasts, onRemove }: { toasts: ToastMsg[]; onRemove: (i
 }
 
 export default function AdminHopitaux() {
+    const { user } = useAuth();
     const [hopitaux, setHopitaux]         = useState<Hopital[]>([]);
     const [loading, setLoading]           = useState(true);
     const [page, setPage]                 = useState(0);
@@ -135,7 +147,7 @@ export default function AdminHopitaux() {
     );
 
     return (
-        <DashboardLayout navItems={NAV} title="Gestion des hôpitaux">
+        <DashboardLayout navItems={getNavItems(user?.role)} title="Gestion des hôpitaux">
 
             {/* ── Toasts ── */}
             <ToastContainer toasts={toasts} onRemove={removeToast} />
@@ -170,7 +182,7 @@ export default function AdminHopitaux() {
                     </div>
                 ) : (
                     <>
-                        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 600 }}>
+                        <div className="table-responsive"><table style={{ width: "100%", borderCollapse: "collapse", minWidth: 600 }}>
                             <thead>
                                 <tr style={{ borderBottom: "2px solid #F0F2F7" }}>
                                     {["#", "Nom", "Adresse", "Email", "Contact", "Actions"].map(h => (
@@ -207,7 +219,7 @@ export default function AdminHopitaux() {
                                     </tr>
                                 ))}
                             </tbody>
-                        </table>
+                        </table></div>
 
                         {totalPages > 1 && (
                             <div className="d-flex justify-content-center gap-2 mt-4">

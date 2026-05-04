@@ -126,14 +126,6 @@ public class MedecinService {
     private String generateId() {
         return UUID.randomUUID().toString().replace("-", "").substring(0, 8);
     }
-<<<<<<< Updated upstream
 
-    public Medecin getMedecinByEmail(String email) {
-        return medecinRepository.findByEmail(email)
-                .orElseThrow(() ->
-                        new MedecinNotFoundException("Médecin introuvable avec email : " + email)
-                );
-    }
-=======
->>>>>>> Stashed changes
+
 }
