@@ -440,7 +440,7 @@ function RDV() {
     const [error, setError]               = useState<string | null>(null);
     const [specialites, setSpecialites]   = useState<string[]>([]);
     const [filtre, setFiltre]             = useState<string>("Tous");
-    const [selected, setSelected]         = useState<Record<string, Creneau | null>>({});
+
     const [toast, setToast]               = useState<string | null>(null);
 
     useEffect(() => {

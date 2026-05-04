@@ -7,8 +7,8 @@ import { useAuth } from "../../context/AuthContext";
 // @ts-ignore
 // @ts-ignore
 import {
-    patientService, rendezVousService, dossierService, medecinService,
-    type Patient, type RendezVous, type DossierMedical, type Medecin} from "../../services/DomainServices";
+    patientService, rendezVousService, dossierService,
+    type Patient, type RendezVous, type DossierMedical} from "../../services/DomainServices";
 
 const NAV = [
     { icon: "bi-speedometer2", label: "Tableau de bord", path: "/dashboard/patient" },

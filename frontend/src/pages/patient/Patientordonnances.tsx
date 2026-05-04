@@ -68,7 +68,7 @@ export default function PatientOrdonnances() {
                                     </div>
                                     <div>
                                         <div style={{ fontWeight: 700, fontSize: 14, color: "#0D1F2D" }}>Dr. {o.medecin?.prenom} {o.medecin?.nom}</div>
-                                        <div style={{ fontSize: 12, color: "#8A94A6" }}>{o.medecin?.specialite}</div>
+                                        <div style={{ fontSize: 12, color: "#8A94A6" }}>{(o.medecin as any)?.specialite}</div>
                                     </div>
                                     <div style={{ marginLeft: "auto", background: "#E8F5EE", color: "#1A7A52", fontSize: 11, fontWeight: 600, padding: "4px 10px", borderRadius: 20 }}>
                                         {o.dateCreation ? new Date(o.dateCreation).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" }) : "—"}
@@ -123,7 +123,7 @@ export default function PatientOrdonnances() {
                                 <div>
                                     <div style={{ fontSize: 11, color: "#8A94A6", textTransform: "uppercase", letterSpacing: 1 }}>Ordonnance médicale</div>
                                     <div style={{ fontSize: 20, fontWeight: 800, color: "#0D1F2D", marginTop: 4 }}>Dr. {selected.medecin?.prenom} {selected.medecin?.nom}</div>
-                                    <div style={{ fontSize: 14, color: "#6B7280", marginTop: 2 }}>{selected.medecin?.specialite}</div>
+                                    <div style={{ fontSize: 14, color: "#6B7280", marginTop: 2 }}>{(selected.medecin as any)?.specialite}</div>
                                 </div>
                                 <button onClick={() => setSelected(null)} style={{ background: "#F3F4F6", border: "none", borderRadius: 10, width: 36, height: 36, cursor: "pointer", fontSize: 18, color: "#6B7280", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
                             </div>

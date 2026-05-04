@@ -128,7 +128,7 @@ export default function PatientRendezVous() {
 
         try {
             if (searchMode === "ADDRESS") {
-                const doctorsAtAddress = specialiteMedecins.filter(m => m.hopital?.nom === addressQuery || m.hopital?.adresse === addressQuery);
+                const doctorsAtAddress = specialiteMedecins.filter(m => m.hopital?.nom === addressQuery || (m.hopital as any)?.adresse === addressQuery);
                 if (doctorsAtAddress.length > 0) {
                     setClosestMedecins(doctorsAtAddress.map(m => ({ medecin: m, distanceKm: 0 })));
                     setStep(2);
@@ -147,21 +147,21 @@ export default function PatientRendezVous() {
                 setFormLoading(false);
                 return;
             }
-            
+
             // Get Position Promise wrapper
             const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
                 navigator.geolocation.getCurrentPosition(resolve, reject);
-            }).catch(e => {
+            }).catch(_e => {
                 console.warn("Geolocation failed, using default coords");
                 return null;
             });
-            
+
             if (pos) {
                 lat = pos.coords.latitude;
                 lon = pos.coords.longitude;
             }
 
-            const results = await medecinService.getClosest(lat, lon, specialite);
+            const results = await (medecinService as any).getClosest(lat, lon, specialite);
             setClosestMedecins(results);
             setStep(2);
         } catch (e: any) {
@@ -198,13 +198,13 @@ export default function PatientRendezVous() {
             setFormError("Veuillez sélectionner un médecin et un créneau.");
             return;
         }
-        
+
         const dispo = medecinDispos.find(d => d.id === selectedDispoId);
         if (dispo) {
             setDate(dispo.date);
             setHeure(dispo.heureDebut);
         }
-        
+
         setFormError("");
         setStep(3);
     };
@@ -215,19 +215,19 @@ export default function PatientRendezVous() {
             return;
         }
         if (!patient) return;
-        
+
         setFormLoading(true);
         setFormError("");
 
         // Simulate mobile money payment processing
         setTimeout(async () => {
             try {
-                await rendezVousService.prendre({ 
-                    patientId: patient.id, 
+                await rendezVousService.prendre({
+                    patientId: patient.id,
                     medecinId: selectedMedecinId,
                     disponibiliteId: selectedDispoId,
-                    date, 
-                    heure, 
+                    date,
+                    heure,
                     motif,
                     statutPaiement: "PAYE"
                 });
@@ -354,7 +354,7 @@ export default function PatientRendezVous() {
             {rdvModal && (
                 <div style={{ position:"fixed", inset:0, background:"rgba(15, 23, 42, 0.6)", backdropFilter:"blur(4px)", zIndex:1000, display:"flex", alignItems:"center", justifyContent:"center", padding: 20 }}>
                     <div style={{ background:"#fff", borderRadius:24, padding:40, width:550, maxWidth:"100%", boxShadow: "0 20px 40px rgba(0,0,0,0.1)", position: "relative", overflow: "hidden" }}>
-                        
+
                         {/* Progress Bar */}
                         <div style={{ position: "absolute", top: 0, left: 0, height: 4, background: "#E2E8F0", width: "100%" }}>
                             <div style={{ height: "100%", background: "linear-gradient(90deg, #208A56, #27A869)", width: `${(step / 4) * 100}%`, transition: "width 0.3s ease" }}></div>
@@ -406,17 +406,17 @@ export default function PatientRendezVous() {
                                             <i className="bi bi-map-fill me-2"></i>Adresse
                                         </button>
                                     </div>
-                                    
+
                                     {searchMode === "ADDRESS" && (
                                         <select value={addressQuery} onChange={e=>setAddressQuery(e.target.value)} style={{...inp, backgroundColor: "#F8FAFC", cursor: "pointer"}}>
                                             <option value="">Sélectionner un hôpital / adresse</option>
-                                            {Array.from(new Set(specialiteMedecins.map(m => m.hopital?.nom || m.hopital?.adresse).filter(Boolean))).map(addr => (
+                                            {Array.from(new Set(specialiteMedecins.map(m => m.hopital?.nom || (m.hopital as any)?.adresse).filter(Boolean))).map(addr => (
                                                 <option key={addr as string} value={addr as string}>{addr}</option>
                                             ))}
                                         </select>
                                     )}
                                 </div>
-                                
+
                                 {searchMode === "GPS" && (
                                     <div style={{ background: "#F2F9F6", padding: 16, borderRadius: 12, display: "flex", gap: 12, alignItems: "center", marginTop: 8 }}>
                                         <i className="bi bi-geo-alt-fill" style={{ fontSize: 24, color: "#27A869" }}></i>
@@ -439,9 +439,9 @@ export default function PatientRendezVous() {
                         {/* STEP 2: Choix du médecin et du créneau */}
                         {step === 2 && (
                             <div style={{ display:"flex", flexDirection:"column", gap:20, animation: "fadeIn 0.3s ease" }}>
-                                
+
                                 <label style={{ fontSize:14, fontWeight:600, color:"#334155", display:"block", marginBottom: -10 }}>Médecins à proximité</label>
-                                
+
                                 {closestMedecins.length === 0 ? (
                                     <div style={{ textAlign: "center", padding: "30px", background: "#F8FAFC", borderRadius: 12 }}>
                                         <i className="bi bi-emoji-frown" style={{ fontSize: 32, color: "#94A3B8" }}></i>
@@ -450,7 +450,7 @@ export default function PatientRendezVous() {
                                 ) : (
                                     <div style={{ maxHeight: 220, overflowY: "auto", display: "flex", flexDirection: "column", gap: 10, paddingRight: 4 }}>
                                         {closestMedecins.map(({ medecin, distanceKm }) => (
-                                            <div key={medecin.id} 
+                                            <div key={medecin.id}
                                                  onClick={() => setSelectedMedecinId(medecin.id)}
                                                  style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderRadius: 12, border: selectedMedecinId === medecin.id ? "2px solid #27A869" : "2px solid transparent", background: selectedMedecinId === medecin.id ? "#F2F9F6" : "#F8FAFC", cursor: "pointer", transition: "all 0.2s" }}>
                                                 <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#27A869", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700 }}>
@@ -503,7 +503,7 @@ export default function PatientRendezVous() {
                         {/* STEP 3: Paiement */}
                         {step === 3 && (
                             <div style={{ display:"flex", flexDirection:"column", gap:20, animation: "fadeIn 0.3s ease" }}>
-                                
+
                                 <div style={{ textAlign: "center", padding: "16px", background: "#F8FAFC", borderRadius: 16 }}>
                                     <div style={{ fontSize: 14, color: "#64748B", fontWeight: 600, textTransform: "uppercase", letterSpacing: 1 }}>Montant à payer</div>
                                     <div style={{ fontSize: 36, fontWeight: 900, color: "#0F172A", marginTop: 4 }}>5 000 <span style={{ fontSize: 20 }}>FCFA</span></div>
@@ -528,7 +528,7 @@ export default function PatientRendezVous() {
                                         <input type="text" value={phoneNumber} onChange={e=>setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0,9))} placeholder="77 123 45 67" style={{...inp, paddingLeft: 60, fontSize: 16, fontWeight: 600, letterSpacing: 1}}/>
                                     </div>
                                 </div>
-                                
+
                                 <div style={{ display:"flex", gap:12, marginTop:16 }}>
                                     <button onClick={() => setStep(2)} disabled={formLoading} style={{ background:"#F1F5F9", color: "#475569", border:"none", borderRadius:12, padding:"12px 20px", cursor:"pointer", fontWeight: 600 }}>Retour</button>
                                     <button onClick={handlePaymentAndConfirm} disabled={formLoading || phoneNumber.length < 9}
@@ -556,7 +556,7 @@ export default function PatientRendezVous() {
                                 </button>
                             </div>
                         )}
-                        
+
                     </div>
                 </div>
             )}
@@ -593,7 +593,7 @@ export default function PatientRendezVous() {
                                 </div>
                                 <div style={{ gridColumn:"span 2" }}>
                                     <div style={{ fontSize:11, color:"#9CA3AF", fontWeight:600 }}>Lieu</div>
-                                    <div style={{ fontSize:13, fontWeight:600, color:"#4B5563" }}>{ticketModal.medecin?.hopital?.nom} - {ticketModal.medecin?.hopital?.adresse}</div>
+                                    <div style={{ fontSize:13, fontWeight:600, color:"#4B5563" }}>{ticketModal.medecin?.hopital?.nom} - {(ticketModal.medecin?.hopital as any)?.adresse}</div>
                                 </div>
                             </div>
 

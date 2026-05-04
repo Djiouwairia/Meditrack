@@ -323,7 +323,6 @@ export default function DashboardLayout({
     navItems,
     children,
     title,
-    accentColor = "#27A869"
 }: Props) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);

@@ -4,7 +4,7 @@ import StatCard from "../../components/common/Statcard";
 import StatusBadge from "../../components/common/StatusBadge";
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { rendezVousService, ordonnanceService, dossierService, type RendezVous, type Medecin, type Patient, type DossierMedical, type Ordonnance } from "../../services/DomainServices";
+import { rendezVousService, ordonnanceService, dossierService, type RendezVous, type Medecin, type Patient } from "../../services/DomainServices";
 import api from "../../services/api";
 
 const NAV = [
@@ -71,11 +71,6 @@ export default function MedecinDashboard() {
 
     useEffect(() => { loadData(); }, [loadData]);
 
-    const handleAnnuler = async (rdvId: string) => {
-        setActionLoading(rdvId + "_annuler");
-        try { await rendezVousService.annuler(rdvId); await loadData(); }
-        finally { setActionLoading(null); }
-    };
 
     const openDossier = (pat: Patient) => {
         navigate("/dashboard/medecin/patients/" + pat.id);

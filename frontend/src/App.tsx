@@ -1,306 +1,181 @@
+import { useState, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
-import { authService } from "./services/Authservice";
-
-import NavBar from "./components/layout/NavBar";
-import ChatbotButton from "./components/layout/ChatbotButton";
-import Footer from "./components/layout/Footer";
-
-import Accueil from "./components/sections/Accueil";
-import Fonctionnalites from "./components/sections/Fonctionnalites";
-import Specialites from "./components/sections/Specialites";
-import Apropos from "./components/sections/Apropos";
-import Contact from "./components/sections/Contact";
-import RDV from "./components/sections/RDV";
+import { hasCustomServerUrl, setServerBaseUrl, getServerBaseUrl, clearServerBaseUrl } from "./services/serverConfig";
 
 import Login from "./pages/Login";
 import Inscription from "./pages/Inscription";
 
-import AdminDashboard from "./pages/admin/Admindashboard";
-import MedecinDashboard from "./pages/medecin/Medecindashboard";
-import MedecinAgenda from "./pages/medecin/Medecinagenda";
 import PatientDashboard from "./pages/patient/Patientdashboard";
 import PatientRendezVous from "./pages/patient/Patientrendezvous";
 import PatientDossier from "./pages/patient/Patientdossier";
 import PatientOrdonnances from "./pages/patient/Patientordonnances";
 import PatientProfil from "./pages/patient/Patientprofil";
 
-import SecretaireDashboard from "./pages/secretaire/SecretaireDashboard";
-
-/* 🟩 MÉDECIN PAGES */
-import MedecinPatients from "./pages/medecin/Medecinpatients";
-import MedecinDossier from "./pages/medecin/Medecindossier";
-import MedecinOrdonnances from "./pages/medecin/Medecinordonnances";
-import MedecinProfil from "./pages/medecin/Medecinprofil";
-
-/* 🟦 SECRÉTAIRE PAGES */
-import SecretairePatients from "./pages/secretaire/Secretairepatients";
-import SecretaireRendezVous from "./pages/secretaire/Secretairerendezvous";
-import SecretaireProfil from "./pages/secretaire/Secretaireprofil";
-
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
-import imagePath from "./assets/logo.png";
-import AdminUtilisateurs from "./pages/admin/AdminUtilisateurs";
-import AdminHopitaux from "./pages/admin/AdminHopital";
-import AdminMedecins from "./pages/admin/AdminMedecins";
-import AdminProfil from "./pages/admin/AdminProfil";
+import LogoImg from "./assets/logo.png";
 
-/* ───────────── REDIRECTION SELON RÔLE ───────────── */
-function RoleRedirect() {
-    const { user, isAuthenticated } = useAuth();
+/* ─── Exports utiles pour Login.tsx et DashboardLayout.tsx ─── */
+export { hasCustomServerUrl, setServerBaseUrl, getServerBaseUrl, clearServerBaseUrl };
 
-    if (!isAuthenticated) return <Navigate to="/login" replace />;
+/* ─────────────────────────────────────────────────────────────
+   ÉCRAN DE CONFIGURATION SERVEUR
+───────────────────────────────────────────────────────────── */
+function ServerSetupScreen({ onDone }: { onDone: () => void }) {
+    const [input, setInput] = useState("");
+    const [error, setError] = useState("");
+    const [busy, setBusy] = useState(false);
 
-    return <Navigate to={authService.getDashboardPath(user!.role)} replace />;
+    const submit = async () => {
+        const val = input.trim();
+        if (!val) { setError("Entrez une adresse."); return; }
+        setBusy(true);
+        setError("");
+        try {
+            setServerBaseUrl(val);
+            onDone();
+        } catch {
+            setError("Adresse invalide.");
+        } finally {
+            setBusy(false);
+        }
+    };
+
+    return (
+        <div className="min-vh-100 d-flex align-items-center justify-content-center p-3"
+            style={{ background: "linear-gradient(160deg,#0f2c1e 0%,#1A7A52 60%,#27A869 100%)" }}>
+            <div className="bg-white rounded-4 p-4 w-100" style={{ maxWidth: 380, boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
+                <div className="text-center mb-4">
+                    <img src={LogoImg} alt="Meditrack" style={{ width: "65%", maxWidth: 160 }} />
+                    <h5 className="fw-bold mt-3 mb-1">Connexion au serveur</h5>
+                    <p className="text-muted small mb-0">Entrez l'adresse IP et le port du backend</p>
+                </div>
+
+                <div className="input-group mb-2">
+                    <span className="input-group-text bg-light">
+                        <i className="bi bi-hdd-network text-success"></i>
+                    </span>
+                    <input
+                        type="text"
+                        className="form-control"
+                        placeholder="192.168.1.X:8080"
+                        value={input}
+                        onChange={e => { setInput(e.target.value); setError(""); }}
+                        onKeyDown={e => e.key === "Enter" && submit()}
+                        autoCapitalize="none"
+                        autoCorrect="off"
+                        style={{ fontFamily: "monospace" }}
+                    />
+                </div>
+
+                {error && (
+                    <div className="text-danger small mb-2">
+                        <i className="bi bi-exclamation-triangle-fill me-1"></i>{error}
+                    </div>
+                )}
+
+                <button
+                    className="btn w-100 text-white fw-semibold mt-1"
+                    style={{ background: "linear-gradient(135deg,#1A7A52,#27A869)", borderRadius: 10, padding: "12px" }}
+                    onClick={submit}
+                    disabled={busy}
+                >
+                    {busy
+                        ? <span className="spinner-border spinner-border-sm me-2"></span>
+                        : <i className="bi bi-plug-fill me-2"></i>
+                    }
+                    Se connecter
+                </button>
+
+                <p className="text-muted text-center mt-3 mb-0" style={{ fontSize: 11 }}>
+                    <i className="bi bi-info-circle me-1"></i>
+                    Le serveur doit être sur le même réseau Wi-Fi
+                </p>
+            </div>
+        </div>
+    );
 }
 
-/* ───────────── PROTECTION ROUTES ───────────── */
-function Protected({
-    children,
-    roles,
-}: {
-    children: React.ReactNode;
-    roles?: string[];
-}) {
+/* ─────────────────────────────────────────────────────────────
+   PROTECTION ROUTES PATIENT
+───────────────────────────────────────────────────────────── */
+function PatientRoute({ children }: { children: React.ReactNode }) {
     const { user, isAuthenticated } = useAuth();
-
     if (!isAuthenticated) return <Navigate to="/login" replace />;
-
-    if (roles && user && !roles.includes(user.role.toUpperCase())) {
-        return <Navigate to={authService.getDashboardPath(user.role)} replace />;
-    }
-
+    if (user && user.role.toUpperCase() !== "PATIENT") return <Navigate to="/login" replace />;
     return <>{children}</>;
 }
 
-/* ───────────── ROUTES APP ───────────── */
-function AppRoutes() {
+function LoginRedirect() {
+    const { isAuthenticated, user } = useAuth();
+    if (isAuthenticated && user?.role.toUpperCase() === "PATIENT")
+        return <Navigate to="/dashboard/patient" replace />;
+    return <Navigate to="/login" replace />;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   ROUTES PATIENT
+───────────────────────────────────────────────────────────── */
+function PatientApp() {
     return (
-        <Routes>
+        <AuthProvider>
+            <Routes>
+                <Route path="/" element={<LoginRedirect />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Inscription />} />
 
-            {/* ───────── VITRINE ───────── */}
-            <Route
-                path="/"
-                element={
-                    <div style={{ paddingTop: "80px" }}>
-                        <NavBar brandName="Meditrack" imageSrcPath={imagePath} />
-                        <section id="accueil"><Accueil /></section>
-                        <section id="fonctionnalites"><Fonctionnalites /></section>
-                        <section id="specialites"><Specialites /></section>
-                        <section id="apropos"><Apropos /></section>
-                        <section id="contact"><Contact /></section>
-                        <section id="rdv"><RDV /></section>
-                        <Footer />
-                        <ChatbotButton />
-                    </div>
-                }
-            />
+                <Route path="/dashboard/patient" element={
+                    <PatientRoute><PatientDashboard /></PatientRoute>
+                } />
+                <Route path="/dashboard/patient/rendez-vous" element={
+                    <PatientRoute><PatientRendezVous /></PatientRoute>
+                } />
+                <Route path="/dashboard/patient/dossier" element={
+                    <PatientRoute><PatientDossier /></PatientRoute>
+                } />
+                <Route path="/dashboard/patient/ordonnances" element={
+                    <PatientRoute><PatientOrdonnances /></PatientRoute>
+                } />
+                <Route path="/dashboard/patient/profil" element={
+                    <PatientRoute><PatientProfil /></PatientRoute>
+                } />
 
-            {/* ───────── AUTH ───────── */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Inscription />} />
-
-            {/* ───────── REDIRECT DASHBOARD ───────── */}
-            <Route path="/dashboard" element={<RoleRedirect />} />
-
-            {/* ───────── ADMIN ───────── */}
-            <Route
-                path="/dashboard/admin"
-                element={
-                    <Protected roles={["ADMIN", "ADMIN_HOPITAL"]}>
-                        <AdminDashboard />
-                    </Protected>
-                }
-            />
-
-             <Route
-                path="/dashboard/admin/utilisateurs"
-                element={
-                    <Protected roles={["ADMIN", "ADMIN_HOPITAL"]}>
-                        <AdminUtilisateurs />
-                    </Protected>
-                }
-            />
-
-            <Route
-                path="/dashboard/admin/hopitaux"
-                element={
-                    <Protected roles={["ADMIN"]}>
-                        <AdminHopitaux />
-                    </Protected>
-                }
-            />
-
-            <Route
-                path="/dashboard/admin/medecins"
-                element={
-                    <Protected roles={["ADMIN", "ADMIN_HOPITAL"]}>
-                        <AdminMedecins />
-                    </Protected>
-                }
-            />
-
-            <Route
-                path="/dashboard/admin/profil"
-                element={
-                    <Protected roles={["ADMIN", "ADMIN_HOPITAL"]}>
-                        <AdminProfil />
-                    </Protected>
-                }
-            />
-
-            {/* ───────── MÉDECIN ───────── */}
-            <Route
-                path="/dashboard/medecin"
-                element={
-                    <Protected roles={["MEDECIN"]}>
-                        <MedecinDashboard />
-                    </Protected>
-                }
-            />
-
-            <Route
-                path="/dashboard/medecin/agenda"
-                element={
-                    <Protected roles={["MEDECIN"]}>
-                        <MedecinAgenda />
-                    </Protected>
-                }
-            />
-
-            <Route
-                path="/dashboard/medecin/patients"
-                element={
-                    <Protected roles={["MEDECIN"]}>
-                        <MedecinPatients />
-                    </Protected>
-                }
-            />
-
-            <Route
-                path="/dashboard/medecin/patients/:patientId"
-                element={
-                    <Protected roles={["MEDECIN"]}>
-                        <MedecinDossier />
-                    </Protected>
-                }
-            />
-
-            <Route
-                path="/dashboard/medecin/ordonnances"
-                element={
-                    <Protected roles={["MEDECIN"]}>
-                        <MedecinOrdonnances />
-                    </Protected>
-                }
-            />
-
-            <Route
-                path="/dashboard/medecin/profil"
-                element={
-                    <Protected roles={["MEDECIN"]}>
-                        <MedecinProfil />
-                    </Protected>
-                }
-            />
-
-            {/* ───────── PATIENT ───────── */}
-            <Route
-                path="/dashboard/patient"
-                element={
-                    <Protected roles={["PATIENT"]}>
-                        <PatientDashboard />
-                    </Protected>
-                }
-            />
-
-            <Route
-                path="/dashboard/patient/rendez-vous"
-                element={
-                    <Protected roles={["PATIENT"]}>
-                        <PatientRendezVous />
-                    </Protected>
-                }
-            />
-
-            <Route
-                path="/dashboard/patient/dossier"
-                element={
-                    <Protected roles={["PATIENT"]}>
-                        <PatientDossier />
-                    </Protected>
-                }
-            />
-
-            <Route
-                path="/dashboard/patient/ordonnances"
-                element={
-                    <Protected roles={["PATIENT"]}>
-                        <PatientOrdonnances />
-                    </Protected>
-                }
-            />
-
-            <Route
-                path="/dashboard/patient/profil"
-                element={
-                    <Protected roles={["PATIENT"]}>
-                        <PatientProfil />
-                    </Protected>
-                }
-            />
-            
-
-            {/* ───────── SECRÉTAIRE ───────── */}
-            <Route
-                path="/dashboard/secretaire"
-                element={
-                    <Protected roles={["SECRETAIRE"]}>
-                        <SecretaireDashboard />
-                    </Protected>
-                }
-            />
-
-            <Route
-                path="/dashboard/secretaire/patients"
-                element={
-                    <Protected roles={["SECRETAIRE"]}>
-                        <SecretairePatients />
-                    </Protected>
-                }
-            />
-
-            <Route
-                path="/dashboard/secretaire/rendez-vous"
-                element={
-                    <Protected roles={["SECRETAIRE"]}>
-                        <SecretaireRendezVous />
-                    </Protected>
-                }
-            />
-
-            <Route
-                path="/dashboard/secretaire/profil"
-                element={
-                    <Protected roles={["SECRETAIRE"]}>
-                        <SecretaireProfil />
-                    </Protected>
-                }
-            />
-
-            {/* ───────── FALLBACK ───────── */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-
-        </Routes>
+                <Route path="*" element={<Navigate to="/login" replace />} />
+            </Routes>
+        </AuthProvider>
     );
 }
 
-/* ───────────── APP ROOT ───────────── */
+/* ─────────────────────────────────────────────────────────────
+   APP ROOT
+───────────────────────────────────────────────────────────── */
 export default function App() {
-    return (
-        <AuthProvider>
-            <AppRoutes />
-        </AuthProvider>
-    );
+    const [serverReady, setServerReady] = useState(false);
+    const [checking, setChecking] = useState(true);
+
+    useEffect(() => {
+        // Délai pour laisser le localStorage se monter dans la WebView Android
+        const t = setTimeout(() => {
+            setServerReady(hasCustomServerUrl());
+            setChecking(false);
+        }, 100);
+        return () => clearTimeout(t);
+    }, []);
+
+    // Splash pendant vérification
+    if (checking) {
+        return (
+            <div className="min-vh-100 d-flex align-items-center justify-content-center"
+                style={{ background: "linear-gradient(160deg,#0f2c1e 0%,#1A7A52 60%,#27A869 100%)" }}>
+                <img src={LogoImg} alt="Meditrack" style={{ width: 140 }} />
+            </div>
+        );
+    }
+
+    if (!serverReady) {
+        return <ServerSetupScreen onDone={() => setServerReady(true)} />;
+    }
+
+    return <PatientApp />;
 }

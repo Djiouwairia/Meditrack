@@ -29,7 +29,6 @@ function TabRdv({ medecin }: { medecin: Medecin | null }) {
     const [loading, setLoading] = useState(true);
     const [action, setAction]   = useState<string | null>(null);
     const [filtre, setFiltre]   = useState("TOUS");
-    const today = new Date().toISOString().slice(0, 10);
     const prev7 = (() => { const d = new Date(); d.setDate(d.getDate() - 7); return d.toISOString().slice(0, 10); })();
     const next7 = (() => { const d = new Date(); d.setDate(d.getDate() + 7); return d.toISOString().slice(0, 10); })();
     const [debut, setDebut] = useState(prev7);
@@ -73,14 +72,14 @@ function TabRdv({ medecin }: { medecin: Medecin | null }) {
             await rendezVousService.terminer(terminerRdv.id, terminerDiag);
             setTerminerModal(false);
             await load();
-        } catch(e) { console.error(e); } 
+        } catch(e) { console.error(e); }
         finally { setAction(null); }
     };
 
     const load = useCallback(async (d = debut, f = fin) => {
         if (!medecin) return;
         setLoading(true);
-        try { 
+        try {
             const data = await rendezVousService.getAgendaMedecin(medecin.id, d, f);
             setRdvs(data.filter(r => r.statut === "CONFIRME" || r.statut === "TERMINE"));
         }
@@ -90,10 +89,6 @@ function TabRdv({ medecin }: { medecin: Medecin | null }) {
 
     useEffect(() => { load(); }, [medecin]);
 
-    const act = async (rdvId: string, key: string, fn: () => Promise<unknown>) => {
-        setAction(rdvId + key);
-        try { await fn(); await load(); } finally { setAction(null); }
-    };
 
     const filtered = filtre === "TOUS" ? rdvs : rdvs.filter(r => r.statut === filtre);
     const grouped  = filtered.reduce<Record<string, RendezVous[]>>((acc, r) => {
