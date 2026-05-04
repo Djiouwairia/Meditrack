@@ -304,6 +304,25 @@ const customStyles = `
 @media (max-width: 768px) {
     .rdv-filters { gap: 8px; }
     .rdv-filter-btn { padding: 6px 14px; font-size: 0.75rem; }
+    .rdv-section { padding: 60px 0; }
+    .rdv-header h2 { font-size: 1.9rem; }
+    .rdv-header p { font-size: 0.95rem; }
+    .rdv-card-header { padding: 18px 18px 14px; }
+    .rdv-avatar { width: 48px; height: 48px; font-size: 1.1rem; border-radius: 12px; }
+    .rdv-card-name { font-size: 0.95rem; }
+    .rdv-toast { right: 12px; bottom: 12px; left: 12px; max-width: 100%; font-size: 0.85rem; }
+}
+
+@media (max-width: 480px) {
+    .rdv-section { padding: 50px 0; }
+    .rdv-header { margin-bottom: 36px; }
+    .rdv-header h2 { font-size: 1.65rem; }
+    .rdv-filters { justify-content: flex-start; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; }
+    .rdv-filter-btn { flex-shrink: 0; }
+    .rdv-slots { padding: 14px 14px 16px; }
+    .rdv-btn-reserver { font-size: 0.85rem; padding: 10px; }
+    .rdv-slot-date { font-size: 0.65rem; }
+    .rdv-slot-heure { font-size: 0.82rem; }
 }
 `;
 

@@ -244,7 +244,7 @@ export default function SecretaireDashboard() {
                         </div>
 
                         <div style={{ overflowX: "auto" }}>
-                            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                            <div className="table-responsive"><table style={{ width: "100%", borderCollapse: "collapse" }}>
                                 <thead>
                                     <tr style={{ borderBottom: "2px solid #F0F2F7" }}>
                                         {["Patient", "Email", "Téléphone", "Groupe sanguin", "Actions"].map(h => (
@@ -288,7 +288,7 @@ export default function SecretaireDashboard() {
                                         </tr>
                                     ))}
                                 </tbody>
-                            </table>
+                            </table></div>
                         </div>
 
                         {patTotal > 1 && (

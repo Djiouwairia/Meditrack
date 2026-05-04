@@ -71,7 +71,7 @@ export default function AdminMedecins() {
                     </div>
                 ) : (
                     <>
-                        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 600 }}>
+                        <div className="table-responsive"><table style={{ width: "100%", borderCollapse: "collapse", minWidth: 600 }}>
                             <thead>
                             <tr style={{ borderBottom: "2px solid #F0F2F7" }}>
                                 {["Médecin", "Email", "Téléphone", "Spécialité", "Statut"].map(h => (
@@ -138,7 +138,7 @@ export default function AdminMedecins() {
                                 );
                             })}
                             </tbody>
-                        </table>
+                        </table></div>
 
                         {totalPages > 1 && (
                             <div className="d-flex justify-content-center gap-2 mt-4">

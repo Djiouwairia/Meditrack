@@ -248,7 +248,7 @@ export default function AdminUtilisateurs() {
                     </div>
                 ) : (
                     <>
-                        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 600 }}>
+                        <div className="table-responsive"><table style={{ width: "100%", borderCollapse: "collapse", minWidth: 600 }}>
                             <thead>
                             <tr style={{ borderBottom: "2px solid #F0F2F7" }}>
                                 {["Utilisateur", "Email", "Sexe", "Téléphone", "Rôle", "État", "Actions"].map(h => (
@@ -339,7 +339,7 @@ export default function AdminUtilisateurs() {
                                 );
                             })}
                             </tbody>
-                        </table>
+                        </table></div>
 
                         {totalPages > 1 && (
                             <div className="d-flex justify-content-center gap-2 mt-4">

@@ -182,7 +182,7 @@ export default function AdminHopitaux() {
                     </div>
                 ) : (
                     <>
-                        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 600 }}>
+                        <div className="table-responsive"><table style={{ width: "100%", borderCollapse: "collapse", minWidth: 600 }}>
                             <thead>
                                 <tr style={{ borderBottom: "2px solid #F0F2F7" }}>
                                     {["#", "Nom", "Adresse", "Email", "Contact", "Actions"].map(h => (
@@ -219,7 +219,7 @@ export default function AdminHopitaux() {
                                     </tr>
                                 ))}
                             </tbody>
-                        </table>
+                        </table></div>
 
                         {totalPages > 1 && (
                             <div className="d-flex justify-content-center gap-2 mt-4">

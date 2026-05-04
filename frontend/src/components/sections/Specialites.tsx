@@ -117,11 +117,23 @@ const style = `
 @media (max-width: 768px) {
   .specialites { padding: 60px 20px; }
   .specialites h2 { font-size: 2rem; }
-  .specialites-grid { gap: 20px; }
+  .specialites-grid { gap: 20px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
   .specialite-item { padding: 20px 15px; }
   .specialite-icon { width: 55px; height: 55px; }
   .specialite-icon svg { width: 28px; height: 28px; }
   .specialite-name { font-size: 1rem; }
+}
+
+@media (max-width: 480px) {
+  .specialites { padding: 50px 16px; }
+  .specialites h2 { font-size: 1.75rem; }
+  .specialites p.sub { font-size: 0.95rem; margin-bottom: 30px; }
+  .specialites-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .specialite-item { padding: 16px 10px; border-radius: 14px; }
+  .specialite-icon { width: 48px; height: 48px; }
+  .specialite-icon svg { width: 24px; height: 24px; }
+  .specialite-name { font-size: 0.9rem; }
+  .specialite-desc { font-size: 0.8rem; }
 }
 `;
 

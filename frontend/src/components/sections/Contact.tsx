@@ -280,9 +280,18 @@ const style = `
 @media (max-width: 768px) {
   .contact { padding: 60px 20px; }
   .contact h2 { font-size: 2rem; }
-  .contact-info, .contact-form { padding: 25px; }
+  .contact-info, .contact-form { padding: 25px; border-radius: 20px; }
   .hours-list li { flex-direction: column; gap: 5px; }
   .whatsapp-number { flex-direction: column; align-items: flex-start; }
+}
+
+@media (max-width: 480px) {
+  .contact { padding: 50px 16px; }
+  .contact h2 { font-size: 1.75rem; }
+  .contact-subtitle { font-size: 0.95rem; }
+  .contact-info, .contact-form { padding: 20px; }
+  .info-title { font-size: 1.25rem; }
+  .contact-header { margin-bottom: 40px; }
 }
 `;
 

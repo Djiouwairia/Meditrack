@@ -135,9 +135,19 @@ const style = `
 @media (max-width: 768px) {
   .fonctionnalites { padding: 60px 20px; }
   .fonctionnalites h2 { font-size: 2rem; }
+  .fonctionnalites-grid { margin-top: 40px; gap: 20px; }
   .card { padding: 25px 20px; }
   .icon { width: 42px; height: 42px; }
   .title { font-size: 1.1rem; }
+}
+
+@media (max-width: 480px) {
+  .fonctionnalites { padding: 50px 16px; }
+  .fonctionnalites h2 { font-size: 1.75rem; }
+  .fonctionnalites p.sub { font-size: 0.95rem; }
+  .fonctionnalites-grid { grid-template-columns: 1fr; margin-top: 30px; }
+  .card { padding: 22px 18px; border-radius: 18px; }
+  .cta { width: 100%; justify-content: center; }
 }
 `;
 

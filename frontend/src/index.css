@@ -212,3 +212,109 @@ table tbody tr:last-child td {
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+
+
+/* ==========================================================================
+   DASHBOARD RESPONSIVE — GLOBAL RULES
+   ========================================================================== */
+
+/* Tables — scroll horizontal sur mobile */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Grilles de profil / formulaire 2 colonnes → 1 colonne sur mobile */
+@media (max-width: 767px) {
+
+  /* Stat cards : 2 par ligne sur mobile */
+  .row.g-3 > .col-xl-3,
+  .row.g-4 > .col-xl-3,
+  .row.g-3 > .col-md-3,
+  .row.g-4 > .col-md-3 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+
+  /* Charts et blocs larges : pleine largeur */
+  .row.g-4 > .col-md-8,
+  .row.g-4 > .col-md-4,
+  .row.g-4 > .col-lg-8,
+  .row.g-4 > .col-lg-4,
+  .row.g-4 > .col-md-6,
+  .row.g-4 > .col-lg-6,
+  .row.g-3 > .col-md-6,
+  .row.g-3 > .col-lg-6,
+  .row.g-3 > .col-md-8,
+  .row.g-3 > .col-md-4 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  /* Buttons : taille réduite */
+  .btn {
+    padding: 0.45rem 0.9rem !important;
+    font-size: 0.85rem !important;
+  }
+
+  /* Formulaire inputs */
+  .form-control,
+  .form-select {
+    font-size: 0.9rem !important;
+  }
+
+  /* Header action row (titre + bouton Ajouter) */
+  .d-flex.justify-content-between.align-items-center {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  /* Cards padding réduit */
+  .card-body {
+    padding: 14px !important;
+  }
+
+  /* Modals : full width */
+  .modal-dialog {
+    margin: 8px !important;
+    max-width: calc(100vw - 16px) !important;
+  }
+
+  /* Badge compact */
+  .badge {
+    font-size: 0.72rem !important;
+  }
+
+  /* Table cells : taille réduite */
+  table thead th {
+    font-size: 0.7rem !important;
+    padding: 0.6rem 0.75rem !important;
+  }
+
+  table tbody td {
+    font-size: 0.82rem !important;
+    padding: 0.65rem 0.75rem !important;
+  }
+}
+
+/* Très petit écran */
+@media (max-width: 479px) {
+
+  /* Stat cards : 1 par ligne */
+  .row.g-3 > .col-xl-3,
+  .row.g-4 > .col-xl-3,
+  .row.g-3 > .col-md-3,
+  .row.g-4 > .col-md-3 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  .card-body {
+    padding: 12px !important;
+  }
+
+  /* Stat card value */
+  .fw-bold[style*="font-size: 26"] {
+    font-size: 20px !important;
+  }
+}

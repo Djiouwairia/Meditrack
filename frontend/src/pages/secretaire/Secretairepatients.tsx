@@ -218,7 +218,7 @@ export default function SecretairePatients() {
                     </div>
                 ) : (
                     <>
-                        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 600 }}>
+                        <div className="table-responsive"><table style={{ width: "100%", borderCollapse: "collapse", minWidth: 600 }}>
                             <thead>
                             <tr style={{ borderBottom: "2px solid #F0F2F7" }}>
                                 {["Patient", "Email", "Téléphone", "Groupe", "Adresse", "Actions"].map(h => (
@@ -270,7 +270,7 @@ export default function SecretairePatients() {
                                 </tr>
                             ))}
                             </tbody>
-                        </table>
+                        </table></div>
 
                         {totalPages > 1 && (
                             <div style={{ display: "flex", justifyContent: "center", gap: 8, marginTop: 20 }}>

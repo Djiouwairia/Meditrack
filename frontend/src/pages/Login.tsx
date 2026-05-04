@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { authService } from "../services/Authservice";
+import { getServerBaseUrl, setServerBaseUrl, normalizeBaseUrl } from "../services/serverConfig";
 import LogoImg from "../assets/logo.png";
 import Img from "../assets/Privacy policy.gif";
 import Typewriter from "typewriter-effect";
@@ -12,8 +13,21 @@ export default function Login() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const [showPwd, setShowPwd] = useState(false);
+    const [showServerModal, setShowServerModal] = useState(false);
+    const [serverInput, setServerInput] = useState(() => getServerBaseUrl());
+    const [serverSaved, setServerSaved] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
+
+    const handleSaveServer = () => {
+        try {
+            setServerBaseUrl(serverInput);
+            setServerSaved(true);
+            setTimeout(() => { setServerSaved(false); setShowServerModal(false); }, 1200);
+        } catch {
+            // invalid — do nothing, input shows hint
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -151,6 +165,148 @@ export default function Login() {
                                 </a>
                             ))}
                         </div>
+
+                        {/* ── Bouton config serveur ── */}
+                        <div className="text-center mt-4">
+                            <button
+                                type="button"
+                                onClick={() => { setServerInput(getServerBaseUrl()); setShowServerModal(true); }}
+                                style={{
+                                    background: "none",
+                                    border: "none",
+                                    cursor: "pointer",
+                                    color: "#adb5bd",
+                                    fontSize: 12,
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: 5,
+                                    padding: "4px 8px",
+                                    borderRadius: 6,
+                                    transition: "color 0.2s",
+                                }}
+                                onMouseEnter={e => (e.currentTarget.style.color = "#1A7A52")}
+                                onMouseLeave={e => (e.currentTarget.style.color = "#adb5bd")}
+                            >
+                                <i className="bi bi-hdd-network"></i>
+                                Serveur : {getServerBaseUrl()}
+                            </button>
+                        </div>
+
+                        {/* ── Modal config serveur ── */}
+                        {showServerModal && (
+                            <div
+                                style={{
+                                    position: "fixed", inset: 0,
+                                    background: "rgba(0,0,0,0.45)",
+                                    zIndex: 9999,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    padding: "16px",
+                                }}
+                                onClick={e => { if (e.target === e.currentTarget) setShowServerModal(false); }}
+                            >
+                                <div style={{
+                                    background: "#fff",
+                                    borderRadius: 16,
+                                    padding: "28px 24px",
+                                    width: "100%",
+                                    maxWidth: 380,
+                                    boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+                                }}>
+                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                            <i className="bi bi-hdd-network" style={{ color: "#1A7A52", fontSize: 18 }}></i>
+                                            <span style={{ fontWeight: 700, fontSize: 15 }}>Adresse du serveur</span>
+                                        </div>
+                                        <button
+                                            onClick={() => setShowServerModal(false)}
+                                            style={{ background: "none", border: "none", cursor: "pointer", color: "#adb5bd", fontSize: 18, lineHeight: 1 }}
+                                        >
+                                            <i className="bi bi-x-lg"></i>
+                                        </button>
+                                    </div>
+
+                                    <p style={{ fontSize: 13, color: "#6c757d", marginBottom: 16 }}>
+                                        Entrez l'IP et le port de votre backend Spring Boot.
+                                        Exemple : <code style={{ background: "#f1f3f5", padding: "2px 6px", borderRadius: 4 }}>192.168.1.10:8080</code>
+                                    </p>
+
+                                    <div style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        border: "2px solid #dee2e6",
+                                        borderRadius: 10,
+                                        overflow: "hidden",
+                                        marginBottom: 8,
+                                    }}>
+                                        <span style={{
+                                            padding: "0 12px",
+                                            background: "#f8f9fa",
+                                            borderRight: "2px solid #dee2e6",
+                                            color: "#1A7A52",
+                                            fontSize: 16,
+                                            alignSelf: "stretch",
+                                            display: "flex",
+                                            alignItems: "center",
+                                        }}>
+                                            <i className="bi bi-globe2"></i>
+                                        </span>
+                                        <input
+                                            type="text"
+                                            value={serverInput}
+                                            onChange={e => setServerInput(e.target.value)}
+                                            onKeyDown={e => e.key === "Enter" && handleSaveServer()}
+                                            placeholder="192.168.1.10:8080"
+                                            autoCapitalize="none"
+                                            autoCorrect="off"
+                                            spellCheck={false}
+                                            style={{
+                                                flex: 1,
+                                                border: "none",
+                                                outline: "none",
+                                                padding: "12px 14px",
+                                                fontSize: 15,
+                                                fontFamily: "monospace",
+                                                background: "transparent",
+                                            }}
+                                        />
+                                    </div>
+
+                                    <div style={{ fontSize: 12, color: "#adb5bd", marginBottom: 20 }}>
+                                        URL finale : <code>{normalizeBaseUrl(serverInput) || "—"}</code>
+                                    </div>
+
+                                    <button
+                                        onClick={handleSaveServer}
+                                        style={{
+                                            width: "100%",
+                                            padding: "12px",
+                                            background: serverSaved
+                                                ? "linear-gradient(135deg,#1A7A52,#27A869)"
+                                                : "linear-gradient(135deg,#1A7A52,#27A869)",
+                                            color: "#fff",
+                                            border: "none",
+                                            borderRadius: 10,
+                                            fontSize: 14,
+                                            fontWeight: 600,
+                                            cursor: "pointer",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            gap: 8,
+                                            transition: "opacity 0.2s",
+                                        }}
+                                    >
+                                        {serverSaved
+                                            ? <><i className="bi bi-check-circle-fill"></i> Enregistré !</>
+                                            : <><i className="bi bi-floppy"></i> Enregistrer</>
+                                        }
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
                     </div>
                 </div>
             </div>
